@@ -6,16 +6,40 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "format": "prettier --write ."
   },
   "dependencies": {
+    "@heroicons/react": "^2.0.18",
+    "@pinecone-database/pinecone": "^0.1.6",
     "autoprefixer": "10.4.14",
+    "axios": "^1.4.0",
+    "bcrypt": "^5.1.1",
+    "cheerio": "^1.0.0-rc.12",
     "eslint": "8.42.0",
     "eslint-config-next": "13.4.5",
+    "formidable": "^3.5.0",
+    "langchain": "^0.0.128",
+    "multer": "^1.4.5-lts.1",
     "next": "13.4.5",
+    "next-auth": "^4.23.1",
+    "openai": "^4.0.1",
+    "pdf-parse": "^1.1.1",
+    "pg": "^8.11.2",
     "postcss": "8.4.24",
+    "puppeteer": "^19.11.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "tailwindcss": "3.3.2"
+    "tailwindcss": "3.3.2",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "prettier": "3.0.3"
+  },
+  "prettier": {
+    "tabWidth": 2,
+    "semi": false,
+    "singleQuote": true,
+    "trailingComma": "es5"
   }
 }

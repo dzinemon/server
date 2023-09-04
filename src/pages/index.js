@@ -58,7 +58,7 @@ export default function Home() {
             name: 'Internal',
             url: 'internal',
             description: 'Data for internal use',
-          }
+          },
         ].map(({ name, url, description }, id) => (
           <a
             key={`link-${id}-${name}`}

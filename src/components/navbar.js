@@ -55,13 +55,13 @@ export default function Navbar() {
         <div className="hidden lg:flex lg:gap-x-12">
           {navItems.map((item, idx) => {
             return (
-              <a
+              <Link
                 key={`nav-bar-lg-${idx}`}
                 href={`/${item.slug}`}
                 className="text-sm font-semibold leading-6 text-gray-900"
               >
                 {item.name}
-              </a>
+              </Link>
             )
           })}
         </div>
@@ -101,9 +101,9 @@ export default function Navbar() {
         <div className="fixed inset-0 z-10"></div>
         <div className="fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
           <div className="flex items-center justify-between">
-            <a href="/home" className="-m-1.5 p-1.5">
+            <Link href="/home" className="-m-1.5 p-1.5">
               <span className="sr-only">Logo</span>
-            </a>
+            </Link>
             <button
               onClick={() => setIsOpen(false)}
               type="button"
@@ -131,13 +131,13 @@ export default function Navbar() {
               <div className="space-y-2 py-6">
                 {navItems.map((item, idx) => {
                   return (
-                    <a
+                    <Link
                       key={`nav-bar-lg-${idx}`}
                       href={`/${item.slug}`}
                       className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
                     >
                       {item.name}
-                    </a>
+                    </Link>
                   )
                 })}
               </div>

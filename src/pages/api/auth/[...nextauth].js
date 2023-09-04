@@ -15,9 +15,8 @@ const getUserByEmail = async (email) => {
     return error.message
   }
 }
-const saltRounds = 10;
-const salt = await bcrypt.genSalt(saltRounds);
-
+const saltRounds = 10
+const salt = await bcrypt.genSalt(saltRounds)
 
 export const authOptions = {
   // Configure one or more authentication providers
@@ -42,15 +41,15 @@ export const authOptions = {
         // (i.e., the request IP address)
 
         const user = await getUserByEmail(credentials.username)
-      
 
         // const hash = await bcrypt.hash(credentials.password, salt);
         // console.log('hash', hash)
 
-        const match = await bcrypt.compare(credentials.password, user.password).then((result) => result)
+        const match = await bcrypt
+          .compare(credentials.password, user.password)
+          .then((result) => result)
 
         console.log('match', match)
-
 
         // const res = await fetch("/your/endpoint", {
         //   method: 'POST',

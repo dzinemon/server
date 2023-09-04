@@ -1,4 +1,5 @@
 import { UserIcon } from '@heroicons/react/24/solid'
+import Link from 'next/link'
 
 export default function Login() {
   return (
@@ -62,23 +63,23 @@ export default function Login() {
 
           <div>
             {/* <button type="submit" className="flex w-full justify-center rounded-md bg-blue-500 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Sign in</button> */}
-            <a
+            <Link
               href="/home"
               className="flex w-full justify-center rounded-md bg-blue-500 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >
               Sign in
-            </a>
+            </Link>
           </div>
         </form>
 
         <p className="mt-10 text-center text-sm text-gray-500">
           or
-          <a
+          <Link
             href="#"
             className="font-semibold leading-6 text-blue-500 hover:text-indigo-500"
           >
             Sign in
-          </a>
+          </Link>
         </p>
       </div>
     </div>

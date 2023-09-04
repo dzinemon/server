@@ -7,7 +7,7 @@ const poolConfigLocal = {
   host: process.env.DB_HOST,
   database: process.env.DB_DATABASE,
   password: process.env.DB_PASS,
-  port: 5432
+  port: 5432,
 }
 
 const poolConfigVercel = {
@@ -18,7 +18,6 @@ const poolConfigVercel = {
   // port: 5432
 }
 
-
-const pool = new Pool( useLocal ? poolConfigLocal : poolConfigVercel )
+const pool = new Pool(useLocal ? poolConfigLocal : poolConfigVercel)
 
 export default pool

@@ -92,8 +92,11 @@ export default function AskQuestion() {
   const subtitle = ''
 
   useEffect(() => {
-    document.getElementById('openAiContent').innerText = state.answer
-  }, [state.answer])
+    const openAiContentDiv = document.getElementById('openAiContent')
+    if (openAiContentDiv) {
+      openAiContentDiv.innerHTML = state.answer
+    }
+  }, [state])
 
   return (
     <Layout>
@@ -177,6 +180,7 @@ export default function AskQuestion() {
           </p>
           <div className="p-4 mt-1 rounded-md bg-white/50">
             <div id="openAiContent"></div>
+
             {state.isSubmitted && (
               <div className="opacity-60 italic border-t border-gray-400 pt-2 mt-2 text-sm">
                 Length: {state.answer.length}

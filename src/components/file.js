@@ -10,7 +10,7 @@ import {
 
 // http://localhost:3000/api/urls/:id
 function FileUploadComponent() {
-  const url = 'http://localhost:3000/api/upload-pdf'
+  const url = '/api/upload-pdf'
   const [data, setData] = useState(null)
   const [isLoading, setLoading] = useState(true)
 

@@ -11,7 +11,7 @@ const poolConfigLocal = {
 }
 
 const poolConfigVercel = {
-  connectionString: process.env.POSTGRES_URL + "?sslmode=require",
+  connectionString: process.env.POSTGRES_URL + '?sslmode=require',
 }
 
 const pool = new Pool(useLocal ? poolConfigLocal : poolConfigVercel)

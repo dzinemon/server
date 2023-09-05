@@ -11,7 +11,7 @@ function LinksList() {
   const [data, setData] = useState(null)
   const [isLoading, setLoading] = useState(true)
 
-  const url = 'http://localhost:3000/api/urls'
+  const url = '/api/urls'
 
   const myHeaders = new Headers()
   myHeaders.append('Content-Type', 'application/json')
@@ -59,10 +59,7 @@ function LinksList() {
       redirect: 'follow', // manual, *follow, error
     }
 
-    const res = await fetch(
-      'http://localhost:3000/api/urls',
-      postRequestOptions
-    )
+    const res = await fetch('/api/urls', postRequestOptions)
       .then((response) => {
         if (response.status === 200) {
           console.log('post success')

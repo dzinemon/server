@@ -67,10 +67,7 @@ export default function AskQuestion() {
       redirect: 'follow', // manual, *follow, error
     }
 
-    const aiResponse = await fetch(
-      'http://localhost:3000/api/openai',
-      postRequestOptions
-    )
+    const aiResponse = await fetch('/api/openai', postRequestOptions)
       .then((response) => {
         if (response.status === 200) {
           console.log('post success')

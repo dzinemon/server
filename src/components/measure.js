@@ -13,7 +13,7 @@ function Measure() {
   const [data, setData] = useState(null)
   // const [isLoading, setLoading] = useState(true)
 
-  const url = 'http://localhost:3000/api/urls'
+  const url = '/api/urls'
 
   const myHeaders = new Headers()
   myHeaders.append('Content-Type', 'application/json')
@@ -51,10 +51,7 @@ function Measure() {
       redirect: 'follow', // manual, *follow, error
     }
 
-    const res = await fetch(
-      'http://localhost:3000/api/token-counter',
-      postRequestOptions
-    )
+    const res = await fetch('/api/token-counter', postRequestOptions)
       .then((response) => {
         if (response.status === 200) {
           console.log('post success')

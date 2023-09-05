@@ -14,7 +14,7 @@ function TextsList() {
   const [data, setData] = useState(null)
   const [isLoading, setLoading] = useState(true)
 
-  const url = 'http://localhost:3000/api/texts'
+  const url = '/api/texts'
 
   const myHeaders = new Headers()
   myHeaders.append('Content-Type', 'application/json')
@@ -62,10 +62,7 @@ function TextsList() {
       redirect: 'follow',
     }
 
-    const res = await fetch(
-      'http://localhost:3000/api/texts',
-      postRequestOptions
-    )
+    const res = await fetch('/api/texts', postRequestOptions)
       .then((response) => {
         if (response.status === 200) {
           console.log('post success')

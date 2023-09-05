@@ -93,7 +93,7 @@ export default function AskQuestion() {
 
   useEffect(() => {
     document.getElementById('openAiContent').innerText = state.answer
-  }, [state.answer, state.isSubmitted])
+  }, [state.answer])
 
   return (
     <Layout>

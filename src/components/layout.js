@@ -2,11 +2,16 @@ import Navbar from './navbar'
 // import Footer from './footer'
 import { Inter } from 'next/font/google'
 import { useSession, signIn, signOut } from 'next-auth/react'
+import Loading from './Loading'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Layout({ children }) {
   const { data: session } = useSession()
+
+  if (session === undefined) {
+    return <Loading />
+  }
 
   if (session) {
     return (

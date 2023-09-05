@@ -29,7 +29,7 @@ function LinksList() {
 
   const handleRemove = async (id, ids) => {
     const res = await fetch(
-      `http://localhost:3000/api/urls/${id}?ids=${JSON.stringify(ids)}`,
+      `/api/urls/${id}?ids=${JSON.stringify(ids)}`,
       delRequsetOptions
     )
       .then((response) => {

@@ -33,7 +33,7 @@ function TextsList() {
 
   const handleRemove = async (id, ids) => {
     const res = await fetch(
-      `http://localhost:3000/api/texts/${id}?ids=${JSON.stringify(ids)}`,
+      `/api/texts/${id}?ids=${JSON.stringify(ids)}`,
       delRequsetOptions
     )
       .then((response) => {

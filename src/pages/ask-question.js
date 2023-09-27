@@ -54,8 +54,11 @@ export default function AskQuestion() {
   }
 
   const askQuestion = async (e) => {
-    dispatch({ type: 'SET_LOADING', isLoading: true })
     e.preventDefault()
+    if (state.question.length === 0) {
+      return
+    }
+    dispatch({ type: 'SET_LOADING', isLoading: true })
 
     const postRequestOptions = {
       method: 'POST',
@@ -91,12 +94,12 @@ export default function AskQuestion() {
   const title = 'Ask question'
   const subtitle = ''
 
-  useEffect(() => {
-    const openAiContentDiv = document.getElementById('openAiContent')
-    if (openAiContentDiv) {
-      openAiContentDiv.innerHTML = state.answer
-    }
-  }, [state])
+  // useEffect(() => {
+  //   const openAiContentDiv = document.getElementById('openAiContent')
+  //   if (openAiContentDiv) {
+  //     openAiContentDiv.innerHTML = state.answer
+  //   }
+  // }, [state])
 
   return (
     <Layout>
@@ -115,9 +118,6 @@ export default function AskQuestion() {
                 <h2 className="text-base font-semibold leading-7 text-gray-900">
                   Ask a question to Knowledge base
                 </h2>
-                <p className="mt-1 text-sm leading-6 text-gray-600">
-                  {/* {JSON.stringify(state.rawAnswer, null, 2)} */}
-                </p>
                 <div className="mt-10">
                   <div className="">
                     <div className="mt-2 space-y-4">
@@ -178,13 +178,24 @@ export default function AskQuestion() {
               </>
             )}
           </p>
-          <div className="p-4 mt-1 rounded-md bg-white/50">
-            <div id="openAiContent"></div>
+          <div className="">
+            {/* <div id="openAiContent" className='hidden'></div> */}
 
-            {state.isSubmitted && (
-              <div className="opacity-60 italic border-t border-gray-400 pt-2 mt-2 text-sm">
-                Length: {state.answer.length}
+            {state.isSubmitted ? (
+              <div className="border-t border-gray-400 pt-2 mt-2 text-sm">
+                <div>
+                  <textarea
+                    className="p-4 mt-1 rounded-md bg-white/50 w-full"
+                    rows={16}
+                    value={state.answer}
+                  ></textarea>
+                </div>
+                <span className="opacity-60 italic ">
+                  Length: {state.answer.length}
+                </span>
               </div>
+            ) : (
+              ''
             )}
 
             {state.sources.length > 0 && (

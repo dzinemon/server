@@ -152,7 +152,7 @@ export default function ChatWidget() {
   // };
 
   return (
-    <div className="h-screen w-screen bg-sky-100/50 backdrop-blur-md flex items-center justify-center">
+    <div className="h-screen w-screen flex items-center justify-center">
       <div className="relative bg-white w-full max-w-[720px] mx-auto rounded-lg">
         <p className="p-4 text-xl font-bold text-left">
           {state.isSubmitted && state.question}{' '}
@@ -182,6 +182,7 @@ export default function ChatWidget() {
                       transition={{
                         duration: 0.5,
                       }}
+                      key={`res-${state.sources.length}`}
                       className="flex items-center text-dark-900 font-bold text-sky-600 -mx-1"
                     >
                       <div className="w-auto px-1">
@@ -229,7 +230,7 @@ export default function ChatWidget() {
                         )
                       })}
                   </div>
-                  <div ref={scrollTargetRef}>
+                  <div key={'loading'} ref={scrollTargetRef}>
                     {state.isLoading && <Loading />}
                   </div>
 
@@ -242,6 +243,7 @@ export default function ChatWidget() {
                         transition={{
                           duration: 0.5,
                         }}
+                        key={`res-answer`}
                         className="flex items-center text-dark-900 font-bold text-sky-600 -mx-1"
                       >
                         <div className="w-auto px-1">
@@ -260,6 +262,7 @@ export default function ChatWidget() {
                           duration: 0.5,
                         }}
                         className="grow pb-4"
+                        key={`res-answer-content`}
                       >
                         {state.answer.indexOf('</') >= 0 ? (
                           <div

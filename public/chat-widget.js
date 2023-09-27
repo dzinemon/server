@@ -25,7 +25,7 @@
                 border-radius: 9999px;
                 color: white;
                 cursor: pointer;
-                background-color: #6b7280;
+                background-color: #4791ce;
                 border-style: none;
             }
             .h-7 {
@@ -71,7 +71,12 @@
     const chatWidget = document.createElement('div')
     chatWidget.id = 'chat-widget'
     chatWidget.innerHTML = `
-            <iframe id="chat-frame-widget" src="https://server-pi-sepia.vercel.app/widget" class="shadow-xl ring-1 rounded-lg" style="display: none; border: none; position: fixed; inset: auto 15px 75px auto; width: 400px; height: 540px; opacity: 1; color-scheme: none; background: white !important; margin: 0px; max-height: 100vh; max-width: 100vw; transform: translateY(0px); transition: none 0s ease 0s !important; visibility: visible; z-index: 999999999 !important;"></iframe>
+            <iframe id="chat-frame-widget" 
+            src="https://server-pi-sepia.vercel.app/widget" 
+            data-script-src="/widget" 
+            class="shadow-xl ring-1 rounded-lg" style="display: none; border: none; position: fixed;     inset: 15px 15px 75px 15px;
+            height: -webkit-fill-available;
+            width: -webkit-fill-available; color-scheme: none; background: white !important; margin: 0px; max-height: 100vh; max-width: 100vw; transform: translateY(0px); transition: none 0s ease 0s !important; visibility: visible; z-index: 999999999 !important;"></iframe>
             <button id="btn-trigger-chat" class="shadow-xl ring-1">${components.icon_message}</button>
             `
 

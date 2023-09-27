@@ -285,32 +285,32 @@ export default function ChatWidget() {
               </div>
             </div>
           </div>
-          <div className="bg-gray-50 rounded-b-lg">
-            <form
-              onSubmit={askQuestion}
-              className="p-4 flex gap-2 text-base font-semibold leading-7"
-            >
-              <input
-                name="message"
-                onChange={(e) =>
-                  dispatch({
-                    type: 'SET_QUESTION',
-                    question: e.target.value,
-                  })
-                }
-                value={state.question || ''}
-                placeholder="Ask Kruze anything"
-                className="px-2 py-1.5 border rounded-md flex-1 font-normal focus:outline-none focus:border-gray-400"
-              />
-              <button className="bg-gray-600 px-2.5 rounded-md text-white">
-                {/* prettier-ignore */}
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="22" x2="11" y1="2" y2="13"></line>
-                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                </svg>
-              </button>
-            </form>
-          </div>
+        </div>
+        <div className="bg-gray-50 rounded-b-lg">
+          <form
+            onSubmit={askQuestion}
+            className="p-4 flex gap-2 text-base font-semibold leading-7"
+          >
+            <input
+              name="message"
+              onChange={(e) =>
+                dispatch({
+                  type: 'SET_QUESTION',
+                  question: e.target.value,
+                })
+              }
+              value={state.question || ''}
+              placeholder="Ask Kruze anything"
+              className="px-2 py-1.5 border rounded-md flex-1 font-normal focus:outline-none focus:border-gray-400"
+            />
+            <button className="bg-gray-600 px-2.5 rounded-md text-white">
+              {/* prettier-ignore */}
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="22" x2="11" y1="2" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+            </button>
+          </form>
         </div>
       </div>
     </div>

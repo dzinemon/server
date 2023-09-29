@@ -84,8 +84,20 @@
     document.body.appendChild(chatWidget)
 
     const btn = document.getElementById('btn-trigger-chat')
+    const btn_section = document.getElementById('btn-trigger-chat-section')
     const frameWidget = document.getElementById('chat-frame-widget')
     frameWidget.style.display = 'none'
+
+    btn_section.addEventListener('click', () => {
+      if (btn.innerHTML === components.icon_message) {
+        btn.innerHTML = components.icon_close
+        frameWidget.style.display = 'block'
+      } else {
+        btn.innerHTML = components.icon_message
+        frameWidget.style.display = 'none'
+      }
+    })
+
     btn.addEventListener('click', () => {
       if (btn.innerHTML === components.icon_message) {
         btn.innerHTML = components.icon_close

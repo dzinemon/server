@@ -1,17 +1,11 @@
-import { useEffect  } from 'react';
+import { useEffect } from 'react'
 import Image from 'next/image'
-import Script from "next/script";
+import Script from 'next/script'
 import { Inter } from 'next/font/google'
-
 
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
-
-  const initiateChat = () => {
-    console.log('initiateChat')
-    ChatWidget.init("");
-  }
   return (
     <main
       className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
@@ -85,33 +79,30 @@ export default function Home() {
           </a>
         ))}
 
-          <button
-            
-            type='button'
-            onClick={(e) => {
-              initiateChat();
-              e.target.remove();
-            }}
-            className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
+        <button
+          type="button"
+          id="btn-trigger-chat-section"
+          className="group  rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
+        >
+          <h2 className={`mb-3 text-2xl font-semibold pointer-events-none`}>
+            Start Chat{' '}
+            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
+              -&gt;
+            </span>
+          </h2>
+          <p
+            className={`m-0 max-w-[30ch] text-sm opacity-50 pointer-events-none`}
           >
-            <h2 className={`mb-3 text-2xl font-semibold pointer-events-none`}>
-              Start Chat{' '}
-              <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-                -&gt;
-              </span>
-            </h2>
-            <p className={`m-0 max-w-[30ch] text-sm opacity-50 pointer-events-none`}>
-              use the chat widget to ask questions
-            </p>
-          </button>
+            use the chat widget to ask questions
+          </p>
+        </button>
       </div>
       <Script id="chat-widget-script" src="/chat-widget.js"></Script>
       <Script id="chat-onload-script">{`
-      window.onload = function() {
         setTimeout(() => {
-          ChatWidget.init("");
-        }, 1500);
-      };
+          ChatWidget.init();
+        }
+        , 1500);
       `}</Script>
     </main>
   )

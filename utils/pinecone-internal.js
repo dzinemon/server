@@ -73,7 +73,7 @@ async function deleteAllVectors() {
 
 async function queryEmbedding(queryVector) {
   await init()
-  console.log('queryVector', queryVector)
+  // console.log('queryVector', queryVector)
 
   const index = client.Index(process.env.INTERNAL_PINECONE_INDEX)
 
@@ -96,7 +96,7 @@ async function deleteEmbedding(ids) {
   const response = await index.delete1({
     ids: ids,
   })
-  console.log('deleted vectors response - ', response)
+  // console.log('deleted vectors response - ', response)
 
   return response
 }

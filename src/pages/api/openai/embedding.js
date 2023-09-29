@@ -7,12 +7,12 @@ import { queryEmbedding } from '../../../../utils/pinecone-internal'
 // import data from '../../../../data/data.json';
 
 const postUrl = async (req, res) => {
-  const { question } = req.body
+  const { question, subQuestions } = req.body
 
-  console.log(
-    'Processing post request . . . to generateEmbedding . . .',
-    question
-  )
+  // console.log(
+  //   'Processing post request . . . to generateEmbedding . . .',
+  //   question
+  // )
 
   const questionEmbedding = await generateEmbedding(question)
 
@@ -31,15 +31,25 @@ const postUrl = async (req, res) => {
 
   // bundle prompt using data metadata content from all matches
 
-  const promptTempate = (
-    question,
-    context
-  ) => `Answer the question based on the context below and format the answer with HTML tags:
+  const promptTempate = (question, context, subQuestions = []) => {
+    if (subQuestions.length === 0) {
+      return `Answer the question based on the context below and format the answer with HTML tags:
   
-  Question: ${question}
+      Question: ${question}
+      
+      Context: ${context}
+      `
+    } else {
+      return `Answer the main question based on the context below, keep your reply to the previous quesitons and format the answer with HTML tags:
   
-  Context: ${context}
-  `
+      Main Question: ${question}
+
+      Previous quesitons: ${subQuestions.join(', ')}
+      
+      Context: ${context}
+      `
+    }
+  }
 
   // const thecontext = data.matches
   //   .map((match) => match.metadata.content)
@@ -57,7 +67,7 @@ const postUrl = async (req, res) => {
       }
     }, '')
 
-  const prompt = promptTempate(question, thecontext)
+  const prompt = promptTempate(question, thecontext, subQuestions)
 
   if (thecontext.length === 0) {
     res.status(200).json({

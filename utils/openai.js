@@ -28,6 +28,7 @@ const createChatCompletion = async (prompt) => {
 
   const completion = await openai.chat.completions.create({
     model: 'gpt-3.5-turbo-16k-0613',
+    temperature: 0.2,
     messages: [
       {
         role: 'system',

@@ -20,14 +20,18 @@ const postUrl = async (req, res) => {
 
   // get sources array of data
 
-  const sources = data.matches.map((match) => {
-    return {
-      id: match.metadata.id,
-      title: match.metadata.title,
-      url: match.metadata.url,
-      score: match.score,
-    }
-  })
+  const sources = data.matches
+    .map((match) => {
+      return {
+        id: match.metadata.id,
+        title: match.metadata.title,
+        url: match.metadata.url,
+        score: match.score,
+      }
+    }) // filter unique sources by url
+    .filter(
+      (item, idx, arr) => arr.findIndex((t) => t.url === item.url) === idx
+    )
 
   // bundle prompt using data metadata content from all matches
 

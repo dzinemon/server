@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import Image from 'next/image'
+import InlineLoading from '../InlineLoading'
 
 import {
   DocumentTextIcon,
@@ -68,29 +69,29 @@ export default function QuestionSearchResult({ question, isLatest }) {
         <div className="space-y-4 py-4 text-base leading-7 text-gray-600 overflow-y-auto">
           <div className="relative h-full w-full">
             <div className="px-4 relative h-full w-full">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{
+                  duration: 0.5,
+                }}
+                key={`res-${question.sources.length}`}
+                className="flex items-center text-dark-900 font-bold text-sky-600 -mx-1 mb-2"
+              >
+                <div className="w-auto px-1">
+                  {question.sources.length > 0 ? (
+                    <div className="w-6 h-6 rounded-full bg-sky-600 flex items-center justify-center">
+                      <DocumentTextIcon className="text-white w-4 h-4 inline" />
+                    </div>
+                  ) : (
+                    <InlineLoading />
+                  )}
+                </div>
+                <div className="w-auto px-1">Resources / Search results</div>
+              </motion.div>
               <AnimatePresence>
-                {question.sources && question.sources.length > 0 && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{
-                      duration: 0.5,
-                    }}
-                    key={`res-${question.sources.length}`}
-                    className="flex items-center text-dark-900 font-bold text-sky-600 -mx-1 mb-2"
-                  >
-                    <div className="w-auto px-1">
-                      <div className="w-6 h-6 rounded-full bg-sky-600 flex items-center justify-center">
-                        <DocumentTextIcon className="text-white w-4 h-4 inline" />
-                      </div>
-                    </div>
-                    <div className="w-auto px-1">
-                      Resources / Search results
-                    </div>
-                  </motion.div>
-                )}
-                <div className="flex flex-wrap -mx-1">
+                <div className="flex flex-wrap -mx-1 min-h-[100px]">
                   {question.sources &&
                     question.sources.map((item, idx) => {
                       return (
@@ -128,6 +129,8 @@ export default function QuestionSearchResult({ question, isLatest }) {
                     })}
                 </div>
 
+                <hr className="my-4 opacity-80" />
+
                 {question.answer && (
                   <>
                     <motion.div
@@ -156,7 +159,7 @@ export default function QuestionSearchResult({ question, isLatest }) {
                         duration: 0.5,
                         delay: 1,
                       }}
-                      className="grow pb-4"
+                      className="grow"
                       key={`res-answer-content`}
                     >
                       {question.answer.indexOf('</') >= 0 ? (

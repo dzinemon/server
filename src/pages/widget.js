@@ -1,4 +1,11 @@
-import React, { useContext, useRef, useState, useReducer } from 'react'
+import React, {
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  useReducer,
+  use,
+} from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import ReactMarkdown from 'react-markdown'
 import Image from 'next/image'
@@ -11,6 +18,7 @@ import {
 
 import QuestionSearchResult from '../components/web-widget/question-search-result'
 import Loading from '../components/Loading'
+import InlineLoading from '@/components/InlineLoading'
 
 const questionExamples = [
   'Is QuickBooks good for SaaS Startups?',
@@ -61,6 +69,22 @@ export default function ChatWidget() {
     }, 1000)
   }
 
+  useEffect(() => {
+    // read localstorage for questions
+    const questions = JSON.parse(localStorage.getItem('localQuestions'))
+    if (questions && questions.length > 0) {
+      setQuestions(questions)
+      setIsSubmitted(true)
+    }
+  }, [])
+
+  const handleClearLocalStorage = () => {
+    localStorage.removeItem('localQuestions')
+    setIsSubmitted(false)
+
+    setQuestions([])
+  }
+
   const handleScrollIntoView = () => {
     setTimeout(() => {
       scrollTargetRef.current.scrollIntoView({ behavior: 'smooth' })
@@ -73,14 +97,15 @@ export default function ChatWidget() {
       return
     }
     let currentQuesiton = { question: question, answer: '', sources: [] }
+    setQuestions(questions.concat([currentQuesiton]))
+    setQuestion('')
+    handleScrollIntoView()
 
     setIsLoading(true)
 
     setIsSubmitted(true)
 
     // push current question to array of questions
-
-    setQuestions(questions.concat([currentQuesiton]))
 
     const questionRequestOptions = {
       method: 'POST',
@@ -147,26 +172,25 @@ export default function ChatWidget() {
     // update current question answer
 
     setQuestions((previous) => {
-      return [
+      const currentQuestions = [
         ...previous.slice(0, -1),
         {
           ...previous[previous.length - 1],
           answer: completion,
         },
       ]
+
+      localStorage.setItem('localQuestions', JSON.stringify(currentQuestions))
+
+      return currentQuestions
     })
 
-    // setQuestions(
-    //   questions.slice(0, -1).concat([
-    //     {
-    //       sources: sources,
-    //       question: question,
-    //       answer: completion,
-    //     },
-    //   ])
-    // )
+    // update localstorage for questions
+
+    // localStorage.setItem('localQuestions', JSON.stringify(questions))
+
     setIsLoading(false)
-    setQuestion('')
+
     handleScrollIntoView()
   }
 
@@ -209,7 +233,7 @@ export default function ChatWidget() {
           priority
         />
       </div>
-      <div className="relative overflow-auto pt-4 pb-28 w-full h-screen max-w-[720px] mx-auto flex flex-col justify-center items-center">
+      <div className="relative overflow-auto pt-4 pb-28 w-full h-screen max-w-[720px] mx-auto flex flex-col justify-start items-center">
         <motion.div
           className={`${
             isSubmitted ? 'h-full' : 'h-0'
@@ -232,51 +256,80 @@ export default function ChatWidget() {
         </motion.div>
 
         {/* {JSON.stringify(questions, null, 2)} */}
-        {isLoading && <Loading />}
 
         {/* FORM */}
         <motion.div
           key={'form-div'}
           className={`${
-            isSubmitted ? 'fixed bottom-4' : 'relative'
-          } w-full max-w-[720px] bg-gray-100 rounded-lg`}
+            isSubmitted ? 'fixed bottom-2' : 'relative'
+          } w-full max-w-[720px] `}
         >
-          <form
-            onSubmit={askQuestion}
-            className="p-4 flex gap-2 text-base font-semibold leading-7"
-          >
-            <input
-              name="message"
-              onChange={(e) => {
-                setQuestion(e.target.value)
-                handleButtonAnimation()
-              }}
-              value={question || ''}
-              placeholder="Ask Kruze anything"
-              className="px-2 py-1.5 border rounded-md flex-1 font-normal focus:outline-none focus:border-gray-400"
-            />
-            <button
-              id="submit-question"
-              className={`bg-blue-400 hover:bg-blue-600 delay-100 duration-500 px-2.5 rounded-md text-white relative
-              after:content-['']
-              after:absolute
-              after:opacity-0
-              after:inset-2
-              after:rounded-md
-              after:bg-blue-400
-              after:z-[0]
-
-            `}
+          <div className="absolute inset-1 bg-gradient-to-br from-gray-200 to-gray-400  opacity-75 z-0 rounded-xl blur"></div>
+          <div className="bg-gray-50 rounded-lg relative z-10">
+            <form
+              onSubmit={askQuestion}
+              className="p-4 flex gap-2 text-base font-semibold leading-7 relative"
             >
-              {/* prettier-ignore */}
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-              className='z-10 relative'
+              <input
+                name="message"
+                onChange={(e) => {
+                  setQuestion(e.target.value)
+                  handleButtonAnimation()
+                }}
+                value={question || ''}
+                placeholder="Ask Kruze anything"
+                className="px-2 py-1.5 border rounded-md flex-1 font-normal focus:outline-none focus:border-gray-400"
+              />
+              <button
+                disabled={isLoading}
+                id="submit-question"
+                className={`bg-blue-400 hover:bg-blue-600 delay-100 duration-500 px-2.5 rounded-md text-white relative
+                after:content-['']
+                after:absolute
+                after:opacity-0
+                after:inset-2
+                after:rounded-md
+                after:bg-blue-400
+                after:z-[0]
+              `}
               >
-                <line x1="22" x2="11" y1="2" y2="13"></line>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-              </svg>
-            </button>
-          </form>
+                {/* prettier-ignore */}
+                {isLoading ? (
+                  <InlineLoading />
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="z-10 relative"
+                  >
+                    <line x1="22" x2="11" y1="2" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                  </svg>
+                )}
+              </button>
+            </form>
+          </div>
+
+          {questions.length > 0 && (
+            <div className="px-4 py-2 relative z-10">
+              <div className="flex text-xs justify-center">
+                <button
+                  type="button"
+                  className="border-b border-gray-600 hover:border-dashed"
+                  onClick={() => handleClearLocalStorage()}
+                >
+                  Clear results
+                </button>
+              </div>
+            </div>
+          )}
         </motion.div>
 
         {/* EXAMPLES */}
@@ -300,7 +353,7 @@ export default function ChatWidget() {
                 return (
                   <div className="px-1 mb-1" key={`question-${idx}`}>
                     <button
-                      className=" bg-blue-100 text-xs rounded-md px-2 py-1 text-sm text-gray-600 hover:bg-gray-300 hover:text-gray-700
+                      className=" bg-white text-xs rounded-md px-2 py-1 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900
                       "
                       onClick={() => {
                         setQuestion(item)

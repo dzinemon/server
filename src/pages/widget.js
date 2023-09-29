@@ -260,12 +260,17 @@ export default function ChatWidget() {
         {/* FORM */}
         <motion.div
           key={'form-div'}
+          // animate positionin top and bottom
+          animate={{
+            bottom: isSubmitted ? '16px' : 'auto',
+            top: isSubmitted ? 'auto' : '0px',
+          }}
           className={`${
             isSubmitted ? 'fixed bottom-2' : 'relative'
-          } w-full max-w-[720px] `}
+          } w-full max-w-[720px]`}
         >
-          <div className="absolute inset-1 bg-gradient-to-br from-gray-200 to-gray-400  opacity-75 z-0 rounded-xl blur"></div>
-          <div className="bg-gray-50 rounded-lg relative z-10">
+          {/* <div className="absolute inset-1 bg-gradient-to-br from-gray-200 to-gray-400  opacity-75 z-0 rounded-xl blur"></div> */}
+          <div className="bg-gray-50 rounded-lg relative z-10 shadow-xl">
             <form
               onSubmit={askQuestion}
               className="p-4 flex gap-2 text-base font-semibold leading-7 relative"

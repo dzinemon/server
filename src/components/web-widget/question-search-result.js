@@ -77,11 +77,11 @@ export default function QuestionSearchResult({ question, isLatest }) {
                   duration: 0.5,
                 }}
                 key={`res-${question.sources.length}`}
-                className="flex items-center text-dark-900 font-bold text-sky-600 -mx-1 mb-2"
+                className="flex items-center text-dark-900 font-bold text-blue-400 -mx-1 mb-2"
               >
                 <div className="w-auto px-1">
                   {question.sources.length > 0 ? (
-                    <div className="w-6 h-6 rounded-full bg-sky-600 flex items-center justify-center">
+                    <div className="w-6 h-6 rounded-full bg-blue-400 flex items-center justify-center">
                       <DocumentTextIcon className="text-white w-4 h-4 inline" />
                     </div>
                   ) : (
@@ -142,10 +142,10 @@ export default function QuestionSearchResult({ question, isLatest }) {
                         delay: 1,
                       }}
                       key={`res-answer`}
-                      className="flex items-center text-dark-900 font-bold text-sky-600 -mx-1 mb-2"
+                      className="flex items-center text-dark-900 font-bold text-blue-400 -mx-1 mb-2"
                     >
                       <div className="w-auto px-1">
-                        <div className="w-6 h-6 rounded-full bg-sky-600 flex items-center justify-center">
+                        <div className="w-6 h-6 rounded-full bg-blue-400 flex items-center justify-center">
                           <ChatBubbleBottomCenterTextIcon className="text-white w-4 h-4 inline" />
                         </div>
                       </div>

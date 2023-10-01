@@ -102,7 +102,7 @@ export default function Home() {
         setTimeout(() => {
           ChatWidget.init();
         }
-        , 1500);
+        , 1000);
       `}</Script>
     </main>
   )

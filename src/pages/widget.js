@@ -10,6 +10,8 @@ import { AnimatePresence, motion } from 'framer-motion'
 import ReactMarkdown from 'react-markdown'
 import Image from 'next/image'
 
+import Script from 'next/script'
+
 import {
   DocumentTextIcon,
   ArrowTopRightOnSquareIcon,
@@ -29,6 +31,14 @@ const questionExamples = [
   'Which tools should every startup CFO know/use?',
 ]
 
+const searchExamples = [
+  'Kruze Pricing',
+  'Startup Taxes',
+  'Startup Bookkeeping',
+  'C-Corp Tax Deadlines 2023',
+  '409A Valuation',
+  'Top pre-seed funds',
+]
 const question = {
   q: '',
   answer: '',
@@ -91,6 +101,12 @@ export default function ChatWidget() {
     }, 100)
   }
 
+  const handleSendGoogleAnalyticsEvent = (question) => {
+    window.gtag('event', 'search_widget', {
+      search_term: question,
+    })
+  }
+
   const askQuestion = async (e) => {
     e.preventDefault()
     if (question.length === 0) {
@@ -100,6 +116,9 @@ export default function ChatWidget() {
     setQuestions(questions.concat([currentQuesiton]))
     setQuestion('')
     handleScrollIntoView()
+    if (window.gtag !== undefined) {
+      handleSendGoogleAnalyticsEvent(question)
+    }
 
     setIsLoading(true)
 
@@ -237,7 +256,7 @@ export default function ChatWidget() {
         <motion.div
           className={`${
             isSubmitted ? 'h-full' : 'h-0'
-          } w-full  overflow-auto space-y-4`}
+          } w-full overflow-auto space-y-3 lg:space-y-4 px-4 `}
           layout
         >
           {questions.length > 0
@@ -258,90 +277,91 @@ export default function ChatWidget() {
         {/* {JSON.stringify(questions, null, 2)} */}
 
         {/* FORM */}
-        <motion.div
-          key={'form-div'}
-          // animate positionin top and bottom
-          animate={{
-            bottom: isSubmitted ? '16px' : 'auto',
-            top: isSubmitted ? 'auto' : '0px',
-          }}
-          className={`${
-            isSubmitted ? 'fixed bottom-2' : 'relative'
-          } w-full max-w-[720px]`}
-        >
-          {/* <div className="absolute inset-1 bg-gradient-to-br from-gray-200 to-gray-400  opacity-75 z-0 rounded-xl blur"></div> */}
-          <div className="bg-gray-50 rounded-lg relative z-10 shadow-xl">
-            <form
-              onSubmit={askQuestion}
-              className="p-4 flex gap-2 text-base font-semibold leading-7 relative"
-            >
-              <input
-                name="message"
-                onChange={(e) => {
-                  setQuestion(e.target.value)
-                  handleButtonAnimation()
-                }}
-                value={question || ''}
-                placeholder="Ask Kruze anything"
-                className="px-2 py-1.5 border rounded-md flex-1 font-normal focus:outline-none focus:border-gray-400"
-              />
-              <button
-                disabled={isLoading}
-                id="submit-question"
-                className={`bg-blue-400 hover:bg-blue-600 delay-100 duration-500 px-2.5 rounded-md text-white relative
-                after:content-['']
-                after:absolute
-                after:opacity-0
-                after:inset-2
-                after:rounded-md
-                after:bg-blue-400
-                after:z-[0]
-              `}
+        <AnimatePresence>
+          <motion.div
+            key={'form-div'}
+            // animate positionin top and bottom
+            animate={{
+              bottom: isSubmitted ? '16px' : 'auto',
+              top: isSubmitted ? 'auto' : '0px',
+            }}
+            className={`${
+              isSubmitted ? 'fixed bottom-2' : 'relative'
+            } w-full max-w-[720px]`}
+          >
+            {/* <div className="absolute inset-1 bg-gradient-to-br from-gray-200 to-gray-400  opacity-75 z-0 rounded-xl blur"></div> */}
+            <div className="md:bg-gray-50 md:rounded-lg relative z-10 md:border border-slate-200">
+              <form
+                onSubmit={askQuestion}
+                className="p-4 flex gap-2 text-base font-semibold leading-7 relative"
               >
-                {/* prettier-ignore */}
-                {isLoading ? (
-                  <InlineLoading />
-                ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="z-10 relative"
-                  >
-                    <line x1="22" x2="11" y1="2" y2="13"></line>
-                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                  </svg>
-                )}
-              </button>
-            </form>
-          </div>
-
-          {questions.length > 0 && (
-            <div className="px-4 py-2 relative z-10">
-              <div className="flex text-xs justify-center">
+                <input
+                  name="message"
+                  onChange={(e) => {
+                    setQuestion(e.target.value)
+                    handleButtonAnimation()
+                  }}
+                  value={question || ''}
+                  placeholder="Ask Kruze anything"
+                  className="px-2 py-1.5 border rounded-md flex-1 font-normal focus:outline-none focus:border-gray-400"
+                />
                 <button
-                  type="button"
-                  className="border-b border-gray-600 hover:border-dashed"
-                  onClick={() => handleClearLocalStorage()}
+                  disabled={isLoading}
+                  id="submit-question"
+                  className={`bg-blue-400 hover:bg-blue-600 delay-100 duration-500 px-2.5 rounded-md text-white relative
+                  after:content-['']
+                  after:absolute
+                  after:opacity-0
+                  after:inset-2
+                  after:rounded-md
+                  after:bg-blue-400
+                  after:z-[0]
+                `}
                 >
-                  Clear results
+                  {/* prettier-ignore */}
+                  {isLoading ? (
+                    <InlineLoading />
+                  ) : (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="z-10 relative"
+                    >
+                      <line x1="22" x2="11" y1="2" y2="13"></line>
+                      <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                  )}
                 </button>
-              </div>
+              </form>
             </div>
-          )}
-        </motion.div>
+            {questions.length > 0 && (
+              <div className="px-4 py-2 relative z-10">
+                <div className="flex text-xs justify-center">
+                  <button
+                    type="button"
+                    className="border-b border-gray-600 hover:border-dashed"
+                    onClick={() => handleClearLocalStorage()}
+                  >
+                    Clear results
+                  </button>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
 
         {/* EXAMPLES */}
         <AnimatePresence>
           <motion.div
             key={'examples-div'}
-            className="w-full overflow-hidden"
+            className="w-full overflow-hidden space-y-4 pt-4"
             layout
             // animate={{ opacity: 1 }}
             transition={{
@@ -350,30 +370,55 @@ export default function ChatWidget() {
             }}
             style={{ height: isSubmitted ? '0px' : 'auto' }}
           >
-            <p className="text-center text-gray-600 my-4 text-sm">
-              ask any question, or pick up one below
+            <p className="text-center text-gray-800 text-base max-w-xl mx-auto">
+              {/* ask any question, or pick up one below */}
+              Search any term or question to access comprehensive resources and
+              detailed information from Kruze Consulting.
             </p>
+            <div className="space-y-2">
+              <p className="text-center text-gray-600 text-sm"></p>
+              <p className="text-center text-gray-600 text-sm">
+                Can`t think of a question? Choose one of the frequently asked
+                questions or search terms below.
+              </p>
+            </div>
             <div className="flex flex-wrap justify-center items-center -mx-1">
-              {questionExamples.map((item, idx) => {
-                return (
-                  <div className="px-1 mb-1" key={`question-${idx}`}>
-                    <button
-                      className=" bg-white text-xs rounded-md px-2 py-1 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900
+              {questionExamples
+                .concat(searchExamples)
+                .sort()
+                .map((item, idx) => {
+                  return (
+                    <div className="px-1 mb-1" key={`question-${idx}`}>
+                      <button
+                        className=" bg-white text-xs rounded-md px-2 py-1 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900
                       "
-                      onClick={() => {
-                        setQuestion(item)
-                        handleButtonAnimation()
-                      }}
-                    >
-                      {item}
-                    </button>
-                  </div>
-                )
-              })}
+                        onClick={() => {
+                          setQuestion(item)
+                          handleButtonAnimation()
+                        }}
+                      >
+                        {item}
+                      </button>
+                    </div>
+                  )
+                })}
             </div>
           </motion.div>
         </AnimatePresence>
       </div>
+
+      <Script
+        id="google-tag-manager"
+        async
+        src={`https://www.googletagmanager.com/gtag/js?id=${process.env.GA4_ID}`}
+      ></Script>
+      <Script id="google-analytics">
+        {`window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', '${process.env.GA4_ID}');`}
+      </Script>
     </div>
   )
 }

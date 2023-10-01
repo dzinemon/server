@@ -42,10 +42,10 @@ export default function QuestionSearchResult({ question, isLatest }) {
   return (
     <div className="w-full bg-white rounded-lg bg-gradient-to-b from-white to-gray-100/50">
       <div className="flex flex-row justify-between items-center">
-        <div className="p-4 text-xl font-bold text-left">
+        <div className="py-2 px-3 md:p-4 text-base leading-none md:text-lg lg:text-xl font-bold text-left dark:text-white">
           {question.question}
         </div>
-        <div className="px-4">
+        <div className="px-2 py-2 md:px-4">
           <button
             onClick={() => setIsOpen(!isOpen)}
             className="w-7 h-7 hover:bg-blue-600 text-white duration-200 bg-gray-300 rounded-full flex items-center justify-center"
@@ -68,7 +68,7 @@ export default function QuestionSearchResult({ question, isLatest }) {
       >
         <div className="space-y-4 py-4 text-base leading-7 text-gray-600 overflow-y-auto">
           <div className="relative h-full w-full">
-            <div className="px-4 relative h-full w-full">
+            <div className="px-4 relative h-full w-full ">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -91,7 +91,10 @@ export default function QuestionSearchResult({ question, isLatest }) {
                 <div className="w-auto px-1">Resources / Search results</div>
               </motion.div>
               <AnimatePresence>
-                <div className="flex flex-wrap -mx-1 min-h-[100px]">
+                <div
+                  className="flex flex-wrap -mx-1 min-h-[100px]"
+                  key={`sources`}
+                >
                   {question.sources &&
                     question.sources.map((item, idx) => {
                       return (
@@ -103,7 +106,7 @@ export default function QuestionSearchResult({ question, isLatest }) {
                             duration: 0.5,
                             delay: idx * 0.2,
                           }}
-                          className="w-1/4 px-1 mb-2 overflow-hidden"
+                          className="w-1/2 lg:w-1/4 px-1 mb-2 overflow-hidden"
                           key={`res-${idx}`}
                         >
                           <a
@@ -128,8 +131,6 @@ export default function QuestionSearchResult({ question, isLatest }) {
                       )
                     })}
                 </div>
-
-                <hr className="my-4 opacity-80" />
 
                 {question.answer && (
                   <>

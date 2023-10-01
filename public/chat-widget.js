@@ -1,6 +1,13 @@
 ;(function () {
   const styleTag = `
         <style>
+            #chat-frame-widget {
+              transition: all 500ms ease-in-out;
+              transform: translate(3%,3%) skewY(-3deg) scale(0.5) rotate(6deg);
+              opacity: 0;
+              transform-origin: right bottom;
+            }
+
             #chat-widget {
                 position: fixed;
                 bottom: 20px;
@@ -72,11 +79,18 @@
     chatWidget.id = 'chat-widget'
     chatWidget.innerHTML = `
             <iframe id="chat-frame-widget" 
-            src="https://server-pi-sepia.vercel.app/widget" 
+            src="https://kruze-ai-agent.vercel.app/widget" 
             data-script-src="/widget" 
-            class="shadow-xl ring-1 rounded-lg" style="display: none; border: none; position: fixed;     inset: 15px 15px 75px 15px;
+            class="shadow-xl ring-1 rounded-lg" 
+            style="display: none; 
+            border: none; 
+            position: fixed;
+            inset: 15px 15px 75px 15px;
             height: -webkit-fill-available;
-            width: -webkit-fill-available; color-scheme: none; background: white !important; margin: 0px; max-height: 100vh; max-width: 100vw; transform: translateY(0px); transition: none 0s ease 0s !important; visibility: visible; z-index: 999999999 !important;"></iframe>
+            width: -webkit-fill-available; 
+            color-scheme: none; 
+            margin: 0px; max-height: 100vh; max-width: 100vw; 
+            visibility: visible; z-index: 999999999 !important;"></iframe>
             <button id="btn-trigger-chat" class="shadow-xl ring-1">${components.icon_message}</button>
             `
 
@@ -86,25 +100,42 @@
     const btn = document.getElementById('btn-trigger-chat')
     const btn_section = document.getElementById('btn-trigger-chat-section')
     const frameWidget = document.getElementById('chat-frame-widget')
-    frameWidget.style.display = 'none'
+    // frameWidget.style.display = 'none'
+
+    function openWidget() {
+      btn.innerHTML = components.icon_close
+      frameWidget.style.display = 'block'
+      setTimeout(() => {
+        frameWidget.style.transform =
+          'translate(0%,0%) skewY(0deg) scale(1) rotate(0deg)'
+        frameWidget.style.opacity = '1'
+      }, 100)
+    }
+
+    function closeWidget() {
+      btn.innerHTML = components.icon_message
+
+      frameWidget.style.transform =
+        'translate(3%,3%) skewY(-3deg) scale(0.5) rotate(6deg)'
+      frameWidget.style.opacity = '0'
+      setTimeout(() => {
+        frameWidget.style.display = 'none'
+      }, 300)
+    }
 
     btn_section.addEventListener('click', () => {
       if (btn.innerHTML === components.icon_message) {
-        btn.innerHTML = components.icon_close
-        frameWidget.style.display = 'block'
+        openWidget()
       } else {
-        btn.innerHTML = components.icon_message
-        frameWidget.style.display = 'none'
+        closeWidget()
       }
     })
 
     btn.addEventListener('click', () => {
       if (btn.innerHTML === components.icon_message) {
-        btn.innerHTML = components.icon_close
-        frameWidget.style.display = 'block'
+        openWidget()
       } else {
-        btn.innerHTML = components.icon_message
-        frameWidget.style.display = 'none'
+        closeWidget()
       }
     })
   }

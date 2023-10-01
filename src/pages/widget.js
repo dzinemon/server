@@ -52,7 +52,7 @@ const initialState = {
   isSubmitted: false,
 }
 
-const GA4_ID = process.env.GA4_ID
+const NEXT_PUBLIC_GA4_ID = process.env.NEXT_PUBLIC_GA4_ID
 
 export default function ChatWidget() {
   // const {resources, setResources} = useResourcesContext();

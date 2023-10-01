@@ -52,6 +52,8 @@ const initialState = {
   isSubmitted: false,
 }
 
+const GA4_ID = process.env.GA4_ID
+
 export default function ChatWidget() {
   // const {resources, setResources} = useResourcesContext();
   const scrollTargetRef = useRef(null)
@@ -406,19 +408,19 @@ export default function ChatWidget() {
           </motion.div>
         </AnimatePresence>
       </div>
-      {process.env.GA4_ID !== '' ? (
+      {NEXT_PUBLIC_GA4_ID !== '' ? (
         <>
           <Script
             id="google-tag-manager"
             async
-            src={`https://www.googletagmanager.com/gtag/js?id=${process.env.GA4_ID}`}
+            src={`https://www.googletagmanager.com/gtag/js?id=${NEXT_PUBLIC_GA4_ID}`}
           ></Script>
           <Script id="google-analytics">
             {`window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
 
-          gtag('config', '${process.env.GA4_ID}');`}
+          gtag('config', '${NEXT_PUBLIC_GA4_ID}');`}
           </Script>
         </>
       ) : (

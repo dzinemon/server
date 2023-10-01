@@ -116,11 +116,14 @@ export default function ChatWidget() {
     }
     let currentQuesiton = { question: question, answer: '', sources: [] }
     setQuestions(questions.concat([currentQuesiton]))
-    setQuestion('')
+    setQuestion((prev) => {
+      console.log('prev', prev);
+      if (window.gtag !== undefined) {
+        handleSendGoogleAnalyticsEvent(prev)
+      }
+      return ''
+    })
     handleScrollIntoView()
-    if (window.gtag !== undefined) {
-      handleSendGoogleAnalyticsEvent(question)
-    }
 
     setIsLoading(true)
 

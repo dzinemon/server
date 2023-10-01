@@ -406,19 +406,24 @@ export default function ChatWidget() {
           </motion.div>
         </AnimatePresence>
       </div>
+      {process.env.GA4_ID !== '' ? (
+        <>
+          <Script
+            id="google-tag-manager"
+            async
+            src={`https://www.googletagmanager.com/gtag/js?id=${process.env.GA4_ID}`}
+          ></Script>
+          <Script id="google-analytics">
+            {`window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
 
-      <Script
-        id="google-tag-manager"
-        async
-        src={`https://www.googletagmanager.com/gtag/js?id=${process.env.GA4_ID}`}
-      ></Script>
-      <Script id="google-analytics">
-        {`window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-
-        gtag('config', '${process.env.GA4_ID}');`}
-      </Script>
+          gtag('config', '${process.env.GA4_ID}');`}
+          </Script>
+        </>
+      ) : (
+        ''
+      )}
     </div>
   )
 }

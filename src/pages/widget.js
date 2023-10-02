@@ -274,54 +274,81 @@ export default function ChatWidget() {
           >
             <div className="md:bg-gray-50 md:rounded-lg relative z-10 md:border border-slate-200">
               {limitSearchAttempts > questions.length ? (
-                <form
-                  onSubmit={askQuestion}
-                  className="p-4 flex gap-2 text-base font-semibold leading-7 relative"
-                >
-                  <input
-                    name="message"
-                    onChange={(e) => {
-                      setQuestion(e.target.value)
-                    }}
-                    value={question || ''}
-                    placeholder="Ask Kruze anything"
-                    className="px-2 py-1.5 border rounded-md flex-1 font-normal focus:outline-none focus:border-gray-400"
-                  />
-                  <button
-                    disabled={isLoading}
-                    id="submit-question"
-                    className={`bg-blue-400 hover:bg-blue-600 delay-100 duration-500 px-2.5 rounded-md text-white relative
-                    after:content-['']
-                    after:absolute
-                    after:opacity-0
-                    after:inset-2
-                    after:rounded-md
-                    after:bg-blue-400
-                    after:z-[0]
-                  `}
+                <div>
+                  <form
+                    onSubmit={askQuestion}
+                    className="p-4 flex gap-2 text-base font-semibold leading-7 relative"
                   >
-                    {/* prettier-ignore */}
-                    {isLoading ? (
-                      <InlineLoading />
-                    ) : (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="z-10 relative"
-                      >
-                        <line x1="22" x2="11" y1="2" y2="13"></line>
-                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                      </svg>
-                    )}
-                  </button>
-                </form>
+                    <input
+                      name="message"
+                      onChange={(e) => {
+                        setQuestion(e.target.value)
+                      }}
+                      value={question || ''}
+                      placeholder="Ask Kruze anything"
+                      className="px-2 py-1.5 border rounded-md flex-1 font-normal focus:outline-none focus:border-gray-400"
+                    />
+                    <button
+                      disabled={isLoading}
+                      id="submit-question"
+                      className={`bg-blue-400 hover:bg-blue-600 delay-100 duration-500 px-2.5 rounded-md text-white relative
+                      after:content-['']
+                      after:absolute
+                      after:opacity-0
+                      after:inset-2
+                      after:rounded-md
+                      after:bg-blue-400
+                      after:z-[0]
+                    `}
+                    >
+                      {/* prettier-ignore */}
+                      {isLoading ? (
+                        <InlineLoading />
+                      ) : (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="z-10 relative"
+                        >
+                          <line x1="22" x2="11" y1="2" y2="13"></line>
+                          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                      )}
+                    </button>
+                  </form>
+                  {questions.length > 0 && (
+                    <div className="px-4 py-2 relative z-10">
+                      <div className="flex text-xs justify-center">
+                        <button
+                          type="button"
+                          className="border-b border-gray-600 hover:border-dashed"
+                          onClick={() => handleClearLocalStorage()}
+                        >
+                          <ArrowPathIcon className="inline-block mr-2 w-3.5 h-3.5" />
+                          Clear results
+                        </button>
+                        {/* <button
+                          type="button"
+                          className="border-b border-gray-600 hover:border-dashed"
+                          onClick={() => handleClearLocalStorageDateCount()}
+                        >
+                          <ArrowPathIcon className="inline-block mr-2 w-3.5 h-3.5" />
+                          Clear Date & Count
+                        </button> */}
+                        {/* <span className='px-2'>
+                            attemptCount: {attemptCount} attemptDate: {JSON.stringify(attemptDate)}
+                          </span> */}
+                      </div>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <div className="py-3 text-center text-sm text-slate-400">
                   <p className="">Search Limit Reached.</p>
@@ -329,31 +356,6 @@ export default function ChatWidget() {
                 </div>
               )}
             </div>
-            {questions.length > 0 && (
-              <div className="px-4 py-2 relative z-10">
-                <div className="flex text-xs justify-center">
-                  <button
-                    type="button"
-                    className="border-b border-gray-600 hover:border-dashed"
-                    onClick={() => handleClearLocalStorage()}
-                  >
-                    <ArrowPathIcon className="inline-block mr-2 w-3.5 h-3.5" />
-                    Clear results
-                  </button>
-                  {/* <button
-                    type="button"
-                    className="border-b border-gray-600 hover:border-dashed"
-                    onClick={() => handleClearLocalStorageDateCount()}
-                  >
-                    <ArrowPathIcon className="inline-block mr-2 w-3.5 h-3.5" />
-                    Clear Date & Count
-                  </button> */}
-                  {/* <span className='px-2'>
-                      attemptCount: {attemptCount} attemptDate: {JSON.stringify(attemptDate)}
-                    </span> */}
-                </div>
-              </div>
-            )}
           </motion.div>
         </AnimatePresence>
 

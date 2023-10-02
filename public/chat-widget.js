@@ -104,6 +104,7 @@
 
     function openWidget() {
       btn.innerHTML = components.icon_close
+      document.body.style.overflowY = 'hidden'
       frameWidget.style.display = 'block'
       setTimeout(() => {
         frameWidget.style.transform =
@@ -114,6 +115,7 @@
 
     function closeWidget() {
       btn.innerHTML = components.icon_message
+      document.body.style.overflowY = 'auto'
 
       frameWidget.style.transform =
         'translate(3%,3%) skewY(-3deg) scale(0.5) rotate(6deg)'

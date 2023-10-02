@@ -42,7 +42,7 @@ export default function QuestionSearchResult({ question, isLatest }) {
   return (
     <div className="w-full bg-white rounded-lg bg-gradient-to-b from-white to-gray-100/50">
       <div className="flex flex-row justify-between items-center">
-        <div className="py-2 px-3 md:p-4 text-base leading-none md:text-lg lg:text-xl font-bold text-left dark:text-white">
+        <div className="py-2 px-3 md:p-4 text-base leading-none md:text-lg lg:text-xl font-bold text-left text-gray-900">
           {question.question}
         </div>
         <div className="px-2 py-2 md:px-4">

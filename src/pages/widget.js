@@ -1,25 +1,12 @@
-import React, {
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-  useReducer,
-  use,
-} from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import ReactMarkdown from 'react-markdown'
 import Image from 'next/image'
 
 import Script from 'next/script'
 
-import {
-  DocumentTextIcon,
-  ArrowTopRightOnSquareIcon,
-  ChatBubbleBottomCenterTextIcon,
-} from '@heroicons/react/24/solid'
+import { ArrowPathIcon } from '@heroicons/react/24/solid'
 
 import QuestionSearchResult from '../components/web-widget/question-search-result'
-import Loading from '../components/Loading'
 import InlineLoading from '@/components/InlineLoading'
 
 const questionExamples = [
@@ -39,18 +26,8 @@ const searchExamples = [
   '409A Valuation',
   'Top pre-seed funds',
 ]
-const question = {
-  q: '',
-  answer: '',
-  sources: [],
-}
 
-const initialState = {
-  question: '',
-  questions: [],
-  isLoading: false,
-  isSubmitted: false,
-}
+const limitSearchAttempts = 10
 
 const NEXT_PUBLIC_GA4_ID = process.env.NEXT_PUBLIC_GA4_ID
 
@@ -62,32 +39,53 @@ export default function ChatWidget() {
   const [question, setQuestion] = useState('')
   const [questions, setQuestions] = useState([])
 
+  const [attemptCount, setAttemptCount] = useState(0)
+  const [attemptDate, setAttemptDate] = useState('')
+
   const myHeaders = new Headers()
   myHeaders.append('Content-Type', 'application/json')
 
-  const handleButtonAnimation = () => {
-    const button = document.getElementById('submit-question')
-    button.classList.add(
-      'after:animate-ping',
-      'after:opacity-100',
-      'after:blur-md'
-    )
-    setTimeout(() => {
-      button.classList.remove(
-        'after:animate-ping',
-        'after:opacity-100',
-        'after:blur-md'
-      )
-    }, 1000)
+  const handleGetAttemtCountLocalStorage = () => {
+    const localStorageAttemptCount = localStorage.getItem('attemptCount')
+    const localStorageAttemptDate = localStorage.getItem('lastAttempt')
+
+    console.log('localStorageAttemptCount', localStorageAttemptCount)
+    console.log('localStorageAttemptDate', localStorageAttemptDate)
+
+    const dateNow = new Date()
+
+    const latestDate = new Date(localStorageAttemptDate)
+
+    const dateDiff = Math.abs(dateNow - latestDate)
+
+    const diffHours = Math.ceil(dateDiff / (1000 * 60 * 60))
+
+    console.log('diffHours', diffHours)
+    // console.log('diffDays', diffDays)
+
+    if (localStorageAttemptDate && diffHours > 24) {
+      // console.log('resetting attempt count')
+      handleClearLocalStorageDateCount()
+    } else {
+      setAttemptCount(parseInt(localStorageAttemptCount))
+      setAttemptDate(localStorageAttemptDate)
+    }
   }
 
-  useEffect(() => {
+  const handleSetQuestionsFromLocalStorage = () => {
     // read localstorage for questions
     const questions = JSON.parse(localStorage.getItem('localQuestions'))
     if (questions && questions.length > 0) {
       setQuestions(questions)
       setIsSubmitted(true)
     }
+  }
+
+  useEffect(() => {
+    // handle localstorage for attempt count and date
+
+    handleGetAttemtCountLocalStorage()
+    handleSetQuestionsFromLocalStorage()
   }, [])
 
   const handleClearLocalStorage = () => {
@@ -95,6 +93,13 @@ export default function ChatWidget() {
     setIsSubmitted(false)
 
     setQuestions([])
+  }
+
+  function handleClearLocalStorageDateCount() {
+    localStorage.removeItem('attemptCount')
+    localStorage.removeItem('lastAttempt')
+    setAttemptCount(0)
+    setAttemptDate('')
   }
 
   const handleScrollIntoView = () => {
@@ -116,8 +121,10 @@ export default function ChatWidget() {
     }
     let currentQuesiton = { question: question, answer: '', sources: [] }
     setQuestions(questions.concat([currentQuesiton]))
+    setAttemptCount((prev) => prev + 1)
+    // set attempt date to now
+    setAttemptDate(new Date())
     setQuestion((prev) => {
-      console.log('prev', prev);
       if (window.gtag !== undefined) {
         handleSendGoogleAnalyticsEvent(prev)
       }
@@ -205,45 +212,16 @@ export default function ChatWidget() {
       ]
 
       localStorage.setItem('localQuestions', JSON.stringify(currentQuestions))
+      localStorage.setItem('attemptCount', attemptCount + 1)
+      localStorage.setItem('lastAttempt', new Date())
 
       return currentQuestions
     })
-
-    // update localstorage for questions
-
-    // localStorage.setItem('localQuestions', JSON.stringify(questions))
 
     setIsLoading(false)
 
     handleScrollIntoView()
   }
-
-  // const intialMesages = [
-  //   {
-  //     role: "user",
-  //     content: "Hi, what is websitebot?",
-  //   },
-  //   {
-  //     role: "bot",
-  //     content:
-  //       "WebsiteBot is a software application designed to perform automated tasks on websites.",
-  //   },
-  // ];
-  // const [messages, setMessages] = useState(intialMesages);
-
-  // const handleSubmitMessage = (e) => {
-  //   e.preventDefault();
-  //   const message = e.target.message.value;
-  //   if (!message) {
-  //     return;
-  //   }
-
-  //   setMessages([...messages, { role: "user", content: message }]);
-  //   e.target.message.value = "";
-  //   setTimeout(() => {
-  //     scrollTargetRef.current.scrollIntoView({ behavior: "smooth" });
-  //   }, 100);
-  // };
 
   return (
     <div className="h-screen w-screen  flex items-center justify-center relative">
@@ -294,57 +272,62 @@ export default function ChatWidget() {
               isSubmitted ? 'fixed bottom-2' : 'relative'
             } w-full max-w-[720px]`}
           >
-            {/* <div className="absolute inset-1 bg-gradient-to-br from-gray-200 to-gray-400  opacity-75 z-0 rounded-xl blur"></div> */}
             <div className="md:bg-gray-50 md:rounded-lg relative z-10 md:border border-slate-200">
-              <form
-                onSubmit={askQuestion}
-                className="p-4 flex gap-2 text-base font-semibold leading-7 relative"
-              >
-                <input
-                  name="message"
-                  onChange={(e) => {
-                    setQuestion(e.target.value)
-                    handleButtonAnimation()
-                  }}
-                  value={question || ''}
-                  placeholder="Ask Kruze anything"
-                  className="px-2 py-1.5 border rounded-md flex-1 font-normal focus:outline-none focus:border-gray-400"
-                />
-                <button
-                  disabled={isLoading}
-                  id="submit-question"
-                  className={`bg-blue-400 hover:bg-blue-600 delay-100 duration-500 px-2.5 rounded-md text-white relative
-                  after:content-['']
-                  after:absolute
-                  after:opacity-0
-                  after:inset-2
-                  after:rounded-md
-                  after:bg-blue-400
-                  after:z-[0]
-                `}
+              {limitSearchAttempts > questions.length ? (
+                <form
+                  onSubmit={askQuestion}
+                  className="p-4 flex gap-2 text-base font-semibold leading-7 relative"
                 >
-                  {/* prettier-ignore */}
-                  {isLoading ? (
-                    <InlineLoading />
-                  ) : (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="z-10 relative"
-                    >
-                      <line x1="22" x2="11" y1="2" y2="13"></line>
-                      <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                    </svg>
-                  )}
-                </button>
-              </form>
+                  <input
+                    name="message"
+                    onChange={(e) => {
+                      setQuestion(e.target.value)
+                    }}
+                    value={question || ''}
+                    placeholder="Ask Kruze anything"
+                    className="px-2 py-1.5 border rounded-md flex-1 font-normal focus:outline-none focus:border-gray-400"
+                  />
+                  <button
+                    disabled={isLoading}
+                    id="submit-question"
+                    className={`bg-blue-400 hover:bg-blue-600 delay-100 duration-500 px-2.5 rounded-md text-white relative
+                    after:content-['']
+                    after:absolute
+                    after:opacity-0
+                    after:inset-2
+                    after:rounded-md
+                    after:bg-blue-400
+                    after:z-[0]
+                  `}
+                  >
+                    {/* prettier-ignore */}
+                    {isLoading ? (
+                      <InlineLoading />
+                    ) : (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="z-10 relative"
+                      >
+                        <line x1="22" x2="11" y1="2" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                      </svg>
+                    )}
+                  </button>
+                </form>
+              ) : (
+                <div className="py-3 text-center text-sm text-slate-400">
+                  <p className="">Search Limit Reached.</p>
+                  <p>Please try again later.</p>
+                </div>
+              )}
             </div>
             {questions.length > 0 && (
               <div className="px-4 py-2 relative z-10">
@@ -354,8 +337,20 @@ export default function ChatWidget() {
                     className="border-b border-gray-600 hover:border-dashed"
                     onClick={() => handleClearLocalStorage()}
                   >
+                    <ArrowPathIcon className="inline-block mr-2 w-3.5 h-3.5" />
                     Clear results
                   </button>
+                  <button
+                    type="button"
+                    className="border-b border-gray-600 hover:border-dashed"
+                    onClick={() => handleClearLocalStorageDateCount()}
+                  >
+                    <ArrowPathIcon className="inline-block mr-2 w-3.5 h-3.5" />
+                    Clear Date & Count
+                  </button>
+                  {/* <span className='px-2'>
+                      attemptCount: {attemptCount} attemptDate: {JSON.stringify(attemptDate)}
+                    </span> */}
                 </div>
               </div>
             )}
@@ -399,7 +394,6 @@ export default function ChatWidget() {
                       "
                         onClick={() => {
                           setQuestion(item)
-                          handleButtonAnimation()
                         }}
                       >
                         {item}

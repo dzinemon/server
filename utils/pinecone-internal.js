@@ -80,7 +80,7 @@ async function queryEmbedding(queryVector) {
   const queryRequest = {
     topK: 8,
     vector: queryVector,
-    filter: { source: { $in: ["website"] } },
+    filter: { source: { $in: ['website'] } },
     includeMetadata: true,
   }
 

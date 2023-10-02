@@ -1,7 +1,4 @@
 ;(function () {
-
-
-
   const styleTag = `
         <style>
             #chat-frame-widget {
@@ -108,7 +105,7 @@
     <button style="display: none !important" id="btn-trigger-chat" class="shadow-xl ring-1">${components.icon_message}</button>
     <button id="btn-close-chat" style="display:none" class="">${components.icon_close}</button>`
 
-    const ifraneInnerHTMLToggle = `<iframe id="chat-frame-widget" 
+  const ifraneInnerHTMLToggle = `<iframe id="chat-frame-widget" 
     data-script-src="https://kruze-ai-agent.vercel.app/widget" 
     src="/widget" 
     class="shadow-xl ring-1 rounded-lg" 
@@ -144,7 +141,7 @@
     function openWidget() {
       btn.innerHTML = components.icon_close
       document.body.style.overflowY = 'hidden'
-      
+
       frameWidget.style.display = 'block'
       setTimeout(() => {
         frameWidget.style.transform =
@@ -157,7 +154,7 @@
     function closeWidget() {
       btn.innerHTML = components.icon_message
       document.body.style.overflowY = 'auto'
-      
+
       frameWidget.style.transform =
         'translate(3%,3%) skewY(-3deg) scale(0.5) rotate(6deg)'
       frameWidget.style.opacity = '0'

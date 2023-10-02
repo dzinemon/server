@@ -8,9 +8,57 @@ import {
   ArrowTopRightOnSquareIcon,
   ChatBubbleBottomCenterTextIcon,
   ChevronDownIcon,
+  DocumentChartBarIcon,
+  CalendarIcon,
 } from '@heroicons/react/24/solid'
 
 import ReactMarkdown from 'react-markdown'
+
+const Type = ({ data }) => {
+  switch (data) {
+    case 'webpage':
+      return (
+        <>
+          <DocumentChartBarIcon className="w-3 h-3 mr-1" />
+          Web page
+        </>
+      )
+      break
+    case 'post':
+      return (
+        <>
+          <DocumentChartBarIcon className="w-3 h-3 mr-1" />
+          Blog post
+        </>
+      )
+      break
+    case 'qna':
+      return (
+        <>
+          <DocumentChartBarIcon className="w-3 h-3 mr-1" />Q & A
+        </>
+      )
+      break
+    case 'tax_calendar':
+      return (
+        <>
+          <CalendarIcon className="w-3 h-3 mr-1" />
+          Tax Calendars
+        </>
+      )
+      break
+    case 'tip':
+      return (
+        <>
+          <DocumentChartBarIcon className="w-3 h-3 mr-1" />
+          Startup Tips
+        </>
+      )
+      break
+    default:
+      console.log('Unknown page')
+  }
+}
 
 export default function QuestionSearchResult({ question, isLatest }) {
   const scrollTargetRef = useRef(null)
@@ -88,7 +136,9 @@ export default function QuestionSearchResult({ question, isLatest }) {
                     <InlineLoading />
                   )}
                 </div>
-                <div className="w-auto px-1 text-base lg:text-lg">Resources / Search results</div>
+                <div className="w-auto px-1 text-base lg:text-lg">
+                  Resources / Search results
+                </div>
               </motion.div>
               <AnimatePresence>
                 <div
@@ -113,11 +163,22 @@ export default function QuestionSearchResult({ question, isLatest }) {
                             href={item.url}
                             target="_blank"
                             rel="noreferrer"
-                            className="rounded hover:bg-gray-100 bg-gray-100/50 p-2 group block"
+                            className="rounded hover:bg-gray-100 bg-gray-100/50 p-2 group block relative"
                           >
-                            <div className='flex flex-row items-center justify-center '>
-                              <div className='w-auto flex-none'>
-                              <Image
+                            <div className="flex flex-row items-center justify-start ">
+                              <div className="w-auto">
+                                <div className="flex flex-row items-center justify-start px-1.5 py-0.5 leading-none bg-blue-400 font-light lg:text-xs text-[10px] rounded-full text-white w-auto flex-1 capitalize font-bold">
+                                  <Type data={item.type} />
+                                </div>
+                              </div>
+                            </div>
+
+                            <p className="text-xs my-2">{item.title}</p>
+                            {/* <p className="text-xs">{item.url}</p> */}
+
+                            <div className="flex flex-row items-center justify-start ">
+                              <div className="w-auto flex-none">
+                                <Image
                                   className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
                                   src="/logo-color.png"
                                   alt="Kruze Logo"
@@ -126,21 +187,16 @@ export default function QuestionSearchResult({ question, isLatest }) {
                                   priority
                                 />
                               </div>
-                              <div className="text-[10px] md:text-xs w-auto flex-none capitalize font-bold">
-                                Kruze
+                              <div className="text-[10px] md:text-xs w-auto flex-1 capitalize font-medium">
+                                Kruze Consulting
                               </div>
-                              <div className="text-[10px] md:text-xs w-auto flex-1 capitalize font-bold pl-1">
-                                {item.type.replace('_', " ").replace("-", " ") }
+                              <div className="text-blue-600 flex-none text-xs text-right">
+                                <span className="group-hover:underline">
+                                  {/* Read more{' '} */}
+                                  <ArrowTopRightOnSquareIcon className="w-3 h-3 inline opacity-50  group-hover:opacity-100 group-hover:translate-x-1 group-hover:-translate-y-1 duration-200" />
+                                </span>
                               </div>
                             </div>
-                            <p className="text-xs my-2">{item.title}</p>
-                            {/* <p className="text-xs">{item.url}</p> */}
-                            <p className="text-blue-600 text-xs text-right -mt-4">
-                              <span className="group-hover:underline">
-                                {/* Read more{' '} */}
-                                <ArrowTopRightOnSquareIcon className="w-3 h-3 inline opacity-50  group-hover:opacity-100 group-hover:translate-x-1 group-hover:-translate-y-1 duration-200" />
-                              </span>
-                            </p>
                           </a>
                         </motion.div>
                       )
@@ -165,7 +221,9 @@ export default function QuestionSearchResult({ question, isLatest }) {
                           <ChatBubbleBottomCenterTextIcon className="text-white w-4 h-4 inline" />
                         </div>
                       </div>
-                      <div className="w-auto px-1 text-base lg:text-lg">Answer</div>
+                      <div className="w-auto px-1 text-base lg:text-lg">
+                        Answer
+                      </div>
                     </motion.div>
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}

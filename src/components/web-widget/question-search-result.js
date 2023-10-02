@@ -9,7 +9,7 @@ import {
   ChatBubbleBottomCenterTextIcon,
   ChevronDownIcon,
 } from '@heroicons/react/24/solid'
-import Loading from '../Loading'
+
 import ReactMarkdown from 'react-markdown'
 
 export default function QuestionSearchResult({ question, isLatest }) {
@@ -115,15 +115,30 @@ export default function QuestionSearchResult({ question, isLatest }) {
                             rel="noreferrer"
                             className="rounded hover:bg-gray-100 bg-gray-100/50 p-2 group block"
                           >
-                            <p className="text-[10px]">
-                              Resource #{++idx} | {item.score}
-                            </p>
-                            <p className="text-sm">{item.title}</p>
-                            <p className="text-xs">{item.url}</p>
-                            <p className="text-blue-600 text-xs">
+                            <div className='flex flex-row items-center justify-center '>
+                              <div className='w-auto flex-none'>
+                              <Image
+                                  className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
+                                  src="/logo-color.png"
+                                  alt="Kruze Logo"
+                                  width={14}
+                                  height={16}
+                                  priority
+                                />
+                              </div>
+                              <div className="text-[10px] md:text-xs w-auto flex-none capitalize font-bold">
+                                Kruze
+                              </div>
+                              <div className="text-[10px] md:text-xs w-auto flex-1 capitalize font-bold pl-1">
+                                {item.type.replace('_', " ").replace("-", " ") }
+                              </div>
+                            </div>
+                            <p className="text-xs my-2">{item.title}</p>
+                            {/* <p className="text-xs">{item.url}</p> */}
+                            <p className="text-blue-600 text-xs text-right -mt-4">
                               <span className="group-hover:underline">
-                                Read more{' '}
-                                <ArrowTopRightOnSquareIcon className="w-3 h-3 inline" />
+                                {/* Read more{' '} */}
+                                <ArrowTopRightOnSquareIcon className="w-3 h-3 inline opacity-50  group-hover:opacity-100 group-hover:translate-x-1 group-hover:-translate-y-1 duration-200" />
                               </span>
                             </p>
                           </a>

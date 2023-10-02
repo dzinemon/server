@@ -235,7 +235,7 @@ export default function ChatWidget() {
           priority
         />
       </div>
-      <div className="relative overflow-auto pt-4 pb-28 w-full h-screen max-w-[720px] mx-auto flex flex-col justify-start items-center">
+      <div className="relative overflow-auto pt-8 lg:pt-4 pb-28 w-full h-screen max-w-[720px] mx-auto flex flex-col justify-start items-center">
         <motion.div
           className={`${
             isSubmitted ? 'h-full' : 'h-0'

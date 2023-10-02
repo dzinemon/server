@@ -1,4 +1,7 @@
 ;(function () {
+
+
+
   const styleTag = `
         <style>
             #chat-frame-widget {
@@ -6,6 +9,21 @@
               transform: translate(3%,3%) skewY(-3deg) scale(0.5) rotate(6deg);
               opacity: 0;
               transform-origin: right bottom;
+            }
+
+            #btn-close-chat {
+                position: fixed;
+                top: 8px;
+                right: 8px;
+                display: block;
+                z-index: 999999999 !important;
+                border-radius: 9999px;
+                color: #4791ce;
+                cursor: pointer;
+            
+                align-items: center;
+                justify-content: center;
+                padding: 0.1rem;
             }
 
             #chat-widget {
@@ -74,54 +92,78 @@
     icon_message: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"></path></svg>`,
   }
 
+  const ifraneInnerHTMLClose = `<iframe id="chat-frame-widget" 
+    src="https://kruze-ai-agent.vercel.app/widget" 
+    data-script-src="/widget" 
+    class="shadow-xl ring-1 rounded-lg" 
+    style="display: none; 
+    border: none; 
+    position: fixed;
+    inset: 8px 8px 8px 8px;
+    height: -webkit-fill-available;
+    width: -webkit-fill-available; 
+    color-scheme: none; 
+    margin: 0px; max-height: 100vh; max-width: 100vw; 
+    visibility: visible; z-index: 999999999 !important;"></iframe>
+    <button style="display: none !important" id="btn-trigger-chat" class="shadow-xl ring-1">${components.icon_message}</button>
+    <button id="btn-close-chat" class="">${components.icon_close}</button>`
+
+    const ifraneInnerHTMLToggle = `<iframe id="chat-frame-widget" 
+    data-script-src="https://kruze-ai-agent.vercel.app/widget" 
+    src="/widget" 
+    class="shadow-xl ring-1 rounded-lg" 
+    style="display: none; 
+    border: none; 
+    position: fixed;
+    inset: 15px 15px 75px 15px;
+    height: -webkit-fill-available;
+    width: -webkit-fill-available; 
+    color-scheme: none; 
+    margin: 0px; max-height: 100vh; max-width: 100vw; 
+    visibility: visible; z-index: 999999999 !important;"></iframe>
+    <button id="btn-trigger-chat" class="shadow-xl ring-1">${components.icon_message}</button>`
+
   function intChatInterface(chatKey) {
     const chatWidget = document.createElement('div')
     chatWidget.id = 'chat-widget'
-    chatWidget.innerHTML = `
-            <iframe id="chat-frame-widget" 
-            src="https://kruze-ai-agent.vercel.app/widget" 
-            data-script-src="/widget" 
-            class="shadow-xl ring-1 rounded-lg" 
-            style="display: none; 
-            border: none; 
-            position: fixed;
-            inset: 15px 15px 75px 15px;
-            height: -webkit-fill-available;
-            width: -webkit-fill-available; 
-            color-scheme: none; 
-            margin: 0px; max-height: 100vh; max-width: 100vw; 
-            visibility: visible; z-index: 999999999 !important;"></iframe>
-            <button id="btn-trigger-chat" class="shadow-xl ring-1">${components.icon_message}</button>
-            `
+    chatWidget.innerHTML = ifraneInnerHTMLClose
 
     document.head.insertAdjacentHTML('beforeend', styleTag)
     document.body.appendChild(chatWidget)
 
     const btn = document.getElementById('btn-trigger-chat')
     const btn_section = document.getElementById('btn-trigger-chat-section')
+    const btn_close_chat = document.getElementById('btn-close-chat')
     const frameWidget = document.getElementById('chat-frame-widget')
     // frameWidget.style.display = 'none'
+
+    btn_close_chat.addEventListener('click', () => {
+      closeWidget()
+    })
 
     function openWidget() {
       btn.innerHTML = components.icon_close
       document.body.style.overflowY = 'hidden'
+      
       frameWidget.style.display = 'block'
       setTimeout(() => {
         frameWidget.style.transform =
           'translate(0%,0%) skewY(0deg) scale(1) rotate(0deg)'
         frameWidget.style.opacity = '1'
+        btn_close_chat.style.display = 'block'
       }, 100)
     }
 
     function closeWidget() {
       btn.innerHTML = components.icon_message
       document.body.style.overflowY = 'auto'
-
+      
       frameWidget.style.transform =
         'translate(3%,3%) skewY(-3deg) scale(0.5) rotate(6deg)'
       frameWidget.style.opacity = '0'
       setTimeout(() => {
         frameWidget.style.display = 'none'
+        btn_close_chat.style.display = 'none'
       }, 300)
     }
 

@@ -17,7 +17,7 @@
                 border-radius: 9999px;
                 color: #4791ce;
                 cursor: pointer;
-            
+                border: 2px solid #4791ce;
                 align-items: center;
                 justify-content: center;
                 padding: 0.1rem;

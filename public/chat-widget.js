@@ -106,7 +106,7 @@
     margin: 0px; max-height: 100vh; max-width: 100vw; 
     visibility: visible; z-index: 999999999 !important;"></iframe>
     <button style="display: none !important" id="btn-trigger-chat" class="shadow-xl ring-1">${components.icon_message}</button>
-    <button id="btn-close-chat" class="">${components.icon_close}</button>`
+    <button id="btn-close-chat" style="display:none" class="">${components.icon_close}</button>`
 
     const ifraneInnerHTMLToggle = `<iframe id="chat-frame-widget" 
     data-script-src="https://kruze-ai-agent.vercel.app/widget" 

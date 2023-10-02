@@ -340,14 +340,14 @@ export default function ChatWidget() {
                     <ArrowPathIcon className="inline-block mr-2 w-3.5 h-3.5" />
                     Clear results
                   </button>
-                  <button
+                  {/* <button
                     type="button"
                     className="border-b border-gray-600 hover:border-dashed"
                     onClick={() => handleClearLocalStorageDateCount()}
                   >
                     <ArrowPathIcon className="inline-block mr-2 w-3.5 h-3.5" />
                     Clear Date & Count
-                  </button>
+                  </button> */}
                   {/* <span className='px-2'>
                       attemptCount: {attemptCount} attemptDate: {JSON.stringify(attemptDate)}
                     </span> */}

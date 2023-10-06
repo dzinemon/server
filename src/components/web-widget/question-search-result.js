@@ -306,7 +306,7 @@ export default function QuestionSearchResult({
                                   rel="noopener"
                                   href={`https://twitter.com/intent/tweet/?url=${widgetpage}&text=${
                                     question.question
-                                  }${' — '}${strippedString}&media=https://kruzeconsulting.com/img/hero_vanessa_2020.jpg&hashtags=kruzeconsulting,aiwidget,ai`}
+                                  }%0A${' — '}%0A${strippedString}&media=https://kruzeconsulting.com/img/hero_vanessa_2020.jpg&hashtags=kruzeconsulting,aiwidget,ai`}
                                   className="w-4 h-4 text-slate-400 hover:text-blue-600 inline-block rounded-full"
                                 >
                                   <FontAwesomeIcon icon={faTwitter} />
@@ -329,7 +329,7 @@ export default function QuestionSearchResult({
                                   title="Share by Email"
                                   target="_blank"
                                   rel="noopener"
-                                  href={`mailto:?subject=${question.question}&body=Question: ${question.question} · Answer: ${strippedString} ——— AI Chat With Kruze's Extensive Startup Accounting And Finance Knowledge Base ${widgetpage}.`}
+                                  href={`mailto:?subject=${question.question}&body=Question:%0A${question.question}%0A%0AAnswer:%0A${strippedString} %0A%0A AI Chat With Kruze's Extensive Startup Accounting And Finance Knowledge Base ${widgetpage}.`}
                                   className="w-4 h-4 text-slate-400 hover:text-blue-600 inline-block rounded-full"
                                 >
                                   {/* <FontAwesomeIcon icon={faEnvelope} /> */}

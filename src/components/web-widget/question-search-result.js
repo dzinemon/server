@@ -2,6 +2,13 @@ import { useState, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import Image from 'next/image'
 import InlineLoading from '../InlineLoading'
+import { Fragment } from 'react'
+import { Menu } from '@headlessui/react'
+
+const links = [
+  { val: 'innacurate', label: 'Inaccurate' },
+  { val: 'not-helpful', label: 'Is not helpful' },
+]
 
 import {
   DocumentTextIcon,
@@ -10,9 +17,23 @@ import {
   ChevronDownIcon,
   DocumentChartBarIcon,
   CalendarIcon,
+  FlagIcon,
+  HandThumbDownIcon,
+  HandThumbUpIcon,
+  EnvelopeIcon,
 } from '@heroicons/react/24/solid'
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faEnvelope } from '@fortawesome/free-regular-svg-icons'
+import {
+  faTwitter,
+  faLinkedin,
+  faLinkedinIn,
+} from '@fortawesome/free-brands-svg-icons'
+
 import ReactMarkdown from 'react-markdown'
+
+const widgetpage = 'https://lush-rock.cloudvent.net/ai-widget/'
 
 const Type = ({ data }) => {
   switch (data) {
@@ -60,32 +81,52 @@ const Type = ({ data }) => {
   }
 }
 
-export default function QuestionSearchResult({ question, isLatest }) {
+export default function QuestionSearchResult({
+  question,
+  isLatest,
+  handleLike,
+  handleDislike,
+  handleReport,
+}) {
   const scrollTargetRef = useRef(null)
   const [isOpen, setIsOpen] = useState(isLatest)
-  // const [isTyping, setIsTyping] = useState(false)
 
-  // create typing effect for answer
+  let strippedString = question.answer.replace(/(<([^>]+)>)/gi, '')
 
-  // const typingEffect = (text) => {
-  //   let i = 0;
-  //   setIsTyping(true)
-  //   const timer = setInterval(() => {
-  //     if (i < text.length) {
-  //       document.getElementById('answer').innerHTML += text.charAt(i);
-  //       i++;
-  //     } else {
-  //       clearInterval(timer);
-  //       setIsTyping(false)
-  //     }
-  //   }, 50);
-  // }
-
-  // const handleScrollIntoView = () => {
-  //   setTimeout(() => {
-  //     scrollTargetRef.current.scrollIntoView({ behavior: 'smooth' })
-  //   }, 100)
-  // }
+  function MyMenu() {
+    return (
+      <div className="relative">
+        <Menu>
+          <Menu.Items className="-top-14 -left-20 absolute w-40 text-sm shadow rounded">
+            {links.map((link, idx) => (
+              /* Use the `active` state to conditionally style the active item. */
+              <Menu.Item
+                key={link.val + '-' + idx}
+                as={Fragment}
+                className="flex flex-col justify-center rounded rounded w-full"
+              >
+                {({ active }) => (
+                  <button
+                    onClick={() => handleReport(question, link.label)}
+                    className={`${
+                      active ? 'bg-blue-500 text-white' : 'bg-white text-black'
+                    } block text-center w-full px-4`}
+                  >
+                    {link.label}
+                  </button>
+                )}
+              </Menu.Item>
+            ))}
+          </Menu.Items>
+          <Menu.Button>
+            <div className="w-4 h-4">
+              <FlagIcon />
+            </div>
+          </Menu.Button>
+        </Menu>
+      </div>
+    )
+  }
 
   return (
     <div className="w-full bg-white rounded-lg bg-gradient-to-b from-white to-gray-100/50">
@@ -248,6 +289,98 @@ export default function QuestionSearchResult({ question, isLatest }) {
                           <ReactMarkdown>{question.answer}</ReactMarkdown>
                         </div>
                       )}
+                    </motion.div>
+
+                    <motion.div>
+                      <div className="pt-4 mt-4 border-t border-slate-300">
+                        <div className="flex flex-row justify-between -mx-4">
+                          <div className="w-auto px-4">
+                            <div className="flex flex-row -mx-2 items-center">
+                              <div className="w-auto px-2 text-sm opacity-80">
+                                Do you like the answer? Share on:
+                              </div>
+                              <div className="w-auto px-2">
+                                <a
+                                  title="Share on Twitter"
+                                  target="_blank"
+                                  rel="noopener"
+                                  href={`https://twitter.com/intent/tweet/?url=${widgetpage}&text=${
+                                    question.question
+                                  }${' — '}${strippedString}&media=https://kruzeconsulting.com/img/hero_vanessa_2020.jpg&hashtags=kruzeconsulting,aiwidget,ai`}
+                                  className="w-4 h-4 text-slate-400 hover:text-blue-600 inline-block rounded-full"
+                                >
+                                  <FontAwesomeIcon icon={faTwitter} />
+                                </a>
+                              </div>
+                              <div className="w-auto px-2">
+                                <a
+                                  title="Share on LinkedIn"
+                                  target="_blank"
+                                  rel="noopener"
+                                  // https://www.linkedin.com/shareArticle?url=<URL_OF_WEBPAGE>&title=<TITLE>&summary=<SUMMARY>&source=<SOURCE>
+                                  href={`https://www.linkedin.com/shareArticle?mini=true&url=${widgetpage}&title=${question.question}&summary=${strippedString}&source=${widgetpage}`}
+                                  className="w-4 h-4 text-slate-400 hover:text-blue-600 inline-block rounded-full"
+                                >
+                                  <FontAwesomeIcon icon={faLinkedinIn} />
+                                </a>
+                              </div>
+                              <div className="w-auto px-2">
+                                <a
+                                  title="Share by Email"
+                                  target="_blank"
+                                  rel="noopener"
+                                  href={`mailto:?subject=${question.question}&body=Question: ${question.question} · Answer: ${strippedString} ——— AI Chat With Kruze's Extensive Startup Accounting And Finance Knowledge Base ${widgetpage}.`}
+                                  className="w-4 h-4 text-slate-400 hover:text-blue-600 inline-block rounded-full"
+                                >
+                                  {/* <FontAwesomeIcon icon={faEnvelope} /> */}
+                                  <EnvelopeIcon />
+                                </a>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="w-auto px-4">
+                            <div className="flex flex-row -mx-2 items-center text-slate-400">
+                              <div className="w-auto px-2">
+                                <div
+                                  type="button"
+                                  title={`${
+                                    question.report
+                                      ? question.report
+                                      : 'Report this answer'
+                                  }`}
+                                  className={`${
+                                    question.report ? 'text-red-400' : ''
+                                  } w-4 h-4 hover:text-blue-600 inline-block rounded-full`}
+                                >
+                                  <MyMenu />
+                                </div>
+                              </div>
+                              <div className="w-auto px-2">
+                                <button
+                                  onClick={handleDislike}
+                                  title="Dislike this answer"
+                                  className={`${
+                                    question.dislike && 'text-blue-500'
+                                  } w-4 h-4 hover:text-blue-600 inline-block rounded-full`}
+                                >
+                                  <HandThumbDownIcon />
+                                </button>
+                              </div>
+                              <div className="w-auto px-2">
+                                <button
+                                  onClick={handleLike}
+                                  title="Like this answer"
+                                  className={`${
+                                    question.like && 'text-blue-500'
+                                  } w-4 h-4  hover:text-blue-600 inline-block rounded-full`}
+                                >
+                                  <HandThumbUpIcon />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </motion.div>
                     <div ref={scrollTargetRef}></div>
                   </>

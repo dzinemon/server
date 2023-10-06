@@ -45,6 +45,68 @@ export default function ChatWidget() {
   const myHeaders = new Headers()
   myHeaders.append('Content-Type', 'application/json')
 
+  const handleLike = (question) => {
+    // console.log('like', question)
+    // update questions with like
+
+    const questions = JSON.parse(localStorage.getItem('localQuestions'))
+
+    const updatedQuestions = questions.map((item) => {
+      if (item.question === question.question) {
+        return {
+          ...item,
+          like: true,
+          dislike: false,
+        }
+      }
+      return item
+    })
+
+    setQuestions(updatedQuestions)
+    localStorage.setItem('localQuestions', JSON.stringify(updatedQuestions))
+  }
+
+  const handleDislike = (question) => {
+    // console.log('dislike', question)
+    // update questions with dislike
+
+    const questions = JSON.parse(localStorage.getItem('localQuestions'))
+
+    const updatedQuestions = questions.map((item) => {
+      if (item.question === question.question) {
+        return {
+          ...item,
+          dislike: true,
+          like: false,
+        }
+      }
+      return item
+    })
+
+    setQuestions(updatedQuestions)
+    localStorage.setItem('localQuestions', JSON.stringify(updatedQuestions))
+  }
+
+  const handleReport = (question, report) => {
+    // console.log('report', question)
+    // update questions with report
+
+    const questions = JSON.parse(localStorage.getItem('localQuestions'))
+
+    const updatedQuestions = questions.map((item) => {
+      if (item.question === question.question) {
+        return {
+          ...item,
+          report: report,
+        }
+      }
+      return item
+    })
+
+    setQuestions(updatedQuestions)
+    localStorage.setItem('localQuestions', JSON.stringify(updatedQuestions))
+  }
+
   const handleGetAttemtCountLocalStorage = () => {
     const localStorageAttemptCount = localStorage.getItem('attemptCount')
     const localStorageAttemptDate = localStorage.getItem('lastAttempt')
@@ -246,6 +308,13 @@ export default function ChatWidget() {
             ? questions.map((item, idx, arr) => {
                 return (
                   <QuestionSearchResult
+                    handleLike={() => {
+                      handleLike(item)
+                    }}
+                    handleDislike={() => {
+                      handleDislike(item)
+                    }}
+                    handleReport={handleReport}
                     question={item}
                     key={`qsr-${idx}`}
                     isLatest={idx === arr.length - 1}

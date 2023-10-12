@@ -4,6 +4,7 @@ import Image from 'next/image'
 import InlineLoading from '../InlineLoading'
 import { Fragment } from 'react'
 import { Menu } from '@headlessui/react'
+import CopyToClipboard from '../copy-to-clipboard'
 
 const links = [
   { val: 'innacurate', label: 'Inaccurate' },
@@ -34,6 +35,11 @@ import {
 import ReactMarkdown from 'react-markdown'
 
 const widgetpage = 'https://lush-rock.cloudvent.net/ai-widget/'
+
+const copyRightHtml = `<p>Generated using Kruze Consulting's experimental AI Accounting Bot based on Kruze's published data and content. Do not rely on these responses, always consult your CPA, tax advisor, accountant or lawyer. </p>
+<p>Copyright © <a className='text-sky-600 hover:border-dashed hover:border-b border-sky-600' href='https://kruzeconsulting.com/' target='_blank' rel='noopener'>Kruze Consulting</a>. Not for commercial use.</p>                      `
+
+const encodedcopyRightHtml = encodeURIComponent(copyRightHtml)
 
 const Type = ({ data }) => {
   switch (data) {
@@ -291,13 +297,22 @@ export default function QuestionSearchResult({
                       )}
                     </motion.div>
 
+                    <motion.div className=" text-xs p-3 mt-3 bg-slate-100 rounded">
+                      <div
+                        dangerouslySetInnerHTML={{ __html: copyRightHtml }}
+                      />
+                    </motion.div>
+
                     <motion.div>
                       <div className="pt-4 mt-4 border-t border-slate-300">
                         <div className="flex flex-row justify-between -mx-4">
                           <div className="w-auto px-4">
                             <div className="flex flex-row -mx-2 items-center">
                               <div className="w-auto px-2 text-sm opacity-80">
-                                Do you like the answer? Share on:
+                                <span className="hidden md:inline">
+                                  Do you like the answer?
+                                </span>{' '}
+                                Share on:
                               </div>
                               <div className="w-auto px-2">
                                 <a
@@ -329,12 +344,15 @@ export default function QuestionSearchResult({
                                   title="Share by Email"
                                   target="_blank"
                                   rel="noopener"
-                                  href={`mailto:?subject=${question.question}&body=Question:%0A${question.question}%0A%0AAnswer:%0A${strippedString} %0A%0A AI Chat With Kruze's Extensive Startup Accounting And Finance Knowledge Base ${widgetpage}.`}
+                                  href={`mailto:?subject=${question.question}&body=Question:%0A${question.question}%0A%0AAnswer:%0A${strippedString} %0A%0A AI Chat With Kruze's Extensive Startup Accounting And Finance Knowledge Base ${widgetpage}.%0A%0A Generated using Kruze Consulting's experimental AI Accounting Bot based on Kruze's published data and content. Do not rely on these responses, always consult your CPA, tax advisor, accountant or lawyer.%0A Copyright © Kruze Consulting https://kruzeconsulting.com/. %0ANot for commercial use.`}
                                   className="w-4 h-4 text-slate-400 hover:text-blue-600 inline-block rounded-full"
                                 >
                                   {/* <FontAwesomeIcon icon={faEnvelope} /> */}
                                   <EnvelopeIcon />
                                 </a>
+                              </div>
+                              <div className="w-auto px-2">
+                                <CopyToClipboard text={strippedString} />
                               </div>
                             </div>
                           </div>

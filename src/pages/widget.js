@@ -34,6 +34,7 @@ const NEXT_PUBLIC_GA4_ID = process.env.NEXT_PUBLIC_GA4_ID
 export default function ChatWidget() {
   // const {resources, setResources} = useResourcesContext();
   const scrollTargetRef = useRef(null)
+  const [isAccepted, setIsAccepted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [question, setQuestion] = useState('')
@@ -476,6 +477,34 @@ export default function ChatWidget() {
           </motion.div>
         </AnimatePresence>
       </div>
+
+      {!isAccepted && !question && (
+        <motion.div
+          initial={{ opacity: 1 }}
+          animate={{ opacity: isAccepted ? 0 : 1 }}
+          transition={{ duration: 0.5 }}
+          className={`${
+            !questions && 'hidden'
+          } absolute z-10 inset-0 flex items-start justify-center backdrop-blur bg-white/10 p-6`}
+        >
+          <div className="max-w-lg p-4 rounded-lg border border-slate-400 bg-white text-center">
+            <p>
+              This is an experiential AI-driven question and answer tool. Do not
+              rely on these responses, always consult with your CPA, tax
+              advisor, accountant or lawyer.
+            </p>
+            <button
+              onClick={() => {
+                setIsAccepted(true)
+              }}
+              className="bg-blue-400 hover:bg-blue-600 duration-200 px-2.5 py-1 rounded-md text-white inline-block mt-2"
+            >
+              Got it!
+            </button>
+          </div>
+        </motion.div>
+      )}
+
       {NEXT_PUBLIC_GA4_ID !== '' ? (
         <>
           <Script

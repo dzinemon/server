@@ -136,7 +136,7 @@ export default function QuestionListItem({ question, onClick }) {
                   )}
                 </div>
                 <div className="w-auto px-1 text-base lg:text-lg">
-                  Resources / Search results
+                  Resources
                 </div>
               </motion.div>
               <AnimatePresence>

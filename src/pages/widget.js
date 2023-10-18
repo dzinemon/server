@@ -177,6 +177,32 @@ export default function ChatWidget() {
     })
   }
 
+  const handleSaveQuestionAnswer = async (question, answer, resources) => {
+    const requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: JSON.stringify({
+        question: question,
+        answer: answer,
+        resources: resources,
+      }),
+      redirect: 'follow', // manual, *follow, error
+    }
+
+    const result = await fetch('/api/questions', requestOptions)
+      .then((response) => {
+        if (response.status === 200) {
+          console.log('post success')
+          console.log(response)
+        }
+        return response.json()
+      })
+      .then((result) => result)
+      .catch((error) => console.log('error', error))
+
+    console.log('result', result)
+  }
+
   const askQuestion = async (e) => {
     e.preventDefault()
     if (question.length === 0) {
@@ -280,6 +306,13 @@ export default function ChatWidget() {
 
       return currentQuestions
     })
+
+    // save question answer to db
+    await handleSaveQuestionAnswer(
+      question,
+      completion,
+      JSON.stringify(sources)
+    )
 
     setIsLoading(false)
 

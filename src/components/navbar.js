@@ -24,6 +24,10 @@ export default function Navbar() {
       name: 'Text',
       slug: 'texts',
     },
+    {
+      name: 'What people are asking',
+      slug: 'questions',
+    },
   ]
 
   return (

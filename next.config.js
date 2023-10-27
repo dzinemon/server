@@ -1,9 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  images: {
+    domains: ['kruzeconsulting.com'],
+  },
   async headers() {
     return [
-      {
+      {    
         // matching all API routes
         source: '/api/:path*',
         headers: [

@@ -210,18 +210,34 @@ export default function QuestionSearchResult({
                             href={item.url}
                             target="_blank"
                             rel="noreferrer"
-                            className="rounded hover:bg-gray-100 bg-gray-100/50 p-2 group block relative"
+                            className="rounded hover:bg-gray-100 bg-gray-100/50 group flex flex-col relative h-full"
                           >
-                            <div className="flex flex-row items-center justify-start ">
+                            <div className='aspect-video overflow-hidden'>
+                              {item.image ? (
+                                <Image src={item.image} width={120} height={80} className="w-full rounded-t" alt={item.title} />
+
+                              ) : (
+                                <Image src="https://kruzeconsulting.com/img/hero_vanessa_2020.jpg" width={120} height={80} className="w-full rounded-t" alt={item.title} />
+                              )}
+
+                            </div>
+
+
+                            <div className='p-2 grow flex flex-col justify-between'>
+
+                            <div>
+                            <div className="flex flex-row items-center justify-start -mt-4">
                               <div className="w-auto">
-                                <div className="flex flex-row items-center justify-start px-1.5 py-0.5 leading-none bg-blue-400 font-light lg:text-xs text-[10px] rounded-full text-white w-auto flex-1 capitalize font-bold">
+                                <div className="flex flex-row items-center justify-start px-1 py-px leading-none border-white border bg-blue-400 font-light lg:text-xs text-[10px] rounded-full text-white w-auto flex-1 capitalize font-bold">
                                   <Type data={item.type} />
                                 </div>
                               </div>
                             </div>
 
                             <p className="text-xs my-2">{item.title}</p>
-                            {/* <p className="text-xs">{item.url}</p> */}
+                            </div>
+                           
+                            
 
                             <div className="flex flex-row items-center justify-start ">
                               <div className="w-auto flex-none">
@@ -244,6 +260,9 @@ export default function QuestionSearchResult({
                                 </span>
                               </div>
                             </div>
+                            </div>
+                            
+
                           </a>
                         </motion.div>
                       )

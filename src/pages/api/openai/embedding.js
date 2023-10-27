@@ -26,6 +26,7 @@ const postUrl = async (req, res) => {
         id: match.metadata.id,
         title: match.metadata.title,
         type: match.metadata.type,
+        image: match.metadata.image || '',
         source: match.metadata.source,
         url: match.metadata.url,
         score: match.score,

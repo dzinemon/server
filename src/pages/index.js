@@ -55,7 +55,7 @@ export default function Home() {
       </div>
 
       <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-2 lg:text-left">
-        {[
+        {/* {[
           {
             name: 'Internal',
             url: 'internal',
@@ -77,7 +77,7 @@ export default function Home() {
               {description}
             </p>
           </a>
-        ))}
+        ))} */}
 
         <button
           type="button"

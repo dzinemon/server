@@ -8,22 +8,22 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
 
   const navItems = [
-    {
-      name: 'Ask Question',
-      slug: 'ask-question',
-    },
-    {
-      name: 'Internal',
-      slug: 'internal',
-    },
-    {
-      name: 'Links',
-      slug: 'links',
-    },
-    {
-      name: 'Text',
-      slug: 'texts',
-    },
+    // {
+    //   name: 'Ask Question',
+    //   slug: 'ask-question',
+    // },
+    // {
+    //   name: 'Internal',
+    //   slug: 'internal',
+    // },
+    // {
+    //   name: 'Links',
+    //   slug: 'links',
+    // },
+    // {
+    //   name: 'Text',
+    //   slug: 'texts',
+    // },
     {
       name: 'What people are asking',
       slug: 'questions',

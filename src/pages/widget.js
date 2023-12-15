@@ -39,7 +39,7 @@ export async function getServerSideProps() {
     redirect: 'follow',
   }
 
-  const res = await fetch('http://localhost:3000/api/questions', requestOptions)
+  const res = await fetch('https://kruze-ai-agent.vercel.app/api/questions', requestOptions)
     .then((response) => response)
     .then((result) => result)
     .catch((error) => console.log('error', error))

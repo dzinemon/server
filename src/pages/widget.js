@@ -11,12 +11,6 @@ import InlineLoading from '@/components/InlineLoading'
 
 import rateLimit from '../../utils/rate-limit'
 
-const limiter = rateLimit({
-  // interval: 60 * 1000, // 1 minute
-  interval: 20 * 60 * 60 * 1000, // 20 hrs
-  uniqueTokenPerInterval: 50, // Max 500 users per minute
-})
-
 const questionExamples = [
   'Is QuickBooks good for SaaS Startups?',
   'What is the best accounting software for SaaS startups?',
@@ -39,9 +33,30 @@ const limitSearchAttempts = 5
 
 const NEXT_PUBLIC_GA4_ID = process.env.NEXT_PUBLIC_GA4_ID
 
-export default function ChatWidget() {
-  // const {resources, setResources} = useResourcesContext();
-  const [limitReached, setLimitReached] = useState(false)
+export async function getServerSideProps() {
+  const requestOptions = {
+    method: 'GET',
+    redirect: 'follow',
+  }
+
+  const res = await fetch('http://localhost:3000/api/questions', requestOptions)
+    .then((response) => response)
+    .then((result) => result)
+    .catch((error) => console.log('error', error))
+
+  const data = {
+    status: res.status,
+    limit: res.headers.get('X-RateLimit-Limit'),
+    remaining: res.headers.get('X-RateLimit-Remaining'),
+  }
+
+  // const repo = await res.json()
+  // Pass data to the page via props
+  return { props: { res: data } }
+}
+
+export default function ChatWidget({ res }) {
+  // const [limitReached, setLimitReached] = useState(false)
   const scrollTargetRef = useRef(null)
   const [isAccepted, setIsAccepted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -330,20 +345,6 @@ export default function ChatWidget() {
     handleScrollIntoView()
   }
 
-  useEffect(() => {
-    // limiter check
-    const handleLimiterCheck = async () => {
-      try {
-        await limiter.check(res, 5, 'CACHE_TOKEN') // 5 requests per minute
-      } catch (error) {
-        console.log('error', error)
-        setLimitReached(true)
-      }
-    }
-
-    handleLimiterCheck()
-  }, [])
-
   return (
     <div className="h-screen w-screen  flex items-center justify-center relative">
       <div className="absolute inset-0 flex justify-center items-center opacity-10">
@@ -356,11 +357,9 @@ export default function ChatWidget() {
           priority
         />
       </div>
-
-      <div>{JSON.stringify(limitReached)}</div>
-      <hr />
-
-      <div>{JSON.stringify(limitSearchAttempts > questions.length)}</div>
+      <div className="absolute hidden left-4 bottom-4 rounded border p-3 bg-white text-[10px]">
+        {res && res.remaining == 0 ? 'limit reached' : res.remaining}
+      </div>
 
       <div className="relative overflow-auto pt-8 lg:pt-4 pb-28 w-full h-screen max-w-[720px] mx-auto flex flex-col justify-start items-center">
         <motion.div
@@ -405,10 +404,18 @@ export default function ChatWidget() {
             } w-full max-w-[720px]`}
           >
             <div className="md:bg-gray-50 md:rounded-lg relative z-10 md:border border-slate-200">
-              {limitReached || limitSearchAttempts < questions.length ? (
+              {res.remaining == 0 || limitSearchAttempts < questions.length ? (
                 <div className="py-3 text-center text-sm text-slate-400">
                   <p className="">Search Limit Reached.</p>
                   <p>Please try again later.</p>
+                  <div className="hidden">
+                    {/* <div>limitReached: {JSON.stringify(limitReached)}</div> */}
+                    <div>
+                      {' '}
+                      questions exceeded:{' '}
+                      {JSON.stringify(limitSearchAttempts < questions.length)}
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <div>

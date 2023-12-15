@@ -212,57 +212,61 @@ export default function QuestionSearchResult({
                             rel="noreferrer"
                             className="rounded hover:bg-gray-100 bg-gray-100/50 group flex flex-col relative h-full"
                           >
-                            <div className='aspect-video overflow-hidden'>
+                            <div className="aspect-video overflow-hidden">
                               {item.image ? (
-                                <Image src={item.image} width={120} height={80} className="w-full rounded-t" alt={item.title} />
-
+                                <Image
+                                  src={item.image}
+                                  width={120}
+                                  height={80}
+                                  className="w-full rounded-t"
+                                  alt={item.title}
+                                />
                               ) : (
-                                <Image src="https://kruzeconsulting.com/img/hero_vanessa_2020.jpg" width={120} height={80} className="w-full rounded-t" alt={item.title} />
+                                <Image
+                                  src="https://kruzeconsulting.com/img/hero_vanessa_2020.jpg"
+                                  width={120}
+                                  height={80}
+                                  className="w-full rounded-t"
+                                  alt={item.title}
+                                />
                               )}
-
                             </div>
 
+                            <div className="p-2 grow flex flex-col justify-between">
+                              <div>
+                                <div className="flex flex-row items-center justify-start -mt-4">
+                                  <div className="w-auto">
+                                    <div className="flex flex-row items-center justify-start px-1 py-px leading-none border-white border bg-blue-400 font-light lg:text-xs text-[10px] rounded-full text-white w-auto flex-1 capitalize font-bold">
+                                      <Type data={item.type} />
+                                    </div>
+                                  </div>
+                                </div>
 
-                            <div className='p-2 grow flex flex-col justify-between'>
+                                <p className="text-xs my-2">{item.title}</p>
+                              </div>
 
-                            <div>
-                            <div className="flex flex-row items-center justify-start -mt-4">
-                              <div className="w-auto">
-                                <div className="flex flex-row items-center justify-start px-1 py-px leading-none border-white border bg-blue-400 font-light lg:text-xs text-[10px] rounded-full text-white w-auto flex-1 capitalize font-bold">
-                                  <Type data={item.type} />
+                              <div className="flex flex-row items-center justify-start ">
+                                <div className="w-auto flex-none">
+                                  <Image
+                                    className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
+                                    src="/logo-color.png"
+                                    alt="Kruze Logo"
+                                    width={14}
+                                    height={16}
+                                    priority
+                                  />
+                                </div>
+                                <div className="text-[10px] md:text-xs w-auto flex-1 capitalize font-medium">
+                                  Kruze Consulting
+                                </div>
+                                <div className="text-blue-600 flex-none text-xs text-right">
+                                  <span className="group-hover:underline">
+                                    {/* Read more{' '} */}
+                                    <ArrowTopRightOnSquareIcon className="w-3 h-3 inline opacity-50  group-hover:opacity-100 group-hover:translate-x-1 group-hover:-translate-y-1 duration-200" />
+                                  </span>
                                 </div>
                               </div>
                             </div>
-
-                            <p className="text-xs my-2">{item.title}</p>
-                            </div>
-                           
-                            
-
-                            <div className="flex flex-row items-center justify-start ">
-                              <div className="w-auto flex-none">
-                                <Image
-                                  className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-                                  src="/logo-color.png"
-                                  alt="Kruze Logo"
-                                  width={14}
-                                  height={16}
-                                  priority
-                                />
-                              </div>
-                              <div className="text-[10px] md:text-xs w-auto flex-1 capitalize font-medium">
-                                Kruze Consulting
-                              </div>
-                              <div className="text-blue-600 flex-none text-xs text-right">
-                                <span className="group-hover:underline">
-                                  {/* Read more{' '} */}
-                                  <ArrowTopRightOnSquareIcon className="w-3 h-3 inline opacity-50  group-hover:opacity-100 group-hover:translate-x-1 group-hover:-translate-y-1 duration-200" />
-                                </span>
-                              </div>
-                            </div>
-                            </div>
-                            
-
                           </a>
                         </motion.div>
                       )

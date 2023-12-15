@@ -4,6 +4,8 @@ import {
 } from '../../../../utils/openai'
 import { queryEmbedding } from '../../../../utils/pinecone'
 
+import checkRequestOrigin from '../../../../utils/checkRequestOrigin'
+
 // import data from '../../../../data/data.json';
 
 const postUrl = async (req, res) => {
@@ -67,6 +69,13 @@ const postUrl = async (req, res) => {
 }
 
 export default function handler(req, res) {
+  const originAllowed = checkRequestOrigin(req)
+
+  if (!originAllowed) {
+    res.status(403).end(`Origin ${req.headers.origin} is not allowed`)
+    return
+  }
+
   switch (req.method) {
     case 'POST':
       return postUrl(req, res)

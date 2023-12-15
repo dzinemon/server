@@ -31,7 +31,7 @@ export default function Navbar() {
   ]
 
   return (
-    <header className="bg-white">
+    <header className="fixed top-0 w-full z-50">
       <nav
         className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8"
         aria-label="Global"

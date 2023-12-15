@@ -9,6 +9,14 @@ import { ArrowPathIcon } from '@heroicons/react/24/solid'
 import QuestionSearchResult from '../components/web-widget/question-search-result'
 import InlineLoading from '@/components/InlineLoading'
 
+import rateLimit from '../../utils/rate-limit'
+
+const limiter = rateLimit({
+  // interval: 60 * 1000, // 1 minute
+  interval: 20 * 60 * 60 * 1000, // 20 hrs
+  uniqueTokenPerInterval: 50, // Max 500 users per minute
+})
+
 const questionExamples = [
   'Is QuickBooks good for SaaS Startups?',
   'What is the best accounting software for SaaS startups?',
@@ -27,12 +35,13 @@ const searchExamples = [
   'Top pre-seed funds',
 ]
 
-const limitSearchAttempts = 50
+const limitSearchAttempts = 7
 
 const NEXT_PUBLIC_GA4_ID = process.env.NEXT_PUBLIC_GA4_ID
 
 export default function ChatWidget() {
   // const {resources, setResources} = useResourcesContext();
+  const [limitReached, setLimitReached] = useState(false)
   const scrollTargetRef = useRef(null)
   const [isAccepted, setIsAccepted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -112,8 +121,8 @@ export default function ChatWidget() {
     const localStorageAttemptCount = localStorage.getItem('attemptCount')
     const localStorageAttemptDate = localStorage.getItem('lastAttempt')
 
-    console.log('localStorageAttemptCount', localStorageAttemptCount)
-    console.log('localStorageAttemptDate', localStorageAttemptDate)
+    // console.log('localStorageAttemptCount', localStorageAttemptCount)
+    // console.log('localStorageAttemptDate', localStorageAttemptDate)
 
     const dateNow = new Date()
 
@@ -198,7 +207,9 @@ export default function ChatWidget() {
         return response.json()
       })
       .then((result) => result)
-      .catch((error) => console.log('error', error))
+      .catch((error) => {
+        console.log('error', error)
+      })
 
     console.log('result', result)
   }
@@ -319,6 +330,20 @@ export default function ChatWidget() {
     handleScrollIntoView()
   }
 
+  useEffect(() => {
+    // limiter check
+    const handleLimiterCheck = async () => {
+      try {
+        await limiter.check(res, 5, 'CACHE_TOKEN') // 5 requests per minute
+      } catch (error) {
+        console.log('error', error)
+        setLimitReached(true)
+      }
+    }
+
+    handleLimiterCheck()
+  }, [])
+
   return (
     <div className="h-screen w-screen  flex items-center justify-center relative">
       <div className="absolute inset-0 flex justify-center items-center opacity-10">
@@ -331,6 +356,7 @@ export default function ChatWidget() {
           priority
         />
       </div>
+
       <div className="relative overflow-auto pt-8 lg:pt-4 pb-28 w-full h-screen max-w-[720px] mx-auto flex flex-col justify-start items-center">
         <motion.div
           className={`${
@@ -360,8 +386,6 @@ export default function ChatWidget() {
           <div key={'loading'} ref={scrollTargetRef}></div>
         </motion.div>
 
-        {/* {JSON.stringify(questions, null, 2)} */}
-
         {/* FORM */}
         <AnimatePresence>
           <motion.div
@@ -376,7 +400,7 @@ export default function ChatWidget() {
             } w-full max-w-[720px]`}
           >
             <div className="md:bg-gray-50 md:rounded-lg relative z-10 md:border border-slate-200">
-              {limitSearchAttempts > questions.length ? (
+              {!limitReached ? (
                 <div>
                   <form
                     onSubmit={askQuestion}
@@ -451,6 +475,11 @@ export default function ChatWidget() {
                       </div>
                     </div>
                   )}
+                </div>
+              ) : limitSearchAttempts > questions.length ? (
+                <div className="py-3 text-center text-sm text-slate-400">
+                  <p className="">Search Limit Reached.</p>
+                  <p>Please try again later.</p>
                 </div>
               ) : (
                 <div className="py-3 text-center text-sm text-slate-400">

@@ -2,6 +2,8 @@ import { createChatCompletion } from '../../../../utils/openai'
 
 // import data from '../../../../data/data.json';
 
+// import checkRequestOrigin from '../../../../utils/checkRequestOrigin'
+
 const postUrl = async (req, res) => {
   const { prompt } = req.body
 

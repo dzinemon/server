@@ -43,12 +43,12 @@ const deleteQa = async (req, res) => {
 }
 
 export default async function handler(req, res, next) {
-  const originAllowed = checkRequestOrigin(req)
+  // const originAllowed = checkRequestOrigin(req)
 
-  if (!originAllowed) {
-    res.status(403).end(`Origin ${req.headers.origin} is not allowed`)
-    return
-  }
+  // if (!originAllowed) {
+  //   res.status(403).end(`Origin ${req.headers.origin} is not allowed`)
+  //   return
+  // }
 
   try {
     await limiter.check(req, res, 5, 'CACHE_TOKEN') // 5 requests per minute

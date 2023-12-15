@@ -33,30 +33,11 @@ const limitSearchAttempts = 5
 
 const NEXT_PUBLIC_GA4_ID = process.env.NEXT_PUBLIC_GA4_ID
 
-export async function getServerSideProps() {
-  const requestOptions = {
-    method: 'GET',
-    redirect: 'follow',
-  }
 
-  const res = await fetch('https://kruze-ai-agent.vercel.app/api/questions', requestOptions)
-    .then((response) => response)
-    .then((result) => result)
-    .catch((error) => console.log('error', error))
-
-  const data = {
-    status: res.status,
-    limit: res.headers.get('X-RateLimit-Limit'),
-    remaining: res.headers.get('X-RateLimit-Remaining'),
-  }
-
-  // const repo = await res.json()
-  // Pass data to the page via props
-  return { props: { res: data } }
-}
-
-export default function ChatWidget({ res }) {
+export default function ChatWidget() {
   // const [limitReached, setLimitReached] = useState(false)
+
+  const [response, setResponse] = useState({})
   const scrollTargetRef = useRef(null)
   const [isAccepted, setIsAccepted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -69,6 +50,17 @@ export default function ChatWidget({ res }) {
 
   const myHeaders = new Headers()
   myHeaders.append('Content-Type', 'application/json')
+
+  const makeRequest = async () => {
+    const res = await fetch('/api/questions')
+
+    setResponse({
+      status: res.status,
+      body: await res.json(),
+      limit: res.headers.get('X-RateLimit-Limit'),
+      remaining: res.headers.get('X-RateLimit-Remaining'),
+    })
+  }
 
   const handleLike = (question) => {
     // console.log('like', question)
@@ -170,7 +162,7 @@ export default function ChatWidget({ res }) {
 
   useEffect(() => {
     // handle localstorage for attempt count and date
-
+    makeRequest()
     handleGetAttemtCountLocalStorage()
     handleSetQuestionsFromLocalStorage()
   }, [])
@@ -343,6 +335,7 @@ export default function ChatWidget({ res }) {
     setIsLoading(false)
 
     handleScrollIntoView()
+    makeRequest()
   }
 
   return (
@@ -357,8 +350,19 @@ export default function ChatWidget({ res }) {
           priority
         />
       </div>
-      <div className="absolute hidden left-4 bottom-4 rounded border p-3 bg-white text-[10px]">
-        {res && res.remaining == 0 ? 'limit reached' : res.remaining}
+      <div className="absolute  left-4 bottom-4 rounded border p-3 bg-white text-[9px]">
+
+      {
+        Object.keys(response).length > 0 ? (
+          <div>
+            <div>limit: {response.limit}</div>
+            <div>remaining: {response.remaining}</div>
+            <div>status: {response.status}</div>
+            {/* <div>body: {JSON.stringify(response.body)}</div> */}
+          </div>
+        ) : ("")
+      }
+        
       </div>
 
       <div className="relative overflow-auto pt-8 lg:pt-4 pb-28 w-full h-screen max-w-[720px] mx-auto flex flex-col justify-start items-center">
@@ -404,7 +408,7 @@ export default function ChatWidget({ res }) {
             } w-full max-w-[720px]`}
           >
             <div className="md:bg-gray-50 md:rounded-lg relative z-10 md:border border-slate-200">
-              {res.remaining == 0 || limitSearchAttempts < questions.length ? (
+              { response.remaining === 0 || limitSearchAttempts < questions.length ? (
                 <div className="py-3 text-center text-sm text-slate-400">
                   <p className="">Search Limit Reached.</p>
                   <p>Please try again later.</p>

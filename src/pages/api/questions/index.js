@@ -14,7 +14,14 @@ const limiter = rateLimit({
 })
 
 const getAllQa = async (req, res) => {
-  return res.status(200).json({ message: 'OK' })
+  try {
+    await limiter.check(req, res, 5, 'CACHE_TOKEN') // 5 requests per minute
+    return res.status(200).json({ message: 'OK' })
+  } catch (error) {
+    console.log('error', error)
+    res.status(429).json({ error: 'Rate limit exceeded' })
+    return
+  }
 
   // if (req.origin == 'http://localhost:3000'  || req.origin == 'https://kruze-ai-agent.vercel.app') {
   //   return res.status(200).json({ message: 'OK' })
@@ -27,11 +34,18 @@ const getAllQa = async (req, res) => {
 const addQa = async (req, res) => {
   const { question, answer, resources } = req.body
 
-  const result = await db.query(
-    'INSERT INTO qas (question, answer, resources) VALUES ($1, $2, $3) RETURNING *',
-    [question, answer, resources]
-  )
-  res.status(200).json(result.rows)
+  try {
+    await limiter.check(req, res, 5, 'CACHE_TOKEN') // 5 requests per minute
+    const result = await db.query(
+      'INSERT INTO qas (question, answer, resources) VALUES ($1, $2, $3) RETURNING *',
+      [question, answer, resources]
+    )
+    res.status(200).json(result.rows)
+  } catch (error) {
+    console.log('error', error)
+    res.status(429).json({ error: 'Rate limit exceeded' })
+    return
+  }
 }
 
 const deleteQa = async (req, res) => {
@@ -49,14 +63,6 @@ export default async function handler(req, res, next) {
   //   res.status(403).end(`Origin ${req.headers.origin} is not allowed`)
   //   return
   // }
-
-  try {
-    await limiter.check(req, res, 5, 'CACHE_TOKEN') // 5 requests per minute
-  } catch (error) {
-    console.log('error', error)
-    res.status(429).json({ error: 'Rate limit exceeded' })
-    return
-  }
 
   switch (req.method) {
     case 'GET':

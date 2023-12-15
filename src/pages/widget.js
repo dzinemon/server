@@ -33,7 +33,6 @@ const limitSearchAttempts = 5
 
 const NEXT_PUBLIC_GA4_ID = process.env.NEXT_PUBLIC_GA4_ID
 
-
 export default function ChatWidget() {
   // const [limitReached, setLimitReached] = useState(false)
 
@@ -351,18 +350,16 @@ export default function ChatWidget() {
         />
       </div>
       <div className="absolute  left-4 bottom-4 rounded border p-3 bg-white text-[9px]">
-
-      {
-        Object.keys(response).length > 0 ? (
+        {Object.keys(response).length > 0 ? (
           <div>
             <div>limit: {response.limit}</div>
             <div>remaining: {response.remaining}</div>
             <div>status: {response.status}</div>
             {/* <div>body: {JSON.stringify(response.body)}</div> */}
           </div>
-        ) : ("")
-      }
-        
+        ) : (
+          ''
+        )}
       </div>
 
       <div className="relative overflow-auto pt-8 lg:pt-4 pb-28 w-full h-screen max-w-[720px] mx-auto flex flex-col justify-start items-center">
@@ -408,7 +405,8 @@ export default function ChatWidget() {
             } w-full max-w-[720px]`}
           >
             <div className="md:bg-gray-50 md:rounded-lg relative z-10 md:border border-slate-200">
-              { response.remaining === 0 || limitSearchAttempts < questions.length ? (
+              {response.remaining === 0 ||
+              limitSearchAttempts < questions.length ? (
                 <div className="py-3 text-center text-sm text-slate-400">
                   <p className="">Search Limit Reached.</p>
                   <p>Please try again later.</p>

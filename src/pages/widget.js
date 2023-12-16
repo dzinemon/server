@@ -355,7 +355,7 @@ export default function ChatWidget() {
             <div>limit: {response.limit}</div>
             <div>remaining: {response.remaining}</div>
             <div>status: {response.status}</div>
-            {/* <div>body: {JSON.stringify(response.body)}</div> */}
+            <div>body: {JSON.stringify(response.body)}</div>
           </div>
         ) : (
           ''
@@ -405,7 +405,7 @@ export default function ChatWidget() {
             } w-full max-w-[720px]`}
           >
             <div className="md:bg-gray-50 md:rounded-lg relative z-10 md:border border-slate-200">
-              {response.remaining === 0 ||
+              {response.status === 429 ||
               limitSearchAttempts < questions.length ? (
                 <div className="py-3 text-center text-sm text-slate-400">
                   <p className="">Search Limit Reached.</p>

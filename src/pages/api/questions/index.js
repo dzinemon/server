@@ -55,12 +55,12 @@ export default async function handler(req, res) {
   switch (req.method) {
     case 'GET':
       try {
-        await limiter.check(req, res, 4, 'CACHE_TOKEN') // 5 requests per minute
+        await limiter.check(req, res, 5, 'CACHE_TOKEN') // 5 requests per minute
         return res.status(200).json({ message: 'OK' })
       } catch (error) {
         console.log('error', error)
         return res.status(429).json({
-          // error: 'Rate limit exceeded',
+          error: 'Rate limit exceeded',
           message: 'Rimit reached',
         })
       }
@@ -68,7 +68,10 @@ export default async function handler(req, res) {
       break
     case 'POST':
       try {
-        await limiter.check(req, res, 4, 'CACHE_TOKEN') // 5 requests per minute
+        const { question, answer, resources } = req.body
+
+        await limiter.check(req, res, 5, 'CACHE_TOKEN') // 5 requests per minute
+
         const result = await db.query(
           'INSERT INTO qas (question, answer, resources) VALUES ($1, $2, $3) RETURNING *',
           [question, answer, resources]
@@ -77,7 +80,7 @@ export default async function handler(req, res) {
       } catch (error) {
         console.log('error', error)
         return res.status(429).json({
-          // error: 'Rate limit exceeded',
+          error: 'Rate limit exceeded',
           message: 'Rimit reached',
         })
       }

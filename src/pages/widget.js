@@ -125,18 +125,18 @@ export default function ChatWidget() {
     const localStorageAttemptCount = localStorage.getItem('attemptCount')  === null ? 0 : localStorage.getItem('attemptCount')
     const localStorageAttemptDate = localStorage.getItem('lastAttempt')
 
-    console.log('localStorageAttemptCount', localStorageAttemptCount)
-    console.log('localStorageAttemptDate', localStorageAttemptDate)
+    // console.log('localStorageAttemptCount', localStorageAttemptCount)
+    // console.log('localStorageAttemptDate', localStorageAttemptDate)
 
     const dateNow = new Date()
 
     const latestDate = new Date(localStorageAttemptDate)
 
     const dateDiff = Math.abs(dateNow - latestDate)
-    console.log('dateDiff', dateDiff)
+    // console.log('dateDiff', dateDiff)
     const diffHours = Math.ceil(dateDiff / (1000 * 60 * 60))
 
-    console.log('diffHours', diffHours)
+    // console.log('diffHours', diffHours)
     // console.log('diffDays', diffDays)
 
     if (localStorageAttemptDate && diffHours > 24) {
@@ -339,6 +339,14 @@ export default function ChatWidget() {
     makeRequest()
   }
 
+
+  useEffect(() => {
+    // handle localstorage for attempt count and date
+    makeRequest()
+    handleGetAttemtCountLocalStorage()
+    handleSetQuestionsFromLocalStorage()
+  }, [])
+  
   return (
     <div className="h-screen w-screen  flex items-center justify-center relative">
       <div className="absolute inset-0 flex justify-center items-center opacity-10">
@@ -351,7 +359,7 @@ export default function ChatWidget() {
           priority
         />
       </div>
-      <div className="absolute  left-4 bottom-4 rounded border p-3 bg-white text-[9px]">
+      {/* <div className="absolute  left-4 bottom-4 rounded border p-3 bg-white text-[9px]">
         {Object.keys(response).length > 0 ? (
           <div>
             <div>limit: {response.limit}</div>
@@ -369,7 +377,7 @@ export default function ChatWidget() {
         ) : (
           ''
         )}
-      </div>
+      </div> */}
 
       <div className="relative overflow-auto pt-8 lg:pt-4 pb-28 w-full h-screen max-w-[720px] mx-auto flex flex-col justify-start items-center">
         <motion.div

@@ -163,7 +163,7 @@ export default function QuestionSearchResult({
       >
         <div className="space-y-4 py-4 text-base leading-7 text-gray-600 overflow-y-auto">
           <div className="relative h-full w-full">
-            <div className="px-4 relative h-full w-full ">
+            <div className="px-4 relative h-full w-full space-y-4">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -326,7 +326,7 @@ export default function QuestionSearchResult({
                       />
                     </motion.div>
 
-                    <motion.div>
+                    <motion.div ref={scrollTargetRef}>
                       <div className="pt-4 mt-4 border-t border-slate-300">
                         <div className="flex flex-row justify-between -mx-4">
                           <div className="w-auto px-4">
@@ -423,7 +423,7 @@ export default function QuestionSearchResult({
                         </div>
                       </div>
                     </motion.div>
-                    <div ref={scrollTargetRef}></div>
+                    
                   </>
                 )}
               </AnimatePresence>

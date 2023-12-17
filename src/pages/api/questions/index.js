@@ -8,16 +8,18 @@ import rateLimit from '../../../../utils/rate-limit'
 
 const limiter = rateLimit({
   // interval: 60 * 1000, // 1 minute
-  interval: 20 * 60 * 60 * 1000, // 20 hrs
-  uniqueTokenPerInterval: 5, // Max 500 users per minute
+  // interval: 20 * 60 * 60 * 1000, // 20 hrs
+  // ten hours
+  interval: 10 * 60 * 60 * 1000, // 10 hrs
+  uniqueTokenPerInterval: 100, // Max 500 users per minute
 })
 
 const getAllQa = async (req, res) => {
-  // if (req.origin == 'http://localhost:3000'  || req.origin == 'https://kruze-ai-agent.vercel.app') {
-  //   return res.status(200).json({ message: 'OK' })
-  // }
-  // const result = await db.query('SELECT * FROM qas')
-  // res.status(200).json(result.rows)
+  if (req.origin == 'http://localhost:3000'  || req.origin == 'https://kruze-ai-agent.vercel.app') {
+    return res.status(200).json({ message: 'OK' })
+  }
+  const result = await db.query('SELECT * FROM qas')
+  res.status(200).json(result.rows)
 }
 
 const addQa = async (req, res) => {
@@ -45,12 +47,6 @@ const deleteQa = async (req, res) => {
 }
 
 export default async function handler(req, res) {
-  // const originAllowed = checkRequestOrigin(req)
-
-  // if (!originAllowed) {
-  //   res.status(403).end(`Origin ${req.headers.origin} is not allowed`)
-  //   return
-  // }
 
   switch (req.method) {
     case 'GET':
@@ -64,8 +60,6 @@ export default async function handler(req, res) {
           message: 'Rimit reached',
         })
       }
-
-      break
     case 'POST':
       try {
         const { question, answer, resources } = req.body

@@ -9,8 +9,6 @@ import { ArrowPathIcon } from '@heroicons/react/24/solid'
 import QuestionSearchResult from '../components/web-widget/question-search-result'
 import InlineLoading from '@/components/InlineLoading'
 
-import rateLimit from '../../utils/rate-limit'
-
 const questionExamples = [
   'Is QuickBooks good for SaaS Startups?',
   'What is the best accounting software for SaaS startups?',
@@ -124,18 +122,18 @@ export default function ChatWidget() {
   }
 
   const handleGetAttemtCountLocalStorage = () => {
-    const localStorageAttemptCount = localStorage.getItem('attemptCount')
+    const localStorageAttemptCount = localStorage.getItem('attemptCount')  === null ? 0 : localStorage.getItem('attemptCount')
     const localStorageAttemptDate = localStorage.getItem('lastAttempt')
 
-    // console.log('localStorageAttemptCount', localStorageAttemptCount)
-    // console.log('localStorageAttemptDate', localStorageAttemptDate)
+    console.log('localStorageAttemptCount', localStorageAttemptCount)
+    console.log('localStorageAttemptDate', localStorageAttemptDate)
 
     const dateNow = new Date()
 
     const latestDate = new Date(localStorageAttemptDate)
 
     const dateDiff = Math.abs(dateNow - latestDate)
-
+    console.log('dateDiff', dateDiff)
     const diffHours = Math.ceil(dateDiff / (1000 * 60 * 60))
 
     console.log('diffHours', diffHours)
@@ -215,19 +213,21 @@ export default function ChatWidget() {
       .then((result) => result)
       .catch((error) => {
         console.log('error', error)
+        makeRequest()
       })
 
     console.log('result', result)
   }
 
   const askQuestion = async (e) => {
+    console.log('attemptCount', attemptCount)
     e.preventDefault()
     if (question.length === 0) {
       return
     }
     let currentQuesiton = { question: question, answer: '', sources: [] }
     setQuestions(questions.concat([currentQuesiton]))
-    setAttemptCount((prev) => prev + 1)
+    setAttemptCount(attemptCount + 1)
     // set attempt date to now
     setAttemptDate(new Date())
     setQuestion((prev) => {
@@ -317,6 +317,8 @@ export default function ChatWidget() {
         },
       ]
 
+      console.log('attemptCount', attemptCount)
+
       localStorage.setItem('localQuestions', JSON.stringify(currentQuestions))
       localStorage.setItem('attemptCount', attemptCount + 1)
       localStorage.setItem('lastAttempt', new Date())
@@ -354,8 +356,15 @@ export default function ChatWidget() {
           <div>
             <div>limit: {response.limit}</div>
             <div>remaining: {response.remaining}</div>
+            <div>attemptCount: {attemptCount}</div>
             <div>status: {response.status}</div>
             <div>body: {JSON.stringify(response.body)}</div>
+          <hr />
+          <button
+            onClick={() => {
+              makeRequest()
+            }}
+          >makeRequest</button>
           </div>
         ) : (
           ''

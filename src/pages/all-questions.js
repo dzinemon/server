@@ -12,10 +12,11 @@ export default function AllQuestions({ questions }) {
   return (
     <Layout>
       <div className="container">
-        { questions && questions.map((link) => (
+        { questions && questions.map((link, idx) => (
           <QuestionListItem
             key={link.id}
             question={link}
+            id={idx + 1}
             onClick={() => handleRemove(link.id)}
           />
         ))}

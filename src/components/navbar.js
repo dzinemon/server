@@ -25,8 +25,12 @@ export default function Navbar() {
     //   slug: 'texts',
     // },
     {
-      name: 'What people are asking',
-      slug: 'questions',
+      name: 'All Questions',
+      slug: 'all-questions',
+    },
+    {
+      name: 'AI Widget',
+      slug: 'widget',
     },
   ]
 

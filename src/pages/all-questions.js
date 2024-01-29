@@ -4,7 +4,7 @@ import QuestionListItem from "@/components/question-list-item"
 
 export default function AllQuestions({ questions }) {
 
-  if (questions.error.name) {
+  if ( questions.error && questions.error.name) {
     return <div>Error</div>
   }
   

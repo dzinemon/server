@@ -226,14 +226,14 @@ export default function ChatWidget() {
       return
     }
     let currentQuesiton = { question: question, answer: '', sources: [] }
+    if (window.gtag !== undefined) {
+      handleSendGoogleAnalyticsEvent(question)
+    }
     setQuestions(questions.concat([currentQuesiton]))
     setAttemptCount(attemptCount + 1)
     // set attempt date to now
     setAttemptDate(new Date())
     setQuestion((prev) => {
-      if (window.gtag !== undefined) {
-        handleSendGoogleAnalyticsEvent(prev)
-      }
       return ''
     })
     handleScrollIntoView()

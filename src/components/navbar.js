@@ -29,8 +29,8 @@ export default function Navbar() {
       slug: 'all-questions',
     },
     {
-      name: 'AI Widget',
-      slug: 'widget',
+      name: 'Generate Content',
+      slug: 'content-gen',
     },
   ]
 

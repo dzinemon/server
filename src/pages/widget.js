@@ -188,6 +188,14 @@ export default function ChatWidget() {
     window.gtag('event', 'search_widget', {
       search_term: question,
     })
+    if (typeof(dataLayer) === 'object') {
+      dataLayer.push({
+        'event': 'extSearch',
+        'searchTerm': question
+      });
+    } else {
+      console.log('GA is not a function');
+    }
   }
 
   const handleSaveQuestionAnswer = async (question, answer, resources) => {

@@ -27,10 +27,6 @@ const searchExamples = [
   'Top pre-seed funds',
 ]
 
-const limitSearchAttempts = 5
-
-const NEXT_PUBLIC_GA4_ID = process.env.NEXT_PUBLIC_GA4_ID
-
 export default function ChatWidget() {
   // const [limitReached, setLimitReached] = useState(false)
 
@@ -137,12 +133,6 @@ export default function ChatWidget() {
     }, 100)
   }
 
-  const handleSendGoogleAnalyticsEvent = (question) => {
-    window.gtag('event', 'search_widget', {
-      search_term: question,
-    })
-  }
-
   const askQuestion = async (e) => {
     
     e.preventDefault()
@@ -154,7 +144,7 @@ export default function ChatWidget() {
     // set attempt date to now
     setQuestion((prev) => {
       if (window.gtag !== undefined) {
-        handleSendGoogleAnalyticsEvent(prev)
+        console.log('gtag')
       }
       return ''
     })

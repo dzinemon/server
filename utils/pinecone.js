@@ -4,101 +4,128 @@ import { generateEmbedding } from './openai'
 
 const client = new PineconeClient()
 
+const config = {
+  apiKey: process.env.INTERNAL_PINECONE_API_KEY,
+  environment: process.env.PINECONE_ENVIRONMENT,
+  index: process.env.INTERNAL_PINECONE_INDEX,
+}
+
 async function init() {
   return await client.init({
-    apiKey: process.env.PINECONE_API_KEY,
-    environment: process.env.PINECONE_ENVIRONMENT,
+    apiKey: config.apiKey,
+    environment: config.environment,
   })
 }
 
 // write function to loop through each document and return vectors used to upsert
 
 async function generateVectors(docs) {
-  const promises = await docs.map(async (doc, idx) => {
-    const { content } = doc.metadata
+  try {
+    const promises = await docs.map(async (doc, idx) => {
+      const { content } = doc.metadata
 
-    const embd = await generateEmbedding(content)
+      const embd = await generateEmbedding(content)
 
-    const vector = {
-      id: doc.metadata.id,
-      values: embd,
-      metadata: {
+      const vector = {
         id: doc.metadata.id,
-        url: doc.metadata.url,
-        content: content,
-        title: doc.metadata.title,
-      },
-    }
+        values: embd,
+        metadata: {
+          content: content,
+          id: doc.metadata.id,
+          image: doc.metadata.image,
+          source: doc.metadata.source,
+          title: doc.metadata.title,
+          type: doc.metadata.type,
+          url: doc.metadata.url,
+        },
+      }
 
-    return vector
-  })
-  const vectors = await Promise.all(promises)
-  return vectors
+      return vector
+    })
+    const vectors = await Promise.all(promises)
+    return vectors
+  } catch (error) {
+    console.error(error)
+    throw error
+  }
 }
 
 async function upsertEmbedding(docs) {
-  await init()
+  try {
+    await init()
 
-  const index = client.Index(process.env.PINECONE_INDEX)
+    const index = client.Index(config.index)
 
-  // console.log('delete all started')
-  // await index.delete1({
-  //   deleteAll: true,
-  // });
-  // console.log('delete all ended')
+    const vectors = await generateVectors(docs)
 
-  const vectors = await generateVectors(docs)
+    const response = await index.upsert({
+      upsertRequest: {
+        vectors: vectors,
+      },
+    })
 
-  const response = await index.upsert({
-    upsertRequest: {
-      vectors: vectors,
-      // namespace: 'example-namespace'
-    },
-  })
-
-  return response
+    return response
+  } catch (error) {
+    // Handle the error here
+    console.error(error)
+    throw error
+  }
 }
 
 async function deleteAllVectors() {
-  await init()
+  try {
+    await init()
 
-  const index = client.Index(process.env.PINECONE_INDEX)
+    const index = client.Index(config.index)
 
-  const response = await index.delete1({
-    deleteAll: true,
-  })
+    const response = await index.delete1({
+      deleteAll: true,
+    })
 
-  return response
+    return response
+  } catch (error) {
+    console.error(error)
+    throw error
+  }
 }
 
 async function queryEmbedding(queryVector) {
-  await init()
-  console.log('queryVector', queryVector)
+  try {
+    await init()
 
-  const index = client.Index(process.env.PINECONE_INDEX)
+    const index = client.Index(config.index)
 
-  const queryRequest = {
-    topK: 2,
-    vector: queryVector,
-    includeMetadata: true,
+    const queryRequest = {
+      topK: 8,
+      vector: queryVector,
+      filter: { source: { $in: ['website'] } },
+      includeMetadata: true,
+    }
+
+    const response = await index.query({ queryRequest })
+
+    return response
+  } catch (error) {
+    console.error(error)
+    throw error
   }
-
-  const response = await index.query({ queryRequest })
-
-  return response
 }
 
 async function deleteEmbedding(ids) {
-  await init()
+  try {
+    await init()
 
-  const index = client.Index(process.env.PINECONE_INDEX)
+    const index = client.Index(config.index)
 
-  const response = await index.delete1({
-    ids: ids,
-  })
-  console.log('deleted vectors response - ', response)
+    const response = await index.delete1({
+      ids: ids,
+    })
 
-  return response
+    return response
+  } catch (error) {
+    console.error(error)
+    throw error
+  }
 }
 
 export { upsertEmbedding, deleteEmbedding, deleteAllVectors, queryEmbedding }

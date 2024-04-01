@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import Image from 'next/image'
 
+import toast, { Toaster } from 'react-hot-toast';
+
 import Script from 'next/script'
 
 import { ArrowPathIcon } from '@heroicons/react/24/solid'
@@ -228,7 +230,7 @@ export default function ChatWidget() {
   }
 
   const askQuestion = async (e) => {
-    console.log('attemptCount', attemptCount)
+    // console.log('attemptCount', attemptCount)
     e.preventDefault()
     if (question.length === 0) {
       return
@@ -275,7 +277,19 @@ export default function ChatWidget() {
         return response.json()
       })
       .then((result) => result)
-      .catch((error) => console.log('error', error))
+      .catch((error) => {
+        console.log('error', error)
+        toast('Error generating embedding',
+          {
+            icon: '❌',
+          }
+        )
+        setIsLoading(false)
+        setQuestions((previous) => {
+          return previous.slice(0, -1)
+        }
+        )
+      })
 
     // update current question resources
 
@@ -312,7 +326,20 @@ export default function ChatWidget() {
         return response.json()
       })
       .then((result) => result)
-      .catch((error) => console.log('error', error))
+      .catch((error) =>  {
+        console.log('error', error)
+        toast('Error generating completion',
+          {
+            icon: '❌',
+          }
+        )
+        setIsLoading(false)
+        setQuestions((previous) => {
+          return previous.slice(0, -1)
+        })
+        
+      }
+      )
 
     // update current question answer
 
@@ -325,7 +352,7 @@ export default function ChatWidget() {
         },
       ]
 
-      console.log('attemptCount', attemptCount)
+      // console.log('attemptCount', attemptCount)
 
       localStorage.setItem('localQuestions', JSON.stringify(currentQuestions))
       localStorage.setItem('attemptCount', attemptCount + 1)
@@ -357,6 +384,7 @@ export default function ChatWidget() {
   
   return (
     <div className="h-screen w-screen  flex items-center justify-center relative">
+      <Toaster />
       <div className="absolute inset-0 flex justify-center items-center opacity-10">
         <Image
           className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"

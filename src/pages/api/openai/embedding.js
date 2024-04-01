@@ -2,24 +2,16 @@ import {
   generateEmbedding,
   createChatCompletion,
 } from '../../../../utils/openai'
-import { queryEmbedding } from '../../../../utils/pinecone-internal'
+import { queryEmbedding } from '../../../../utils/pinecone'
 
 import checkRequestOrigin from '../../../../utils/checkRequestOrigin'
-
-// import data from '../../../../data/data.json';
 
 const postUrl = async (req, res) => {
   const { question, subQuestions } = req.body
 
-  // console.log(
-  //   'Processing post request . . . to generateEmbedding . . .',
-  //   question
-  // )
-
   const questionEmbedding = await generateEmbedding(question)
 
-  const data = await queryEmbedding(questionEmbedding)
-
+  const data = await queryEmbedding(questionEmbedding);
   // get sources array of data
 
   const sources = data.matches
@@ -38,6 +30,7 @@ const postUrl = async (req, res) => {
       (item, idx, arr) => arr.findIndex((t) => t.url === item.url) === idx
     )
 
+  // console.log('sources ', sources.length)
   // bundle prompt using data metadata content from all matches
 
   const promptTempate = (question, context, subQuestions = []) => {
@@ -64,7 +57,7 @@ const postUrl = async (req, res) => {
   //   .map((match) => match.metadata.content)
   //   .join('\n')
 
-  let limit = 8000
+  let limit = 16000
 
   const thecontext = data.matches // check maximum length of context allowed by OpenAI
     .map((match) => match.metadata.content)

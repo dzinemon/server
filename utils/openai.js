@@ -30,7 +30,7 @@ const createChatCompletion = async (prompt) => {
     const openai = new OpenAI(configuration)
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo-0125',
+      model: 'gpt-3.5-turbo-16k-0613',
       temperature: 0.2,
       messages: [
         {

@@ -17,7 +17,7 @@ export default function AllQuestions({ questions }) {
             key={link.id}
             question={link}
             id={idx + 1}
-            onClick={() => handleRemove(link.id)}
+            onClick={() => console.log('remove click')}
           />
         ))}
       </div>

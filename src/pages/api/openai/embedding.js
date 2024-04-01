@@ -57,7 +57,7 @@ const postUrl = async (req, res) => {
   //   .map((match) => match.metadata.content)
   //   .join('\n')
 
-  let limit = 16000
+  let limit = 12000
 
   const thecontext = data.matches // check maximum length of context allowed by OpenAI
     .map((match) => match.metadata.content)

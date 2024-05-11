@@ -18,7 +18,7 @@ const postUrl = async (req, res) => {
 
   const questionEmbedding = await generateEmbedding(question)
 
-  const data = await queryEmbedding(questionEmbedding)
+  const data = await queryEmbedding(questionEmbedding, ['website'])
 
   // get sources array of data
 

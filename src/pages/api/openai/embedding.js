@@ -7,11 +7,16 @@ import { queryEmbedding } from '../../../../utils/pinecone'
 import checkRequestOrigin from '../../../../utils/checkRequestOrigin'
 
 const postUrl = async (req, res) => {
-  const { question, subQuestions } = req.body
+  const { question, subQuestions, filter } = req.body
 
-  const questionEmbedding = await generateEmbedding(question)
+  if (filter.length === 0) {
+    filter.push('website')
+  }
+  
+  
+  const questionEmbedding = await generateEmbedding(question);
 
-  const data = await queryEmbedding(questionEmbedding);
+  const data = await queryEmbedding(questionEmbedding, filter);
   // get sources array of data
 
   const sources = data.matches

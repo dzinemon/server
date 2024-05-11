@@ -89,7 +89,7 @@ async function deleteAllVectors() {
   }
 }
 
-async function queryEmbedding(queryVector) {
+async function queryEmbedding(queryVector, filterValues) {
   try {
     await init()
 
@@ -98,12 +98,12 @@ async function queryEmbedding(queryVector) {
     const queryRequest = {
       topK: 8,
       vector: queryVector,
-      filter: { source: { $in: ['website'] } },
+      filter: { source: { $in: filterValues } },
       includeMetadata: true,
     }
 
     const response = await index.query({ queryRequest })
-
+    // console.log('Query Response', response)
     return response
   } catch (error) {
     console.error(error)

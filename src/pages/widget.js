@@ -261,6 +261,7 @@ export default function ChatWidget() {
       body: JSON.stringify({
         question: question,
         subQuestions: questions.map((item) => item.question),
+        filter: [],
       }),
       redirect: 'follow', // manual, *follow, error
     }

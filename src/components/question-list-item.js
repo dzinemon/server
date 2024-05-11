@@ -21,6 +21,7 @@ import {
   TrashIcon,
   CheckIcon,
   XMarkIcon,
+  ChatBubbleLeftRightIcon,
 } from '@heroicons/react/24/solid'
 
 import ReactMarkdown from 'react-markdown'
@@ -32,6 +33,14 @@ const Type = ({ data }) => {
         <>
           <DocumentChartBarIcon className="w-3 h-3 mr-1" />
           Web page
+        </>
+      )
+      break
+    case 'slack':
+      return (
+        <>
+          <ChatBubbleLeftRightIcon className="w-3 h-3 mr-1" />
+          Slack
         </>
       )
       break

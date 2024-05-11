@@ -1,35 +1,23 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import Image from 'next/image'
-import toast, { Toaster } from 'react-hot-toast';
+import toast, { Toaster } from 'react-hot-toast'
 
 import Layout from '@/components/layout'
 
-import { ArrowPathIcon } from '@heroicons/react/24/solid'
+import { ArrowPathIcon, FunnelIcon } from '@heroicons/react/24/solid'
 
 import QuestionSearchResult from '../components/web-widget/question-search-result'
 import InlineLoading from '@/components/InlineLoading'
 
-const questionExamples = [
-  'Is QuickBooks good for SaaS Startups?',
-  'What is the best accounting software for SaaS startups?',
-  'What taxes should I pay as a Delaware C-corp startup?',
-  'How much time do you spend monthly doing bookkeeping?',
-  'Who are good bookkeepers in Mountain View CA?',
-  'Which tools should every startup CFO know/use?',
-]
+import { Listbox } from '@headlessui/react'
 
-const searchExamples = [
-  'Kruze Pricing',
-  'Startup Taxes',
-  'Startup Bookkeeping',
-  'C-Corp Tax Deadlines 2023',
-  '409A Valuation',
-  'Top pre-seed funds',
-]
+const filters = ['website', 'slack']
 
 export default function ChatWidget() {
   // const [limitReached, setLimitReached] = useState(false)
+
+  const [filterArray, setFilterArray] = useState([filters[0], filters[1]])
 
   const [response, setResponse] = useState({})
   const scrollTargetRef = useRef(null)
@@ -64,7 +52,6 @@ export default function ChatWidget() {
   }
 
   const handleDislike = (question) => {
-
     const questions = JSON.parse(localStorage.getItem('localQuestions'))
 
     const updatedQuestions = questions.map((item) => {
@@ -102,7 +89,6 @@ export default function ChatWidget() {
     localStorage.setItem('localQuestions', JSON.stringify(updatedQuestions))
   }
 
-
   const handleSetQuestionsFromLocalStorage = () => {
     // read localstorage for questions
     const questions = JSON.parse(localStorage.getItem('localQuestions'))
@@ -114,8 +100,7 @@ export default function ChatWidget() {
 
   useEffect(() => {
     // handle localstorage for attempt count and date
-    
-    
+
     handleSetQuestionsFromLocalStorage()
   }, [])
 
@@ -133,7 +118,6 @@ export default function ChatWidget() {
   }
 
   const askQuestion = async (e) => {
-    
     e.preventDefault()
     if (question.length === 0) {
       return
@@ -160,7 +144,9 @@ export default function ChatWidget() {
       headers: myHeaders,
       body: JSON.stringify({
         question: question,
-        subQuestions: questions.map((item) => item.question),
+        subQuestions: [],
+        // subQuestions: questions.map((item) => item.question),
+        filter: filterArray,
       }),
       redirect: 'follow', // manual, *follow, error
     }
@@ -179,11 +165,9 @@ export default function ChatWidget() {
       .then((result) => result)
       .catch((error) => {
         console.log('error', error)
-        toast('Error generating completion',
-          {
-            icon: '❌',
-          }
-        )
+        toast('Error generating completion', {
+          icon: '❌',
+        })
       })
 
     // update current question resources
@@ -223,11 +207,9 @@ export default function ChatWidget() {
       .then((result) => result)
       .catch((error) => {
         console.log('error', error)
-        toast('Error generating completion',
-          {
-            icon: '❌',
-          }
-        )
+        toast('Error generating completion', {
+          icon: '❌',
+        })
       })
 
     // update current question answer
@@ -252,20 +234,17 @@ export default function ChatWidget() {
     setIsLoading(false)
 
     handleScrollIntoView()
-    
   }
-
 
   useEffect(() => {
     // handle localstorage for attempt count and date
-    
-    
+
     handleSetQuestionsFromLocalStorage()
   }, [])
-  
+
   return (
     <Layout>
-      <div className=" flex items-center justify-center relative">
+      <div className=" min-h-screen flex items-center justify-center relative">
         <Toaster />
         <div className="absolute inset-0 flex justify-center items-center opacity-10">
           <Image
@@ -319,23 +298,75 @@ export default function ChatWidget() {
             >
               <div className="md:bg-gray-50 md:rounded-lg relative z-10 md:border border-slate-200">
                 <div>
-                    <form
-                      onSubmit={askQuestion}
-                      className="p-4 flex gap-2 text-base font-semibold leading-7 relative"
-                    >
-                      <input
-                        name="message"
-                        onChange={(e) => {
-                          setQuestion(e.target.value)
-                        }}
-                        value={question || ''}
-                        placeholder="Ask Kruze anything"
-                        className="px-2 py-1.5 border rounded-md flex-1 font-normal focus:outline-none focus:border-gray-400"
-                      />
-                      <button
-                        disabled={isLoading}
-                        id="submit-question"
-                        className={`bg-blue-400 hover:bg-blue-600 delay-100 duration-500 px-2.5 rounded-md text-white relative
+                  <form
+                    onSubmit={askQuestion}
+                    className="p-4 flex gap-2 text-base font-semibold leading-7 relative"
+                  >
+                    <div className="w-auto relative">
+                      <Listbox
+                        value={filterArray}
+                        onChange={setFilterArray}
+                        multiple
+                      >
+                        {
+                          ({ open }) => (
+                            <>
+                              <Listbox.Button
+                                className={`${
+                                  filterArray.length > 0
+                                    ? 'bg-gray-400 text-white'
+                                    : 'bg-gray-200 text-gray-600'
+                                } w-full px-2 py-1.5 border rounded-md flex-1 font-normal focus:outline-none focus:border-gray-400 relative`}
+                              >
+                                <FunnelIcon className="w-6 h-6 inline" />
+
+
+                                {!open && (<div className="absolute w-4 h-4 -top-2 -right-2 leading-none flex items-center justify-center rounded-full text-[10px] text-white bg-blue-600">
+                                  {filterArray.length}
+                                </div>)}
+                                
+
+                              </Listbox.Button>
+                              <Listbox.Options
+                                className={
+                                  'absolute w-24 text-xs top-0 bg-white border border-gray-200 rounded-md shadow-lg z-10'
+                                }
+                              >
+                                {filters.map((filter, idx) => (
+                                  <Listbox.Option
+                                    key={`${filter}-${idx}`}
+                                    value={filter}
+                                    className={'px-4 py-2 hover:bg-gray-100'}
+                                  >
+                                    {filter}
+                                    {filterArray.includes(filter) && (
+                                      <span className="text-gray-600">✓</span>
+                                    )}
+                                  </Listbox.Option>
+                                ))}
+                              </Listbox.Options>
+                            </>
+                          )
+                        }
+                      </Listbox>
+                    </div>
+                    
+                    <input
+                      name="message"
+                      onChange={(e) => {
+                        setQuestion(e.target.value)
+                      }}
+                      value={question || ''}
+                      placeholder="Ask Kruze anything"
+                      className="px-2 py-1.5 border rounded-md flex-1 font-normal focus:outline-none focus:border-gray-400"
+                    />
+
+              
+                    
+                    <button
+                      disabled={isLoading}
+                      id="submit-question"
+                      className={`bg-blue-400 hover:bg-blue-600 delay-100 duration-500 px-2.5 rounded-md text-white relative
                         after:content-['']
                         after:absolute
                         after:opacity-0
@@ -344,94 +375,50 @@ export default function ChatWidget() {
                         after:bg-blue-400
                         after:z-[0]
                       `}
-                      >
-                        {/* prettier-ignore */}
-                        {isLoading ? (
-                          <InlineLoading />
-                        ) : (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="z-10 relative"
-                          >
-                            <line x1="22" x2="11" y1="2" y2="13"></line>
-                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                          </svg>
-                        )}
-                      </button>
-                    </form>
-                    {questions.length > 0 && (
-                      <div className="px-4 py-2 relative z-10">
-                        <div className="flex text-xs justify-center">
-                          <button
-                            type="button"
-                            className="border-b border-gray-600 hover:border-dashed"
-                            onClick={() => handleClearLocalStorage()}
-                          >
-                            <ArrowPathIcon className="inline-block mr-2 w-3.5 h-3.5" />
-                            Clear results
-                          </button>
-                        </div>
+                    >
+                      {/* prettier-ignore */}
+                      {isLoading ? (
+                        <InlineLoading />
+                      ) : (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="z-10 relative"
+                        >
+                          <line x1="22" x2="11" y1="2" y2="13"></line>
+                          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                      )}
+                    </button>
+                  </form>
+                  
+                  {questions.length > 0 && (
+                    <div className="px-4 py-2 relative z-10">
+                      <div className="flex text-xs justify-center">
+                        <button
+                          type="button"
+                          className="border-b border-gray-600 hover:border-dashed"
+                          onClick={() => handleClearLocalStorage()}
+                        >
+                          <ArrowPathIcon className="inline-block mr-2 w-3.5 h-3.5" />
+                          Clear results
+                        </button>
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </motion.div>
           </AnimatePresence>
           {/* EXAMPLES */}
-          <AnimatePresence>
-            <motion.div
-              key={'examples-div'}
-              className="w-full overflow-hidden space-y-4 pt-4"
-              layout
-              // animate={{ opacity: 1 }}
-              transition={{
-                // opacity: { ease: "linear" },
-                layout: { duration: 0.3 },
-              }}
-              style={{ height: isSubmitted ? '0px' : 'auto' }}
-            >
-              <p className="text-center text-gray-800 text-base max-w-xl mx-auto">
-                {/* ask any question, or pick up one below */}
-                Search any term or question to access comprehensive resources and
-                detailed information from Kruze Consulting.
-              </p>
-              <div className="space-y-2">
-                <p className="text-center text-gray-600 text-sm"></p>
-                <p className="text-center text-gray-600 text-sm">
-                  Can`t think of a question? Choose one of the frequently asked
-                  questions or search terms below.
-                </p>
-              </div>
-              <div className="flex flex-wrap justify-center items-center -mx-1">
-                {questionExamples
-                  .concat(searchExamples)
-                  .sort()
-                  .map((item, idx) => {
-                    return (
-                      <div className="px-1 mb-1" key={`question-${idx}`}>
-                        <button
-                          className=" bg-white text-xs rounded-md px-2 py-1 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900
-                        "
-                          onClick={() => {
-                            setQuestion(item)
-                          }}
-                        >
-                          {item}
-                        </button>
-                      </div>
-                    )
-                  })}
-              </div>
-            </motion.div>
-          </AnimatePresence>
+          
         </div>
       </div>
     </Layout>

@@ -22,6 +22,7 @@ import {
   HandThumbDownIcon,
   HandThumbUpIcon,
   EnvelopeIcon,
+  ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/solid'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -43,6 +44,14 @@ const encodedcopyRightHtml = encodeURIComponent(copyRightHtml)
 
 const Type = ({ data }) => {
   switch (data) {
+    case 'slack':
+      return (
+        <>
+          <ChatBubbleLeftRightIcon className="w-3 h-3 mr-1" />
+          Slack
+        </>
+      )
+      break
     case 'webpage':
       return (
         <>

@@ -400,11 +400,11 @@ export default function ChatWidget() {
                   </form>
                   
                   {questions.length > 0 && (
-                    <div className="px-4 py-2 relative z-10 border-t border-[#4791ce]">
+                    <div className="px-4 py-2 relative z-10 border-t border-white">
                       <div className="flex text-xs justify-center">
                         <button
                           type="button"
-                          className="border-b border-gray-600 hover:border-dashed"
+                          className="border-b text-white border-white hover:border-dashed"
                           onClick={() => handleClearLocalStorage()}
                         >
                           <ArrowPathIcon className="inline-block mr-2 w-3.5 h-3.5" />

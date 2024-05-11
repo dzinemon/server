@@ -296,8 +296,8 @@ export default function ChatWidget() {
                 isSubmitted ? 'fixed bottom-2' : 'relative'
               } w-full max-w-[720px]`}
             >
-              <div className="md:bg-gray-50 md:rounded-lg relative z-10 md:border border-slate-200">
-                <div>
+              <div className="bg-[#6c757d] md:rounded-lg relative z-10 md:border border-slate-200">
+                <div className=''>
                   <form
                     onSubmit={askQuestion}
                     className="p-4 flex gap-2 text-base font-semibold leading-7 relative"
@@ -357,7 +357,7 @@ export default function ChatWidget() {
                         setQuestion(e.target.value)
                       }}
                       value={question || ''}
-                      placeholder="Ask Kruze anything"
+                      placeholder="Kruze AI - Ask a question"
                       className="px-2 py-1.5 border rounded-md flex-1 font-normal focus:outline-none focus:border-gray-400"
                     />
 
@@ -366,7 +366,7 @@ export default function ChatWidget() {
                     <button
                       disabled={isLoading}
                       id="submit-question"
-                      className={`bg-blue-400 hover:bg-blue-600 delay-100 duration-500 px-2.5 rounded-md text-white relative
+                      className={`bg-[#fd7e14] hover:bg-blue-600 delay-100 duration-500 px-2.5 rounded-md text-white relative
                         after:content-['']
                         after:absolute
                         after:opacity-0
@@ -400,7 +400,7 @@ export default function ChatWidget() {
                   </form>
                   
                   {questions.length > 0 && (
-                    <div className="px-4 py-2 relative z-10">
+                    <div className="px-4 py-2 relative z-10 border-t border-[#4791ce]">
                       <div className="flex text-xs justify-center">
                         <button
                           type="button"

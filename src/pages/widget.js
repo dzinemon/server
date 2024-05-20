@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import Image from 'next/image'
 
+import { useRouter } from 'next/router'
+
 import toast, { Toaster } from 'react-hot-toast';
 
 import Script from 'next/script'
@@ -35,13 +37,15 @@ const NEXT_PUBLIC_GA4_ID = process.env.NEXT_PUBLIC_GA4_ID
 
 export default function ChatWidget() {
   // const [limitReached, setLimitReached] = useState(false)
-
+  const router = useRouter()
   const [response, setResponse] = useState({})
   const scrollTargetRef = useRef(null)
   const [isAccepted, setIsAccepted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
-  const [question, setQuestion] = useState('')
+  const [question, setQuestion] = useState(
+    router.query.question ? router.query.question : ''
+  )
   const [questions, setQuestions] = useState([])
 
   const [attemptCount, setAttemptCount] = useState(0)
@@ -231,6 +235,7 @@ export default function ChatWidget() {
 
   const askQuestion = async (e) => {
     // console.log('attemptCount', attemptCount)
+    router.query = {}
     e.preventDefault()
     if (question.length === 0) {
       return
@@ -375,13 +380,20 @@ export default function ChatWidget() {
     makeRequest()
   }
 
-
   useEffect(() => {
     // handle localstorage for attempt count and date
     makeRequest()
     handleGetAttemtCountLocalStorage()
     handleSetQuestionsFromLocalStorage()
   }, [])
+
+  useEffect(() => {
+    // router query question
+    if (router.query.question) {
+      setQuestion(router.query.question)
+    }
+  }
+  , [router.query.question])
   
   return (
     <div className="h-screen w-screen  flex items-center justify-center relative">

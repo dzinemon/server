@@ -1,8 +1,12 @@
 import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
+import GoogleProvider from 'next-auth/providers/google'
 
 import db from '../../../db'
 import bcrypt from 'bcrypt'
+
+// For more information on each option (and a full list of options) go to
+
 
 const getUserByEmail = async (email) => {
   try {
@@ -68,8 +72,20 @@ export const authOptions = {
         return null
       },
     }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
     // ...add more providers here
   ],
+  callbacks: {
+    async signIn({ account, profile }) {
+      if (account.provider === "google") {
+        return profile.email_verified && profile.email.endsWith("@kruzeconsulting.com")
+      }
+      return true // Do different verification for other providers that don't have `email_verified`
+    },
+  }
 }
 
 export default NextAuth(authOptions)

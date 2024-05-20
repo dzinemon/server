@@ -132,7 +132,22 @@
     const btn_section = document.getElementById('btn-trigger-chat-section')
     const btn_close_chat = document.getElementById('btn-close-chat')
     const frameWidget = document.getElementById('chat-frame-widget')
-    // frameWidget.style.display = 'none'
+
+    const buttonsByClass = document.getElementsByClassName('btn-trigger-chat')
+    // add event listener to each button if they exist and check if they have data-question  attribute, and add onclick envent to set session storage item with the value of the data-question attribute
+
+    if (buttonsByClass.length > 0) {
+      for (let i = 0; i < buttonsByClass.length; i++) {
+        const btn = buttonsByClass[i]
+        if (btn.getAttribute('data-question')) {
+          btn.addEventListener('click', () => {
+            sessionStorage.setItem('question', btn.getAttribute('data-question'))
+            // open chat widget
+            openWidget()
+          })
+        }
+      }
+    }
 
     btn_close_chat.addEventListener('click', () => {
       closeWidget()

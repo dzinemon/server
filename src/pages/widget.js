@@ -31,7 +31,7 @@ const searchExamples = [
   'Top pre-seed funds',
 ]
 
-const limitSearchAttempts = 5
+const limitSearchAttempts = 20
 
 const NEXT_PUBLIC_GA4_ID = process.env.NEXT_PUBLIC_GA4_ID
 

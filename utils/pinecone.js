@@ -1,21 +1,20 @@
-import { PineconeClient } from '@pinecone-database/pinecone'
-// import generateEmbedding from './embed';
+import { Pinecone } from '@pinecone-database/pinecone'
 import { generateEmbedding } from './openai'
 
-const client = new PineconeClient()
-
 const config = {
-  apiKey: process.env.INTERNAL_PINECONE_API_KEY,
-  environment: process.env.PINECONE_ENVIRONMENT,
-  index: process.env.INTERNAL_PINECONE_INDEX,
+  apiKey: process.env.PINECONE_API_KEY,
+  index: process.env.PINECONE_INDEX,
 }
 
-async function init() {
-  return await client.init({
-    apiKey: config.apiKey,
-    environment: config.environment,
-  })
-}
+const client = new Pinecone({
+  apiKey: config.apiKey,
+})
+
+const index = client.index(config.index)
+
+// const indexes = await client.listIndexes()
+
+// console.log(indexes)
 
 // write function to loop through each document and return vectors used to upsert
 
@@ -52,17 +51,10 @@ async function generateVectors(docs) {
 
 async function upsertEmbedding(docs) {
   try {
-    await init()
-
-    const index = client.Index(config.index)
-
+    // const index = client.index(config.index)
     const vectors = await generateVectors(docs)
-
-    const response = await index.upsert({
-      upsertRequest: {
-        vectors: vectors,
-      },
-    })
+    
+    const response = await index.upsert(vectors)
 
     return response
   } catch (error) {
@@ -74,10 +66,7 @@ async function upsertEmbedding(docs) {
 
 async function deleteAllVectors() {
   try {
-    await init()
-
-    const index = client.Index(config.index)
-
+    // const index = client.index(config.index)
     const response = await index.delete1({
       deleteAll: true,
     })
@@ -91,10 +80,7 @@ async function deleteAllVectors() {
 
 async function queryEmbedding(queryVector, filterValues) {
   try {
-    await init()
-
-    const index = client.Index(config.index)
-
+    // const index = client.index(config.index)
     const queryRequest = {
       topK: 8,
       vector: queryVector,
@@ -102,8 +88,8 @@ async function queryEmbedding(queryVector, filterValues) {
       includeMetadata: true,
     }
 
-    const response = await index.query({ queryRequest })
-    // console.log('Query Response', response)
+    const response = await index.query(queryRequest)
+
     return response
   } catch (error) {
     console.error(error)
@@ -113,13 +99,8 @@ async function queryEmbedding(queryVector, filterValues) {
 
 async function deleteEmbedding(ids) {
   try {
-    await init()
-
-    const index = client.Index(config.index)
-
-    const response = await index.delete1({
-      ids: ids,
-    })
+    // const index = client.index(config.index)
+    const response = await index.deleteMany(ids)
 
     return response
   } catch (error) {

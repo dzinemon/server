@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['kruzeconsulting.com'],
+    domains: ['kruzeconsulting.com', 'lh3.googleusercontent.com'],
   },
   async headers() {
     return [

@@ -4,7 +4,7 @@
 // Define the configuration object
 const config = {
   production: {
-    baseUrl: process.env.NEXT_PUBLIC_VERCEL_URL,
+    baseUrl: `https://${process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}`,
   },
   staging: {
     baseUrl: 'http://localhost:3000',

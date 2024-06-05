@@ -1,12 +1,12 @@
 import React, { createContext, useState, useContext } from 'react'
 
+import { baseUrl } from '../../utils/config'
+
 const ResourceContext = createContext()
 
 export const ResourceProvider = ({ children }) => {
   // Define your resource data and any other required state here
-
-  const url = 'https://kruze-ai-agent.vercel.app/api/questions/all';
-  // const url = 'http://localhost:3000/api/questions/all';
+  const url = `${baseUrl}/api/questions/all`
 
   const [resources, setResources] = useState([])
   const [loading, setLoading] = useState(false)

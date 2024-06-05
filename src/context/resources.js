@@ -15,7 +15,7 @@ export const ResourceProvider = ({ children }) => {
 
   const fetchAllQuestions = async () => {
     setLoading(true)
-    const res = await fetch(url)
+    const res = await fetch(url, { next: { revalidate: 43200 } })
     const questions = await res.json()
     // console.log(questions)
     setAllQuestions(questions)

@@ -7,15 +7,15 @@ const configuration = {
 
 const generateEmbedding = async (document) => {
   const openai = new OpenAI(configuration)
-  console.log('start gen embedding  - - - - >')
+  // console.log('start gen embedding  - - - - >')
   try {
     const response = await openai.embeddings.create({
       model: 'text-embedding-ada-002',
       input: document,
     })
-    console.log(' embedding response  - - - - >')
+    // console.log(' embedding response  - - - - >')
     const totalTokens = response.usage.total_tokens
-    console.log('totalTokens', totalTokens)
+    // console.log('totalTokens', totalTokens)
     // console.log('response', response)
     const embedding = response.data[0].embedding
     return embedding

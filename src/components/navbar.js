@@ -1,29 +1,39 @@
 import { useState } from 'react'
-import { PlayCircleIcon } from '@heroicons/react/24/solid'
 import Link from 'next/link'
 import Image from 'next/image'
 import LoginComponent from './login-btn'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/router'
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
 
-  const navItems = [
-    // {
-    //   name: 'Ask Question',
-    //   slug: 'ask-question',
-    // },
-    // {
-    //   name: 'Internal',
-    //   slug: 'internal',
-    // },
-    // {
-    //   name: 'Links',
-    //   slug: 'links',
-    // },
+  const {
+    pathname
+  } = useRouter()
+
+  const { data: session } = useSession()
+
+  const adminNavItems = [
+    {
+      name: 'Links',
+      slug: 'links',
+    },
+    {
+      name: 'Files',
+      slug: 'files',
+    },
     // {
     //   name: 'Text',
     //   slug: 'texts',
     // },
+  ]
+
+  const navItems = [
+    {
+      name: 'Widget',
+      slug: 'widget',
+    },
     {
       name: 'All Questions',
       slug: 'all-questions',
@@ -34,8 +44,12 @@ export default function Navbar() {
     },
   ]
 
+  if (session?.user?.role === 'admin') {
+    navItems.push(...adminNavItems)
+  }
+
   return (
-    <header className="fixed top-0 w-full z-50">
+    <header className="fixed backdrop-blur-lg top-0 w-full z-50">
       <nav
         className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8"
         aria-label="Global"
@@ -66,7 +80,7 @@ export default function Navbar() {
               <Link
                 key={`nav-bar-lg-${idx}`}
                 href={`/${item.slug}`}
-                className="text-sm font-semibold leading-6 text-gray-900"
+                className={`${ pathname.indexOf(item.slug) !== -1 ? 'underline pointer-events-none' : '' } text-sm font-semibold leading-6 text-gray-900`}
               >
                 {item.name}
               </Link>
@@ -142,7 +156,7 @@ export default function Navbar() {
                     <Link
                       key={`nav-bar-lg-${idx}`}
                       href={`/${item.slug}`}
-                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+                      className={`${ pathname.indexOf(item.slug) !== -1 ? 'underline pointer-events-none' : '' } -mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50`}
                     >
                       {item.name}
                     </Link>

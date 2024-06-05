@@ -35,9 +35,9 @@ import {
 
 import ReactMarkdown from 'react-markdown'
 
-const widgetpage = 'https://kruzeconsulting.com/ai-widget/'
+export const widgetpage = 'https://kruzeconsulting.com/#ask-kruze-ai-tool'
 
-const copyRightHtml = `<p>Generated using Kruze Consulting's experimental AI Accounting Bot based on Kruze's published data and content. Do not rely on these responses, always consult your CPA, tax advisor, accountant or lawyer. </p>
+export const copyRightHtml = `<p>Generated using Kruze Consulting's experimental AI Accounting Bot based on Kruze's published data and content. Do not rely on these responses, always consult your CPA, tax advisor, accountant or lawyer. </p>
 <p>Copyright © <a className='text-sky-600 hover:border-dashed hover:border-b border-sky-600' href='https://kruzeconsulting.com/' target='_blank' rel='noopener'>Kruze Consulting</a>. Not for commercial use.</p>                      `
 
 const encodedcopyRightHtml = encodeURIComponent(copyRightHtml)

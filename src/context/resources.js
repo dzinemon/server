@@ -1,23 +1,45 @@
-import React, { useContext, createContext, useState } from 'react'
+import React, { createContext, useState, useContext } from 'react'
 
-export const ResourcesContext = createContext(null)
+const ResourceContext = createContext()
 
-export default function ResourcesContextProvider({ children }) {
+export const ResourceProvider = ({ children }) => {
+  // Define your resource data and any other required state here
+
+  const url = `${process.env.VERCEL_ENV === 'production' ? "https://kruze-ai-agent.vercel.app/" : "http://localhost:3000"}/api/questions/all`
+
   const [resources, setResources] = useState([])
+  const [loading, setLoading] = useState(false)
+
+  const [allQuestions, setAllQuestions] = useState([])
+
+  const fetchAllQuestions = async () => {
+    setLoading(true)
+    const res = await fetch(url)
+    const questions = await res.json()
+    // console.log(questions)
+    setAllQuestions(questions)
+    setLoading(false)
+  }
+
+  // Add any other functions or methods needed to modify resource data
+
+  // Provide the resource data and any necessary methods to child components
 
   return (
-    <ResourcesContext.Provider value={{ resources, setResources }}>
+    <ResourceContext.Provider value={{ loading, resources, setResources, allQuestions, fetchAllQuestions }}>
       {children}
-    </ResourcesContext.Provider>
+    </ResourceContext.Provider>
   )
 }
 
-export function useResourcesContext() {
-  const context = useContext(ResourcesContext)
-  if (context === undefined) {
-    throw new Error(
-      'useResourcesContext must be used within a ResourcesContextProvider'
-    )
+// Custom hook to consume the resource data and any necessary methods
+
+export const useResources = () => {
+  const context = useContext(ResourceContext)
+
+  if (!context) {
+    throw new Error('useResources must be used within a ResourceProvider')
   }
+
   return context
 }

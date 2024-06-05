@@ -26,7 +26,7 @@ import {
 
 import ReactMarkdown from 'react-markdown'
 
-const Type = ({ data }) => {
+export const Type = ({ data }) => {
   switch (data) {
     case 'webpage':
       return (

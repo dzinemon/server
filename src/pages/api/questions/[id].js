@@ -21,7 +21,7 @@ export default async function qaById(req, res) {
       try {
         const result = await db.query('DELETE FROM qas WHERE id = $1', [id])
 
-        res.status(200).json(result.rows[0])
+        res.status(200).json(result)
       } catch (error) {
         res.status(500).json({ error })
       }

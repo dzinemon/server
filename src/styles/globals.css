@@ -19,3 +19,7 @@
 main {
   @apply pt-20;
 }
+
+.ck-content a {
+  @apply text-blue-500;
+}

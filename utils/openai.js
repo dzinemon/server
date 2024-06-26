@@ -25,6 +25,32 @@ const generateEmbedding = async (document) => {
   }
 }
 
+const createChatCompletionCustom = async (prompt, model, temperature, instructions) => {
+  try {
+    const openai = new OpenAI(configuration)
+
+    const completion = await openai.chat.completions.create({
+      model,
+      temperature: parseInt(temperature) / 100,
+      messages: [
+        {
+          role: 'system',
+          content: instructions,
+        },
+        { role: 'user', content: prompt },
+      ],
+      stream: false,
+    })
+
+    // console.log(completion.choices)
+
+    return completion.choices[0].message.content
+  } catch (error) {
+    console.error('Error creating chat completion:', error)
+    throw error
+  }
+}
+
 const createChatCompletion = async (prompt) => {
   try {
     const openai = new OpenAI(configuration)
@@ -44,7 +70,7 @@ const createChatCompletion = async (prompt) => {
       stream: false,
     })
 
-    console.log(completion.choices)
+    // console.log(completion.choices)
 
     return completion.choices[0].message.content
   } catch (error) {
@@ -53,4 +79,4 @@ const createChatCompletion = async (prompt) => {
   }
 }
 
-export { generateEmbedding, createChatCompletion }
+export { generateEmbedding, createChatCompletion, createChatCompletionCustom }

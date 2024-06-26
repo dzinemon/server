@@ -11,6 +11,7 @@ import {
 import ReactMarkdown from "react-markdown";
 import toast, { Toaster } from 'react-hot-toast';
 
+import Layout from '@/components/layout'
 
 import { useResources } from '@/context/resources'
 import dynamic from 'next/dynamic';
@@ -175,113 +176,74 @@ export default function Login() {
   }, [keywords, promptLinks, promptSubject, prompt])
 
   return (
-    <div className="flex min-h-full flex-wrap justify-center px-6 py-12 lg:px-8 -mx-4 space-y-10">
-      <Toaster />
-      <div className="w-full lg:w-7/12 px-4">
-        Prompt
-        <DocumentTextIcon className="w-6 h-6 text-blue-500 inline" />
-        <textarea
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          className="w-full h-64 border border-gray-300 rounded-lg p-2"
-        />
-
-        <hr className="my-2" />
-        <div>
-          Prompt preview <EyeIcon className="w-6 h-6 text-blue-500 inline" />
-          <div className="bg-white/30 p-2">{promptToGenerate}</div>
-        </div>
-      </div>
-      
-      
-      <div className="w-full lg:w-5/12 space-y-1 px-4">
-
-        
-          
-          <div className="bg-white p-3 rounded-lg">
-          Subject
+    <Layout>
+      <div className="flex min-h-full flex-wrap justify-center px-6 py-12 lg:px-8 -mx-4 space-y-10">
+        <Toaster />
+        <div className="w-full lg:w-7/12 px-4">
+          Prompt
           <DocumentTextIcon className="w-6 h-6 text-blue-500 inline" />
-            <input
-              className='w-full border border-slate-200 p-2'
-              placeholder="Subject"
-              value={promptSubject}
-              onChange={(e) => setPromptSubject(e.target.value)}
-            />
-          </div>
-        
-      
-
-
-        <div className="bg-white p-3 rounded-lg">
-          Keywords
-          <VariableIcon className="w-6 h-6 text-blue-500 inline" />
-          <div className='flex space-x-1'>
-            <input
-              className='w-7/12 border border-slate-200 p-2'
-              placeholder="Keyword"
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
-            />
-            <input
-              className='w-3/12 border border-slate-200 p-2'
-              type="number"
-              placeholder="Times to appear"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-            />
-            <button
-              className="p-2 bg-slate-400 text-white rounded text-xs"
-              onClick={addKeyword}
-            >
-              <PlusIcon className="w-4 h-4 inline" />
-              Add
-            </button>
-          </div>
-          <div className='flex space-x-1 flex-wrap'>
-            {keywords.map((keyword, idx) => (
-              <div key={idx} className='border border-slate-400 rounded-full flex items-center'>
-                <span className='text-sm leading-none inline-block px-1'>
-                  {keyword.name} - {keyword.times}
-                </span>
-                <button
-                  className="p-1 bg-rose-400 block text-white rounded-r-full hover:bg-rose-600"
-                  onClick={() => deleteKeyword(idx)}
-                >
-                  <XMarkIcon className="w-4 h-4 block" />
-                </button>
-              </div>
-            ))}
+          <textarea
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            className="w-full h-64 border border-gray-300 rounded-lg p-2"
+          />
+          <hr className="my-2" />
+          <div>
+            Prompt preview <EyeIcon className="w-6 h-6 text-blue-500 inline" />
+            <div className="bg-white/30 p-2">{promptToGenerate}</div>
           </div>
         </div>
-
-        <div>
+      
+      
+        <div className="w-full lg:w-5/12 space-y-1 px-4">
+      
+      
+            <div className="bg-white p-3 rounded-lg">
+            Subject
+            <DocumentTextIcon className="w-6 h-6 text-blue-500 inline" />
+              <input
+                className='w-full border border-slate-200 p-2'
+                placeholder="Subject"
+                value={promptSubject}
+                onChange={(e) => setPromptSubject(e.target.value)}
+              />
+            </div>
+      
+      
           <div className="bg-white p-3 rounded-lg">
-            Links
+            Keywords
             <VariableIcon className="w-6 h-6 text-blue-500 inline" />
             <div className='flex space-x-1'>
               <input
-                className='w-auto border border-slate-200 p-2'
-                placeholder="Link"
-                value={link}
-                onChange={(e) => setLink(e.target.value)}
+                className='w-7/12 border border-slate-200 p-2'
+                placeholder="Keyword"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+              />
+              <input
+                className='w-3/12 border border-slate-200 p-2'
+                type="number"
+                placeholder="Times to appear"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
               />
               <button
                 className="p-2 bg-slate-400 text-white rounded text-xs"
-                onClick={addLink}
+                onClick={addKeyword}
               >
                 <PlusIcon className="w-4 h-4 inline" />
                 Add
               </button>
             </div>
             <div className='flex space-x-1 flex-wrap'>
-              {promptLinks.map((link, idx) => (
+              {keywords.map((keyword, idx) => (
                 <div key={idx} className='border border-slate-400 rounded-full flex items-center'>
                   <span className='text-sm leading-none inline-block px-1'>
-                    {link.name} - {link.link}
+                    {keyword.name} - {keyword.times}
                   </span>
                   <button
                     className="p-1 bg-rose-400 block text-white rounded-r-full hover:bg-rose-600"
-                    onClick={() => deleteLink(idx)}
+                    onClick={() => deleteKeyword(idx)}
                   >
                     <XMarkIcon className="w-4 h-4 block" />
                   </button>
@@ -289,99 +251,130 @@ export default function Login() {
               ))}
             </div>
           </div>
-        </div>
-
-        <div className='bg-white rounded-lg p-2 space-y-2'>
-          <AdjustmentsVerticalIcon className="w-6 h-6 text-blue-500 inline" />
           <div>
-            Instructions
-          
-          
-            <textarea
-              value={instructions}
-              onChange={(e) => setInstructions(e.target.value)}
-              className="w-full border border-slate-200 p-2"
-            />
-          </div>
-                <div>
-            Model
-          
-            <select
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
-              className="w-full border border-slate-200 p-2"
-            >
-              <option value="gpt-4o">gpt-4o</option>
-              <option value="gpt-4">gpt-4-turbo</option>
-              <option value="gpt-4">gpt-4</option>
-          
-            </select>
-                </div>
-          <div>
-            Temperature - <span className='w-6 inline-block'>{temperature}</span>
-          
-            {/* // input range for temperature */}
-            <input
-              type="range"
-              min="0"
-              max="2"
-              step="0.01"
-              value={temperature}
-              onChange={(e) => setTemperature(e.target.value)}
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="w-full px-4">
-        <h2>Paste Here (Rich text, Document)</h2>
-        <div className="grid grid-cols-2 w-full gap-4">
-          <div className="bg-white rounded p-2">
-          <CustomEditor
-              initialData=''
-            />
-
-          </div>
-          <div className="bg-white rounded p-2">
-            <div>markdown</div>
-            <div style={{
-              fontFamily: 'monospace',
-            }}>
-              {markdownContent}
+            <div className="bg-white p-3 rounded-lg">
+              Links
+              <VariableIcon className="w-6 h-6 text-blue-500 inline" />
+              <div className='flex space-x-1'>
+                <input
+                  className='w-auto border border-slate-200 p-2'
+                  placeholder="Link"
+                  value={link}
+                  onChange={(e) => setLink(e.target.value)}
+                />
+                <button
+                  className="p-2 bg-slate-400 text-white rounded text-xs"
+                  onClick={addLink}
+                >
+                  <PlusIcon className="w-4 h-4 inline" />
+                  Add
+                </button>
+              </div>
+              <div className='flex space-x-1 flex-wrap'>
+                {promptLinks.map((link, idx) => (
+                  <div key={idx} className='border border-slate-400 rounded-full flex items-center'>
+                    <span className='text-sm leading-none inline-block px-1'>
+                      {link.name} - {link.link}
+                    </span>
+                    <button
+                      className="p-1 bg-rose-400 block text-white rounded-r-full hover:bg-rose-600"
+                      onClick={() => deleteLink(idx)}
+                    >
+                      <XMarkIcon className="w-4 h-4 block" />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-          <div>
-          <button className={`
-            ${isLoading ? 'bg-gray-300 animate-pulse' : 'bg-blue-500'}
-          
-            p-2 text-white rounded text-sm
-          `} type='button'
-              onClick={handleGenerate}
-            >
-              {isLoading ? 'Generating...' : 'Generate'}
-            </button>
+          <div className='bg-white rounded-lg p-2 space-y-2'>
+            <AdjustmentsVerticalIcon className="w-6 h-6 text-blue-500 inline" />
+            <div>
+              Instructions
+      
+      
+              <textarea
+                value={instructions}
+                onChange={(e) => setInstructions(e.target.value)}
+                className="w-full border border-slate-200 p-2"
+              />
+            </div>
+                  <div>
+              Model
+      
+              <select
+                value={model}
+                onChange={(e) => setModel(e.target.value)}
+                className="w-full border border-slate-200 p-2"
+              >
+                <option value="gpt-4o">gpt-4o</option>
+                <option value="gpt-4">gpt-4-turbo</option>
+                <option value="gpt-4">gpt-4</option>
+      
+              </select>
+                  </div>
+            <div>
+              Temperature - <span className='w-6 inline-block'>{temperature}</span>
+      
+              {/* // input range for temperature */}
+              <input
+                type="range"
+                min="0"
+                max="2"
+                step="0.01"
+                value={temperature}
+                onChange={(e) => setTemperature(e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+        <div className="w-full px-4">
+          <h2>Paste Here (Rich text, Document)</h2>
+          <div className="grid grid-cols-2 w-full gap-4">
+            <div className="bg-white rounded p-2">
+            <CustomEditor
+                initialData=''
+              />
+            </div>
+            <div className="bg-white rounded p-2">
+              <div>markdown</div>
+              <div style={{
+                fontFamily: 'monospace',
+              }}>
+                {markdownContent}
+              </div>
+            </div>
+            <div>
+            <button className={`
+              ${isLoading ? 'bg-gray-300 animate-pulse' : 'bg-blue-500'}
+      
+              p-2 text-white rounded text-sm
+            `} type='button'
+                onClick={handleGenerate}
+              >
+                {isLoading ? 'Generating...' : 'Generate'}
+              </button>
+            </div>
+          </div>
+        </div>
+        <div className="w-full px-4">
+          <h2>Result</h2>
+          <div className="grid grid-cols-2 w-full gap-4">
+            <div className="bg-white rounded p-2 prose prose-a:text-blue-600 w-full">
+              <ReactMarkdown>
+                {value}
+              </ReactMarkdown>
+            </div>
+            <div className="bg-white rounded p-2">
+              markdown
+              <textarea value={value} className="border-slate-200 border w-full block" />
+            </div>
+            <div>
+      
+            </div>
           </div>
         </div>
       </div>
-
-      <div className="w-full px-4">
-        <h2>Result</h2>
-        <div className="grid grid-cols-2 w-full gap-4">
-          <div className="bg-white rounded p-2 prose prose-a:text-blue-600 w-full">
-            <ReactMarkdown>
-              {value}
-            </ReactMarkdown>
-          </div>
-          <div className="bg-white rounded p-2">
-            markdown
-            <textarea value={value} className="border-slate-200 border w-full block" />
-          </div>
-
-          <div>
-           
-          </div>
-        </div>
-      </div>
-    </div>
+    </Layout>
   )
 }

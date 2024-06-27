@@ -74,7 +74,8 @@ export default function Login() {
   const [keywords, setKeywords] = useState([])
   const [promptLinks, setPromptLinks] = useState([])
   const [promptSubject, setPromptSubject] = useState('')
-  const [prompt, setPrompt] = useState(prompts[0])
+  const [prompt, setPrompt] = useState('')
+  const [selectedPrompt, setSelectedPrompt] = useState(prompts[0])
 
   const [link, setLink] = useState('')
 
@@ -164,7 +165,7 @@ export default function Login() {
   }
 
   const handleReset = () => {
-    setPrompt('')
+    setPrompt(prompts[0])
     setPromptSubject('')
     setPromptLinks([])
     setKeywords([])
@@ -175,9 +176,9 @@ export default function Login() {
   }
 
   useEffect(() => {
-    let newPrompt = prompt.content
-
-    // newPrompt = newPrompt.replace(`{{{document}}}`, promptSubject)
+    console.log(prompt)
+    
+    let newPrompt = prompt;
 
     if (promptSubject) {
       newPrompt = newPrompt.replace(`{{{subject}}}`, promptSubject)
@@ -240,22 +241,30 @@ export default function Login() {
     }
   }, [taKeywords])
 
+  useEffect(() => {
+    setPrompt(selectedPrompt.content)
+  }, [selectedPrompt])
+
   return (
     <Layout>
       <div className="flex min-h-full flex-wrap justify-center px-6 py-12 lg:px-8 -mx-4 space-y-10">
         <Toaster />
         <div className="w-full lg:w-7/12 px-4 space-y-2">
           <div className="flex flex-wrap items-center -mx-2">
+
+            {
+              JSON.stringify(prompt.content)  
+            }
             <div className="w-auto px-2">Prompt</div>
             <div className="w-auto px-2">
-              <Listbox value={prompt} onChange={setPrompt}>
+              <Listbox value={selectedPrompt} onChange={setSelectedPrompt}>
                 <div className="relative">
                   <Listbox.Button
                     className={
                       'relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left  focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm'
                     }
                   >
-                    <span className="block truncate">{prompt.name}</span>
+                    <span className="block truncate">{selectedPrompt.name}</span>
                     <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                       <ChevronUpDownIcon
                         className="h-5 w-5 text-gray-400"
@@ -297,7 +306,7 @@ export default function Login() {
           </div>
 
           <textarea
-            value={prompt.content}
+            value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             className="w-full h-64 border border-gray-300 rounded-lg p-2"
           />
@@ -394,6 +403,7 @@ export default function Login() {
             <div>
               <textarea
                 value={taKeywords}
+                placeholder='Paste keywords here, separated by new line "\n"'
                 onChange={(e) => setTaKeywords(e.target.value)}
                 className="w-full h-32 border border-gray-300 rounded-lg p-2"
               />

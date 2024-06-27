@@ -5,6 +5,13 @@ const configuration = {
   apiKey: process.env.OPENAI_API_KEY,
 }
 
+// increase the request timeout to 30 seconds
+
+export const config = {
+  maxDuration: 30,
+}
+
+
 const generateEmbedding = async (document) => {
   const openai = new OpenAI(configuration)
   // console.log('start gen embedding  - - - - >')

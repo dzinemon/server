@@ -17,6 +17,10 @@ const postUrl = async (req, res) => {
   res.status(200).json({ completion })
 }
 
+export const config = {
+  maxDuration: 30,
+};
+
 export default function handler(req, res) {
   switch (req.method) {
     case 'POST':

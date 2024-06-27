@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/openai/custom.js": {
+      "maxDuration": 50
+    }
+  }
+}

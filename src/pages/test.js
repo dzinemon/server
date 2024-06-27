@@ -30,7 +30,7 @@ const prompts = [
   {
     id: 0,
     name: 'Add subject, links keywords to content',
-    content: `I have content in makrdown, I need to update the content with the following details:
+    content: `I have content in markdown, I need to update the content with the following details:
       add subject "{{{subject}}}" as Heading level 2,
       add links {{{link_var}}} for internal linking
       add keywords {{{keywords}}} for SEO.
@@ -43,7 +43,7 @@ const prompts = [
   {
     id: 1,
     name: 'Generate content with subject, links and keywords',
-    content: `I Need to create content in makrdown with the following details:
+    content: `I Need to create content in markdown with the following details:
       add subject "{{{subject}}}" as Heading level 2,
       add links {{{link_var}}} for internal linking,
       add keywords {{{keywords}}} for SEO and for each keyword create a paragraph and related heading level 3.

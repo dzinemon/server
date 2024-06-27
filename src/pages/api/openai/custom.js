@@ -6,6 +6,13 @@ import {
 
 // import checkRequestOrigin from '../../../../utils/checkRequestOrigin'
 
+
+// increase the request timeout to 30 seconds
+
+export const config = {
+  maxDuration: 30,
+}
+
 const postUrl = async (req, res) => {
   const { 
     prompt, model, temperature, instructions } = req.body

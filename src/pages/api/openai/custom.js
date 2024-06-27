@@ -10,10 +10,6 @@ const postUrl = async (req, res) => {
   const { 
     prompt, model, temperature, instructions } = req.body
 
-    console.log('temperature', temperature)
-    console.log('instructions', instructions)
-    console.log('model', model)
-
   const completion = await createChatCompletionCustom(
     prompt, model, temperature, instructions
   )

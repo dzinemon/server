@@ -25,7 +25,7 @@
     "axios": "^1.4.0",
     "bcrypt": "^5.1.1",
     "cheerio": "^1.0.0-rc.12",
-    "ckeditor5-custom-build": "^0.0.6",
+    "ckeditor5": "^42.0.0",
     "eslint": "8.42.0",
     "eslint-config-next": "13.4.5",
     "formidable": "^3.5.0",

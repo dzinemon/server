@@ -1,6 +1,7 @@
-import React, { createContext, useState, useContext } from 'react'
-
+import React, { createContext, useState, useContext, useEffect } from 'react'
+import TurndownService from 'turndown';
 import { baseUrl } from '../../utils/config'
+
 
 const ResourceContext = createContext()
 
@@ -10,6 +11,14 @@ export const ResourceProvider = ({ children }) => {
 
   const [resources, setResources] = useState([])
   const [loading, setLoading] = useState(false)
+
+  const [text, setText] = useState('');
+
+  const [markdownContent, setMarkdownContent] = useState('');
+
+  const handleTextChange = (text) => {
+    setText(text)
+  }
 
   const [allQuestions, setAllQuestions] = useState([])
 
@@ -26,8 +35,20 @@ export const ResourceProvider = ({ children }) => {
 
   // Provide the resource data and any necessary methods to child components
 
+  useEffect(() => {
+    if (text) {
+      const turndownService = new TurndownService()
+      const markdown = turndownService.turndown(text)
+      setMarkdownContent(markdown)
+    }
+  }, [text])
+
+  
+
   return (
-    <ResourceContext.Provider value={{ loading, resources, setResources, allQuestions, fetchAllQuestions }}>
+    <ResourceContext.Provider value={{ loading, resources, setResources, allQuestions, fetchAllQuestions, text, handleTextChange, 
+      markdownContent
+     }}>
       {children}
     </ResourceContext.Provider>
   )

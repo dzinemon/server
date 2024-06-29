@@ -1,5 +1,5 @@
 import { Fragment, useState, useEffect } from 'react'
-import { Listbox, Transition } from '@headlessui/react'
+import { Listbox, Transition, Tab } from '@headlessui/react'
 
 import {
   UserIcon,
@@ -177,8 +177,8 @@ export default function Login() {
 
   useEffect(() => {
     console.log(prompt)
-    
-    let newPrompt = prompt;
+
+    let newPrompt = prompt
 
     if (promptSubject) {
       newPrompt = newPrompt.replace(`{{{subject}}}`, promptSubject)
@@ -225,11 +225,21 @@ export default function Login() {
   }, [keywords, promptLinks, promptSubject, prompt, markdownContent])
 
   useEffect(() => {
+    if (taKeywords === '') return
+
     const kwstring = JSON.stringify(taKeywords).replaceAll('"', '')
 
     const kw = kwstring.split(/\\n/).map((kw) => {
       if (kw === '') {
         return false
+      }
+
+      // if kw includes '\t', split by '\t' and get the first element as name and the second element as times
+
+      if (kw.includes('\\t')) {
+        const [name, times] = kw.split('\\t')
+        console.log('name', name)
+        return { name: name, times: times }
       }
 
       return { name: kw, times: 1 }
@@ -238,6 +248,7 @@ export default function Login() {
     if (kw.length !== 0 && kw[0] !== false) {
       const k = keywords.concat(kw)
       setKeywords(k)
+      setTaKeywords('')
     }
   }, [taKeywords])
 
@@ -248,13 +259,9 @@ export default function Login() {
   return (
     <Layout>
       <div className="flex min-h-full flex-wrap justify-center px-6 py-12 lg:px-8 -mx-4 space-y-10">
-        <Toaster />
+        
         <div className="w-full lg:w-7/12 px-4 space-y-2">
           <div className="flex flex-wrap items-center -mx-2">
-
-            {
-              JSON.stringify(prompt.content)  
-            }
             <div className="w-auto px-2">Prompt</div>
             <div className="w-auto px-2">
               <Listbox value={selectedPrompt} onChange={setSelectedPrompt}>
@@ -264,7 +271,9 @@ export default function Login() {
                       'relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left  focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm'
                     }
                   >
-                    <span className="block truncate">{selectedPrompt.name}</span>
+                    <span className="block truncate">
+                      {selectedPrompt.name}
+                    </span>
                     <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                       <ChevronUpDownIcon
                         className="h-5 w-5 text-gray-400"
@@ -343,28 +352,72 @@ export default function Login() {
               Keywords
               <VariableIcon className="w-6 h-6 text-blue-500 inline" />
             </div>
-            <div className="flex space-x-1">
-              <input
-                className="w-7/12 border border-slate-200 p-2"
-                placeholder="Keyword"
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-              />
-              <input
-                className="w-3/12 border border-slate-200 p-2"
-                type="number"
-                placeholder="Times to appear"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-              />
-              <button
-                className="p-2 bg-slate-400 text-white rounded text-xs"
-                onClick={addKeyword}
-              >
-                <PlusIcon className="w-4 h-4 inline" />
-                Add
-              </button>
-            </div>
+
+            <Tab.Group>
+              <Tab.List>
+                <Tab className={` `}>
+                  {
+                    ({selected}) => (
+                      <div className={`${
+                        selected ? 'bg-blue-500 text-white' : 'bg-slate-400 text-white'
+                      } rounded-t-lg px-2 py-1`}>
+                        Multiple Keywords
+                      </div>
+                    )
+                  }
+                  
+                </Tab>
+                <Tab className={``}>
+                  {
+                    ({selected}) => (
+                      <div className={`${
+                        selected ? 'bg-blue-500 text-white' : 'bg-slate-400 text-white'
+                      } rounded-t-lg px-2 py-1`}>
+                        Single Keyword
+                      </div>
+                    )
+                  }
+
+                </Tab>
+              </Tab.List>
+              <Tab.Panels>
+                <Tab.Panel>
+                  <div>
+                    <textarea
+                      value={taKeywords}
+                      placeholder='Paste multiple keywords here, separated by new line "\n"'
+                      onChange={(e) => setTaKeywords(e.target.value)}
+                      className="w-full h-10 border border-gray-300 rounded-lg p-2"
+                    />
+                  </div>
+                </Tab.Panel>
+                <Tab.Panel>
+                  <div className="flex space-x-1">
+                    <input
+                      className="w-7/12 border border-slate-200 p-2"
+                      placeholder="Keyword"
+                      value={keyword}
+                      onChange={(e) => setKeyword(e.target.value)}
+                    />
+                    <input
+                      className="w-3/12 border border-slate-200 p-2"
+                      type="number"
+                      placeholder="Times to appear"
+                      value={time}
+                      onChange={(e) => setTime(e.target.value)}
+                    />
+                    <button
+                      className="p-2 bg-slate-400 text-white rounded text-xs"
+                      onClick={addKeyword}
+                    >
+                      <PlusIcon className="w-4 h-4 inline" />
+                      Add
+                    </button>
+                  </div>
+                </Tab.Panel>
+              </Tab.Panels>
+            </Tab.Group>
+
             <div className="flex space-x-2 flex-wrap">
               {keywords.map((keyword, idx) => (
                 <div
@@ -399,14 +452,6 @@ export default function Login() {
                   </button>
                 </div>
               ))}
-            </div>
-            <div>
-              <textarea
-                value={taKeywords}
-                placeholder='Paste keywords here, separated by new line "\n"'
-                onChange={(e) => setTaKeywords(e.target.value)}
-                className="w-full h-32 border border-gray-300 rounded-lg p-2"
-              />
             </div>
             <div>
               <button
@@ -494,12 +539,12 @@ export default function Login() {
           </div>
         </div>
         <div className="w-full px-4">
-          <h2>Paste Here (Rich text, Document)</h2>
+          <h2>Paste Here the Rich Text - document </h2>
           <div className="grid grid-cols-2 w-full gap-4">
             <div className="bg-white rounded p-2">
               <CustomEditor initialData="" />
             </div>
-            <div className="bg-white rounded p-2">
+            <div className="bg-white rounded p-2 hidden">
               <div>markdown</div>
               {/* markdownContent */}
 
@@ -508,6 +553,10 @@ export default function Login() {
                 className="border border-slate-200 border w-full block h-96"
               />
             </div>
+        
+          </div>
+
+          <div className='grid grid-cols-2 w-full gap-4'>
             <div>
               <button
                 className={`
@@ -523,22 +572,24 @@ export default function Login() {
             </div>
           </div>
         </div>
-        <div className="w-full px-4">
-          <h2>Result</h2>
+        <div className="w-full px-4 bg-blue-100 rounded-lg py-3">
+          <h2 className="text-5xl">Result</h2>
           <div className="grid grid-cols-2 w-full gap-4">
             <div className="bg-white rounded p-2 prose prose-a:text-blue-600 w-full">
+              <h3>Rich text</h3>
               <ReactMarkdown>{value}</ReactMarkdown>
             </div>
-            <div className="bg-white rounded p-2">
-              markdown
+            <div className="bg-white rounded p-2 prose prose-a:text-blue-600 w-full">
+              <h3>Markdown</h3>
               <textarea
                 defaultValue={value}
                 className="border-slate-200 border w-full block h-96"
               />
             </div>
-            <div></div>
+            
           </div>
         </div>
+        <Toaster />
       </div>
     </Layout>
   )

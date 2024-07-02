@@ -48,19 +48,10 @@ const editorConfiguration = {
                 data={ props.initialData }
                 onChange={ (event, editor ) => {
                     const data = editor.getData();
-                    console.log( { event, editor, data } );
+                    // console.log( { event, editor, data } );
                     handleTextChange( data );
                 }}
             />
-
-            // <textarea
-            //     className='border border-slate-300 p-2 w-full h-full'
-            //     value={props.initialData}
-            //     onChange={(event) => {
-            //         const data = event.target.value;
-            //         handleTextChange(data);
-            //     }}
-            // />
         )
 }
 

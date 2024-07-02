@@ -1,8 +1,8 @@
-import { Fragment, useState, useEffect } from 'react'
+'use client';
+import { Fragment, useState, useEffect, useRef } from 'react'
 import { Listbox, Transition, Tab } from '@headlessui/react'
 
 import {
-  UserIcon,
   VariableIcon,
   DocumentTextIcon,
   XMarkIcon,
@@ -10,12 +10,13 @@ import {
   EyeIcon,
   ChevronUpDownIcon,
   AdjustmentsVerticalIcon,
+  ClipboardIcon,
+  ClipboardDocumentCheckIcon
 } from '@heroicons/react/24/solid'
 import ReactMarkdown from 'react-markdown'
 import toast, { Toaster } from 'react-hot-toast'
 
 import Layout from '@/components/layout'
-
 import { useResources } from '@/context/resources'
 import dynamic from 'next/dynamic'
 
@@ -34,7 +35,7 @@ const prompts = [
       add subject "{{{subject}}}" as Heading level 2,
       add links {{{link_var}}} for internal linking
       add keywords {{{keywords}}} for SEO.
-      
+      Please provide just the content without any descriptive text.
       the content is as follows:
 
       {{{document}}}
@@ -47,13 +48,39 @@ const prompts = [
       add subject "{{{subject}}}" as Heading level 2,
       add links {{{link_var}}} for internal linking,
       add keywords {{{keywords}}} for SEO and for each keyword create a paragraph and related heading level 3.
+      Please just create the content, I do not need any descriptive text.
       `,
   },
 ]
 
-export default function Login() {
+export const copyToClipboardRichText = async (element) => {
+  if ( element) {
+    const innerHtml = element.innerHTML
+    try {
+      // Create a new ClipboardItem
+      const blob = new Blob([innerHtml], { type: 'text/html' })
+      const clipboardItem = new ClipboardItem({ 'text/html': blob })
+
+      // Use the Clipboard API to write the clipboard item
+      await navigator.clipboard.write([clipboardItem])
+      
+    } catch (err) {
+      
+      console.error('Failed to copy!', err);
+    } finally {
+      console.log('finally')
+    }
+  }
+}
+
+export default function Test() {
   const myHeaders = new Headers()
   myHeaders.append('Content-Type', 'application/json')
+
+  // useRef to get react markdown content
+  const markdownContentRef = useRef(null)
+
+  const [isCopied, setIsCopied] = useState(false)
 
   const [taKeywords, setTaKeywords] = useState('')
 
@@ -176,7 +203,6 @@ export default function Login() {
   }
 
   useEffect(() => {
-    console.log(prompt)
 
     let newPrompt = prompt
 
@@ -250,7 +276,7 @@ export default function Login() {
       setKeywords(k)
       setTaKeywords('')
     }
-  }, [taKeywords])
+  }, [taKeywords, keywords])
 
   useEffect(() => {
     setPrompt(selectedPrompt.content)
@@ -259,10 +285,9 @@ export default function Login() {
   return (
     <Layout>
       <div className="flex min-h-full flex-wrap justify-center px-6 py-12 lg:px-8 -mx-4 space-y-10">
-        
         <div className="w-full lg:w-7/12 px-4 space-y-2">
           <div className="flex flex-wrap items-center -mx-2">
-            <div className="w-auto px-2">Prompt</div>
+            <div className="w-auto px-2 font-bold">Prompt</div>
             <div className="w-auto px-2">
               <Listbox value={selectedPrompt} onChange={setSelectedPrompt}>
                 <div className="relative">
@@ -321,9 +346,9 @@ export default function Login() {
           />
           <hr className="my-2" />
           <div>
-            Prompt preview (disabled){' '}
+            <strong>Prompt preview </strong>(disabled){' '}
             <EyeIcon className="w-6 h-6 text-blue-500 inline" />
-            <div className="bg-white/30 p-2">
+            <div className="">
               {/* promptToGenerate */}
               <textarea
                 value={promptToGenerate}
@@ -337,7 +362,7 @@ export default function Login() {
 
         <div className="w-full lg:w-5/12 space-y-1 px-4">
           <div className="bg-white p-3 rounded-lg">
-            Subject
+            <strong>Subject</strong>
             <DocumentTextIcon className="w-6 h-6 text-blue-500 inline" />
             <input
               className="w-full border border-slate-200 p-2"
@@ -349,35 +374,37 @@ export default function Login() {
 
           <div className="bg-white p-3 rounded-lg space-y-1">
             <div>
-              Keywords
+              <strong>Keywords</strong>
               <VariableIcon className="w-6 h-6 text-blue-500 inline" />
             </div>
 
             <Tab.Group>
               <Tab.List>
                 <Tab className={` `}>
-                  {
-                    ({selected}) => (
-                      <div className={`${
-                        selected ? 'bg-blue-500 text-white' : 'bg-slate-400 text-white'
-                      } rounded-t-lg px-2 py-1`}>
-                        Multiple Keywords
-                      </div>
-                    )
-                  }
-                  
+                  {({ selected }) => (
+                    <div
+                      className={`${
+                        selected
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-slate-400 text-white'
+                      } rounded-t-lg px-2 py-1`}
+                    >
+                      Multiple Keywords
+                    </div>
+                  )}
                 </Tab>
                 <Tab className={``}>
-                  {
-                    ({selected}) => (
-                      <div className={`${
-                        selected ? 'bg-blue-500 text-white' : 'bg-slate-400 text-white'
-                      } rounded-t-lg px-2 py-1`}>
-                        Single Keyword
-                      </div>
-                    )
-                  }
-
+                  {({ selected }) => (
+                    <div
+                      className={`${
+                        selected
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-slate-400 text-white'
+                      } rounded-t-lg px-2 py-1`}
+                    >
+                      Single Keyword
+                    </div>
+                  )}
                 </Tab>
               </Tab.List>
               <Tab.Panels>
@@ -402,6 +429,8 @@ export default function Login() {
                     <input
                       className="w-3/12 border border-slate-200 p-2"
                       type="number"
+                      min={1}
+                      step={1}
                       placeholder="Times to appear"
                       value={time}
                       onChange={(e) => setTime(e.target.value)}
@@ -431,6 +460,7 @@ export default function Login() {
                   <input
                     type="number"
                     value={keyword.times}
+                    min={1}
                     className="bg-slate-100 mx-1 rounded w-8 text-xs"
                     onChange={(e) => {
                       // update current keyword times
@@ -447,6 +477,7 @@ export default function Login() {
                   <button
                     className="p-1 text-rose-400 block rounded-r-full hover:text-rose-600"
                     onClick={() => deleteKeyword(idx)}
+                    type='button'
                   >
                     <XMarkIcon className="w-4 h-4 block" />
                   </button>
@@ -457,18 +488,21 @@ export default function Login() {
               <button
                 className="p-2 bg-rose-400 text-white rounded text-xs"
                 onClick={clearKeywords}
+                type='button'
               >
                 Clear Keywords
               </button>
             </div>
           </div>
           <div>
-            <div className="bg-white p-3 rounded-lg">
-              Links
-              <VariableIcon className="w-6 h-6 text-blue-500 inline" />
+            <div className="bg-white p-3 rounded-lg space-y-2">
+              <div>
+                <strong>Links</strong>
+                <VariableIcon className="w-6 h-6 text-blue-500 inline" />
+              </div>
               <div className="flex space-x-1">
                 <input
-                  className="w-auto border border-slate-200 p-2"
+                  className="w-auto grow border border-slate-200 p-2"
                   placeholder="Link"
                   value={link}
                   onChange={(e) => setLink(e.target.value)}
@@ -487,8 +521,8 @@ export default function Login() {
                     key={idx}
                     className="border border-slate-400 rounded-full flex items-center"
                   >
-                    <span className="text-sm leading-none inline-block px-1">
-                      {link.name} - {link.link}
+                    <span className="text-sm leading-none inline-block px-2">
+                      {link.link}
                     </span>
                     <button
                       className="p-1 bg-rose-400 block text-white rounded-r-full hover:bg-rose-600"
@@ -504,7 +538,7 @@ export default function Login() {
           <div className="bg-white rounded-lg p-2 space-y-2">
             <AdjustmentsVerticalIcon className="w-6 h-6 text-blue-500 inline" />
             <div>
-              Instructions
+              <strong>Instructions</strong>
               <textarea
                 value={instructions}
                 onChange={(e) => setInstructions(e.target.value)}
@@ -512,20 +546,19 @@ export default function Login() {
               />
             </div>
             <div>
-              Model
+              <strong>Model</strong>
               <select
                 value={model}
                 onChange={(e) => setModel(e.target.value)}
                 className="w-full border border-slate-200 p-2"
               >
                 <option value="gpt-4o">gpt-4o</option>
-                <option value="gpt-4">gpt-4-turbo</option>
+                <option value="gpt-4-turbo">gpt-4-turbo</option>
                 <option value="gpt-4">gpt-4</option>
               </select>
             </div>
-            <div>
-              Temperature -{' '}
-              <span className="w-6 inline-block">{temperature}</span>
+            <div className="flex items-center">
+              <strong>Temperature</strong> -{' '}
               {/* // input range for temperature */}
               <input
                 type="range"
@@ -535,11 +568,16 @@ export default function Login() {
                 value={temperature}
                 onChange={(e) => setTemperature(e.target.value)}
               />
+              <span className="w-10 inline-block text-center">
+                {temperature}
+              </span>
             </div>
           </div>
         </div>
         <div className="w-full px-4">
-          <h2>Paste Here the Rich Text - document </h2>
+          <h2>
+            <strong>Document</strong> Paste Here the Rich Text -{' '}
+          </h2>
           <div className="grid grid-cols-2 w-full gap-4">
             <div className="bg-white rounded p-2">
               <CustomEditor initialData="" />
@@ -553,10 +591,9 @@ export default function Login() {
                 className="border border-slate-200 border w-full block h-96"
               />
             </div>
-        
           </div>
 
-          <div className='grid grid-cols-2 w-full gap-4'>
+          <div className="grid grid-cols-2 w-full gap-4">
             <div>
               <button
                 className={`
@@ -574,10 +611,47 @@ export default function Login() {
         </div>
         <div className="w-full px-4 bg-blue-100 rounded-lg py-3">
           <h2 className="text-5xl">Result</h2>
+          <div className="flex items-center space-x-3 my-2">
+            <h3 className="font-bold">Rich text</h3>
+            <div>
+              <button
+                onClick={
+                  () => {
+                    setIsCopied(true)
+                    copyToClipboardRichText(markdownContentRef.current)
+                    setTimeout(
+                      () => setIsCopied(false), 1000
+                    )
+                  }
+                }
+                type='button'
+                className="p-2 w-36 flex justify-between bg-blue-500 text-white rounded text-xs hover:bg-blue-600 active:bg-blue-700 group"
+              >
+
+                {
+                  isCopied ? (
+                  <>
+                    Copied <ClipboardDocumentCheckIcon className='w-4 h-4' />
+                  </>
+                ) : (
+                <>
+                  Copy to Clipboard
+                  <ClipboardIcon className='w-4 h-4'/>
+                </>
+                )
+                }
+
+              </button>
+            </div>
+          </div>
           <div className="grid grid-cols-2 w-full gap-4">
-            <div className="bg-white rounded p-2 prose prose-a:text-blue-600 w-full">
-              <h3>Rich text</h3>
-              <ReactMarkdown>{value}</ReactMarkdown>
+            <div className="bg-white rounded p-2 w-full">
+              <div
+                ref={markdownContentRef}
+                className="prose prose-a:text-blue-600 w-full"
+              >
+                <ReactMarkdown>{value}</ReactMarkdown>
+              </div>
             </div>
             <div className="bg-white rounded p-2 prose prose-a:text-blue-600 w-full">
               <h3>Markdown</h3>
@@ -586,7 +660,6 @@ export default function Login() {
                 className="border-slate-200 border w-full block h-96"
               />
             </div>
-            
           </div>
         </div>
         <Toaster />

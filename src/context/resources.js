@@ -36,11 +36,25 @@ export const ResourceProvider = ({ children }) => {
   // Provide the resource data and any necessary methods to child components
 
   useEffect(() => {
-    if (text) {
-      const turndownService = new TurndownService()
-      const markdown = turndownService.turndown(text)
-      setMarkdownContent(markdown)
-    }
+    setMarkdownContent(text)
+    // if (text) {
+      // const turndownService = new TurndownService({
+      //   headingStyle: 'atx',
+      //   bulletListMarker: '*',
+      //   codeBlockStyle: 'fenced',
+      //   emDelimiter: '*',
+      //   strongDelimiter: '**',
+      //   linkStyle: 'inlined',
+      //   linkReferenceStyle: 'full',
+      //   br: '  ',
+      //   hr: '---',
+      //   blockquote: '> ',
+      //   fence: '```',
+
+      // })
+      // const markdown = turndownService.turndown(text)
+      // setMarkdownContent(text)
+    // }
   }, [text])
 
   

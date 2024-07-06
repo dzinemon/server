@@ -22,9 +22,18 @@ main {
 
 .ck-content {
   @apply prose border border-slate-400 rounded;
-  @apply min-h-[400px];
+  @apply min-h-[400px] max-w-none;
 }
 
 .ck-content a {
   @apply text-blue-500;
+}
+
+span.added {
+  background-color: lightgreen;
+}
+
+span.removed {
+  background-color: salmon;
+  text-decoration: line-through;
 }

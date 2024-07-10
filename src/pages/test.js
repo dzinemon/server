@@ -291,8 +291,8 @@ export default function Test() {
   return (
     <Layout>
       <div className="xl:container">
-        <div className="flex min-h-full flex-wrap justify-center px-6 py-12 lg:px-8 -mx-4 space-y-10">
-          <div className="w-full lg:w-7/12 px-4 space-y-2">
+        <div className="flex min-h-full flex-wrap justify-center px-6 py-12 lg:px-8 -mx-2 space-y-10">
+          <div className="w-full lg:w-7/12 px-2 space-y-2">
             <div className="flex flex-wrap items-center -mx-2">
               <div className="w-auto px-2 font-bold">Prompt</div>
               <div className="w-auto px-2">
@@ -365,7 +365,7 @@ export default function Test() {
               </div>
             </div>
           </div>
-          <div className="w-full lg:w-5/12 space-y-1 px-4">
+          <div className="w-full lg:w-5/12 space-y-1 px-2">
             <div className="bg-white p-3 rounded-lg">
               <strong>Subject</strong>
               <DocumentTextIcon className="w-6 h-6 text-blue-500 inline" />
@@ -390,7 +390,7 @@ export default function Test() {
                           selected
                             ? 'bg-blue-500 text-white'
                             : 'bg-slate-400 text-white'
-                        } rounded-t-lg px-2 py-1`}
+                        } rounded-t-lg px-2 py-1 text-xs`}
                       >
                         Multiple Keywords
                       </div>
@@ -403,7 +403,7 @@ export default function Test() {
                           selected
                             ? 'bg-blue-500 text-white'
                             : 'bg-slate-400 text-white'
-                        } rounded-t-lg px-2 py-1`}
+                        } rounded-t-lg px-2 py-1 text-xs`}
                       >
                         Single Keyword
                       </div>
@@ -484,15 +484,20 @@ export default function Test() {
                   </div>
                 ))}
               </div>
-              <div>
-                <button
-                  className="p-2 bg-rose-400 text-white rounded text-xs"
-                  onClick={clearKeywords}
-                  type="button"
-                >
-                  Clear Keywords
-                </button>
-              </div>
+              {
+                keywords.length > 0 && (
+                  <div>
+                    <button
+                      className="p-2 bg-rose-400 text-white rounded text-xs"
+                      onClick={clearKeywords}
+                      type="button"
+                    >
+                      Clear All Keywords
+                    </button>
+                  </div>
+                )
+              }
+             
             </div>
             <div>
               <div className="bg-white p-3 rounded-lg space-y-2">
@@ -574,7 +579,7 @@ export default function Test() {
               </div>
             </div>
           </div>
-          <div className="w-full px-4 space-y-4">
+          <div className="w-full px-2 space-y-4">
             <div className="flex flex-wrap -mx-4">
               <div className=" w-full lg:w-1/2 px-2 rounded">
                 <div className="flex flex-row items-center">
@@ -694,7 +699,7 @@ export default function Test() {
               )}
             </div>
           </div>
-          <div className="w-full px-4 bg-blue-100 rounded-lg py-3 hidden">
+          <div className="w-full px-2 bg-blue-100 rounded-lg py-3 hidden">
             <h2 className="text-5xl">Result</h2>
             <div className="flex items-center space-x-3 my-2">
               <h3 className="font-bold">Rich text</h3>
@@ -741,13 +746,12 @@ export default function Test() {
           </div>
 
           {markdownContent && value && (
-            <div className="w-full px-4">
+            <div className="">
               <h3 className="font-bold">View the Differences</h3>
               {/* <HighlightDifferences
                 oldText={markdownContent} //
                 newText={value} // markdown
               /> */}
-
               <DiffViewer
                 oldValue={markdownContent}
                 newValue={value}

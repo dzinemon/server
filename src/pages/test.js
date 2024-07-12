@@ -45,6 +45,7 @@ const prompts = [
       add subject "{{{subject}}}" as Heading level 2,
       add links {{{link_var}}} for internal linking
       add keywords {{{keywords}}} for SEO.
+      Keep existing content links, attributes and html tags as is.
       Please provide just the content without any descriptive text.
       the content is as follows:
       {{{document}}}
@@ -57,6 +58,7 @@ const prompts = [
       add subject "{{{subject}}}" as Heading level 2,
       add links {{{link_var}}} for internal linking,
       add keywords {{{keywords}}} for SEO and for each keyword create a paragraph and related heading level 3.
+      Keep existing content links, attributes and html tags as is.
       Please just create the content, I do not need any descriptive text.
       `,
   },
@@ -80,6 +82,14 @@ export const copyToClipboardRichText = async (element) => {
   }
 }
 
+export const copyToClipboard = async (text) => {
+  try {
+    await navigator.clipboard.writeText(text)
+  } catch (err) {
+    console.error('Failed to copy!', err)
+  }
+}
+
 export default function Test() {
   const myHeaders = new Headers()
   myHeaders.append('Content-Type', 'application/json')
@@ -91,7 +101,7 @@ export default function Test() {
 
   const [taKeywords, setTaKeywords] = useState('')
 
-  const { text, markdownContent } = useResources()
+  const { text, markdownContent, handleMarkdownChange } = useResources()
 
   const [isLoading, setIsLoading] = useState(false)
 
@@ -137,9 +147,12 @@ export default function Test() {
   }
 
   const addKeyword = () => {
+    if (keyword === '') {
+      return
+    }
     setKeywords([...keywords, { name: keyword, times: time }])
     setKeyword('')
-    setTime(0)
+    setTime(1)
   }
 
   const deleteKeyword = (idx) => {
@@ -484,20 +497,17 @@ export default function Test() {
                   </div>
                 ))}
               </div>
-              {
-                keywords.length > 0 && (
-                  <div>
-                    <button
-                      className="p-2 bg-rose-400 text-white rounded text-xs"
-                      onClick={clearKeywords}
-                      type="button"
-                    >
-                      Clear All Keywords
-                    </button>
-                  </div>
-                )
-              }
-             
+              {keywords.length > 0 && (
+                <div>
+                  <button
+                    className="p-2 bg-rose-400 text-white rounded text-xs"
+                    onClick={clearKeywords}
+                    type="button"
+                  >
+                    Clear All Keywords
+                  </button>
+                </div>
+              )}
             </div>
             <div>
               <div className="bg-white p-3 rounded-lg space-y-2">
@@ -579,8 +589,110 @@ export default function Test() {
               </div>
             </div>
           </div>
+
           <div className="w-full px-2 space-y-4">
-            <div className="flex flex-wrap -mx-4">
+            <div className="flex flex-wrap -mx-2">
+              <div className=" w-full lg:w-1/2 px-2 rounded">
+                <div className="flex flex-wrap -mx-2">
+                  <div className="px-2">
+                    <h2>
+                      <strong>Initial Document</strong>{' '}
+                      <span className="font-mono">Paste Markdown</span>
+                    </h2>
+                  </div>
+                  <div>
+                    <button
+                      className={`
+                    ${isLoading ? 'bg-gray-300 animate-pulse' : 'bg-blue-500'}
+            
+                    py-0.5 px-1 text-white rounded text-xs
+                  `}
+                      type="button"
+                      onClick={handleGenerate}
+                    >
+                      {isLoading ? 'Generating...' : 'Generate'}
+                    </button>
+                  </div>
+                </div>
+                <hr className="my-2" />
+                <textarea
+                  onChange={(e) => handleMarkdownChange(e.target.value)}
+                  defaultValue={markdownContent}
+                  className="mb-2 border p-2 rounded-lg border-slate-200 border w-full block h-96"
+                />
+
+                <button
+                  className={`
+                    ${isLoading ? 'bg-gray-300 animate-pulse' : 'bg-blue-500'}
+            
+                    py-2 px-6 text-white text-xl rounded-md
+                  `}
+                  type="button"
+                  onClick={handleGenerate}
+                >
+                  {isLoading ? 'Generating...' : 'Generate'}
+                </button>
+              </div>
+              <div className=" w-full lg:w-1/2 px-2 rounded">
+                <div className="flex flex-wrap -mx-2">
+                  <div className="px-2">
+                    <h2>
+                      <strong>Result Document</strong> AI Processed{' '}
+                      <span className="font-mono">Markdown</span>
+                    </h2>
+                  </div>
+                  <div>
+                    {/* // copy to clipboard */}
+
+                    {value && (
+                      <div className="px-4">
+                        <button
+                          onClick={() => {
+                            setIsCopied(true)
+                            copyToClipboard(value)
+                            setTimeout(() => setIsCopied(false), 1000)
+                          }}
+                          type="button"
+                          className="px-1 py-0.5 flex justify-between bg-blue-500 text-white rounded text-xs hover:bg-blue-600 active:bg-blue-700 group"
+                        >
+                          {isCopied ? (
+                            <>
+                              Copied{' '}
+                              <ClipboardDocumentCheckIcon className="w-4 h-4" />
+                            </>
+                          ) : (
+                            <>
+                              Copy Markdown
+                              <ClipboardIcon className="w-4 h-4" />
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <hr className="my-2" />
+
+                {value ? (
+                  <textarea
+                    value={value}
+                    className="mb-2 border p-2 rounded-lg border-slate-200 border w-full block h-96"
+                  />
+                ) : (
+                  <div className="flex items-start justify-center py-20">
+                    <div className="italic text-slate-400">
+                      No content to display.
+                    </div>
+                  </div>
+                )}
+
+              
+              </div>
+            </div>
+          </div>
+
+          <div className="w-full px-2 space-y-4 hidden">
+            <div className="flex flex-wrap -mx-2">
               <div className=" w-full lg:w-1/2 px-2 rounded">
                 <div className="flex flex-row items-center">
                   <h2>
@@ -649,14 +761,6 @@ export default function Test() {
                   </div>
                 )}
               </div>
-              <div className="bg-white rounded p-2 hidden">
-                <div>markdown</div>
-                {/* markdownContent */}
-                <textarea
-                  defaultValue={markdownContent}
-                  className="border border-slate-200 border w-full block h-96"
-                />
-              </div>
             </div>
             <div className="-mx-4 flex flex-row items-center justify-between">
               <div className="px-4">
@@ -699,6 +803,7 @@ export default function Test() {
               )}
             </div>
           </div>
+
           <div className="w-full px-2 bg-blue-100 rounded-lg py-3 hidden">
             <h2 className="text-5xl">Result</h2>
             <div className="flex items-center space-x-3 my-2">

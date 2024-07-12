@@ -20,6 +20,10 @@ export const ResourceProvider = ({ children }) => {
     setText(text)
   }
 
+  const handleMarkdownChange = (text) => {  
+    setMarkdownContent(text)
+  }
+
   const [allQuestions, setAllQuestions] = useState([])
 
   const fetchAllQuestions = async () => {
@@ -61,7 +65,8 @@ export const ResourceProvider = ({ children }) => {
 
   return (
     <ResourceContext.Provider value={{ loading, resources, setResources, allQuestions, fetchAllQuestions, text, handleTextChange, 
-      markdownContent
+      markdownContent,
+      handleMarkdownChange
      }}>
       {children}
     </ResourceContext.Provider>

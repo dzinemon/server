@@ -73,7 +73,8 @@ I have content in markdown, I need to update the content with the following deta
       While you can change the existing content text, keep the existing content links, attributes and html tags as is.
       Please provide just the content without any descriptive text.
       the content is as follows:
-      {{{document}}}`,
+      {{{document}}}
+      `,
   },
   {
     id: 3,
@@ -260,7 +261,15 @@ export default function Test() {
     if (promptSubject) {
       newPrompt = newPrompt.replace(`{{{subject}}}`, promptSubject)
     } else {
-      newPrompt = newPrompt.replace(`{{{subject}}}`, '')
+      // if new prompt contains {{{subject}}}, replace it with empty string
+
+      if ( newPrompt && newPrompt.includes(`{{{subject}}}`)) {
+        newPrompt = newPrompt.replace(`{{{subject}}}`, '')
+
+      }
+
+
+      
     }
 
     if (markdownContent) {
@@ -272,7 +281,10 @@ export default function Test() {
         `
       )
     } else {
-      newPrompt = newPrompt.replace('{{{document}}}', '')
+
+      if ( newPrompt && newPrompt.includes(`{{{document}}}`)) {
+        newPrompt = newPrompt.replace('{{{document}}}', '')
+      }
     }
 
     if (promptLinks.length > 0) {
@@ -282,7 +294,9 @@ export default function Test() {
 
       newPrompt = newPrompt.replace(`{{{link_var}}}`, links)
     } else {
-      newPrompt = newPrompt.replace(`{{{link_var}}}`, '')
+      if (newPrompt && newPrompt.includes(`{{{link_var}}}`)) {
+        newPrompt = newPrompt.replace(`{{{link_var}}}`, '')
+      }
     }
 
     if (keywords.length > 0) {
@@ -295,7 +309,11 @@ export default function Test() {
 
       newPrompt = newPrompt.replace(`{{{keywords}}}`, bundleKeywords)
     } else {
-      newPrompt = newPrompt.replace(`{{{keywords}}}`, '')
+      if (newPrompt && newPrompt.includes(`{{{keywords}}}`)) {
+
+        newPrompt = newPrompt.replace(`{{{keywords}}}`, '')
+      }
+      
     }
 
     setPromptToGenerate(newPrompt)

@@ -25,7 +25,7 @@ const generateEmbedding = async (document) => {
   }
 }
 
-const createChatCompletionCustom = async (prompt, model, temperature, instructions) => {
+const createChatCompletionCustom = async (prompt, model, temperature, instructions, maxTokens) => {
   try {
     const openai = new OpenAI(configuration)
 
@@ -40,6 +40,7 @@ const createChatCompletionCustom = async (prompt, model, temperature, instructio
         { role: 'user', content: prompt },
       ],
       stream: false,
+      max_tokens: parseInt(maxTokens),
     })
 
     // console.log(completion.choices)

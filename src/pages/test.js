@@ -62,6 +62,34 @@ const prompts = [
       Please just create the content, I do not need any descriptive text.
       `,
   },
+  {
+    id: 2,
+    name: 'Healy\'s variant 1 - no subjet and links',
+    contat: ` I am the marketing manager for a CPA firm that serves venture capital backed startups
+My SEO consultant wants me to modify existing pages to improve the SEO
+He has given me a list of keywords to add to the existing page
+I have content in markdown, I need to update the content with the following details:
+      add keywords {{{keywords}}} for SEO, the keywords are either a single word or a phrase, they have a number of times to add them, so add each keyword the number of times specified if possible. For adding keywords, if possible, add them into existing paragraphs in ways that make sense. You can also add them into the new subject section, but adding them as new sentences or phrases into the existing content is better.
+      While you can change the existing content text, keep the existing content links, attributes and html tags as is.
+      Please provide just the content without any descriptive text.
+      the content is as follows:
+      {{{document}}}`,
+  },
+  {
+    id: 3,
+    name: 'Healy\'s variant 2 - no subjet and links',
+    content: `I am the marketing manager for a CPA firm that serves venture capital backed startups
+My SEO consultant wants me to modify existing pages to improve the SEO
+He has given me a list of keywords to add to the existing page
+I have content in markdown, I need to update the content with the following details:
+      add keywords {{{keywords}}} for SEO, the keywords are either a single word or a phrase, they have a number of times to add them, so add each keyword the number of times specified, for example if it says to add CPA 3 times, add the term CPA 3 times into the content. For adding keywords, if possible, add them into existing paragraphs in ways that make sense. You can also add them into the new subject section, but adding them as new sentences or phrases into the existing content is better.
+      While you can change the existing content text, keep the existing content links, attributes and html tags as is.
+      Please provide just the content without any descriptive text.
+      the content is as follows:
+      {{{document}}}
+      `,
+  },
+
 ]
 
 export const copyToClipboardRichText = async (element) => {
@@ -106,6 +134,8 @@ export default function Test() {
   const [isLoading, setIsLoading] = useState(false)
 
   const [temperature, setTemperature] = useState(1)
+
+  const [maxTokens, setMaxTokens] = useState(100)
 
   const [model, setModel] = useState('gpt-4o')
 
@@ -172,6 +202,7 @@ export default function Test() {
         model,
         temperature,
         instructions,
+        maxTokens
       }),
       redirect: 'follow', // manual, *follow, error
     }
@@ -219,6 +250,7 @@ export default function Test() {
     setInstructions('')
     setModel('gpt-4o')
     setTemperature(0.1)
+    setMaxTokens(100)
     setValue('')
   }
 
@@ -585,6 +617,20 @@ export default function Test() {
                 />
                 <span className="w-10 inline-block text-center">
                   {temperature}
+                </span>
+              </div>
+              <div className="flex items-center">
+                <strong>Max Tokens</strong> -{' '}
+                <input
+                  type="range"
+                  min="1"
+                  step="1"
+                  max={4095}
+                  value={maxTokens}
+                  onChange={(e) => setMaxTokens(e.target.value)}
+                />
+                <span className="w-10 inline-block text-center">
+                  {maxTokens}
                 </span>
               </div>
             </div>

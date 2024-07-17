@@ -8,10 +8,10 @@ import {
 
 const postUrl = async (req, res) => {
   const { 
-    prompt, model, temperature, instructions } = req.body
-
+    prompt, model, temperature, instructions, maxTokens } = req.body
+  
   const completion = await createChatCompletionCustom(
-    prompt, model, temperature, instructions
+    prompt, model, temperature, instructions, maxTokens
   )
 
   res.status(200).json({ completion })

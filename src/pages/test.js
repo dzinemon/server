@@ -65,11 +65,14 @@ const prompts = [
   {
     id: 2,
     name: 'Healy\'s variant 1 - no subjet and links',
-    contat: ` I am the marketing manager for a CPA firm that serves venture capital backed startups
+    content: `I am the marketing manager for a CPA firm that serves venture capital backed startups
 My SEO consultant wants me to modify existing pages to improve the SEO
 He has given me a list of keywords to add to the existing page
 I have content in markdown, I need to update the content with the following details:
-      add keywords {{{keywords}}} for SEO, the keywords are either a single word or a phrase, they have a number of times to add them, so add each keyword the number of times specified if possible. For adding keywords, if possible, add them into existing paragraphs in ways that make sense. You can also add them into the new subject section, but adding them as new sentences or phrases into the existing content is better.
+      add keywords {{{keywords}}} for SEO, the keywords are either a single word or a phrase, 
+      they have a number of times to add them, so add each keyword the number of times specified if possible. 
+      For adding keywords, if possible, add them into existing paragraphs in ways that make sense. 
+      You can also add them into the new subject section, but adding them as new sentences or phrases into the existing content is better.
       While you can change the existing content text, keep the existing content links, attributes and html tags as is.
       Please provide just the content without any descriptive text.
       the content is as follows:
@@ -83,7 +86,10 @@ I have content in markdown, I need to update the content with the following deta
 My SEO consultant wants me to modify existing pages to improve the SEO
 He has given me a list of keywords to add to the existing page
 I have content in markdown, I need to update the content with the following details:
-      add keywords {{{keywords}}} for SEO, the keywords are either a single word or a phrase, they have a number of times to add them, so add each keyword the number of times specified, for example if it says to add CPA 3 times, add the term CPA 3 times into the content. For adding keywords, if possible, add them into existing paragraphs in ways that make sense. You can also add them into the new subject section, but adding them as new sentences or phrases into the existing content is better.
+      add keywords {{{keywords}}} for SEO, the keywords are either a single word or a phrase, they have a number of times to add them, 
+      so add each keyword the number of times specified, for example if it says to add CPA 3 times, add the term CPA 3 times into the content. 
+      For adding keywords, if possible, add them into existing paragraphs in ways that make sense. 
+      You can also add them into the new subject section, but adding them as new sentences or phrases into the existing content is better.
       While you can change the existing content text, keep the existing content links, attributes and html tags as is.
       Please provide just the content without any descriptive text.
       the content is as follows:
@@ -150,7 +156,7 @@ export default function Test() {
   const [promptLinks, setPromptLinks] = useState([])
   const [promptSubject, setPromptSubject] = useState('')
   const [prompt, setPrompt] = useState('')
-  const [selectedPrompt, setSelectedPrompt] = useState(prompts[0])
+  const [selectedPrompt, setSelectedPrompt] = useState(prompts[2])
 
   const [link, setLink] = useState('')
 
@@ -307,7 +313,10 @@ export default function Test() {
         } , `
       })
 
-      newPrompt = newPrompt.replace(`{{{keywords}}}`, bundleKeywords)
+      if (newPrompt && newPrompt.includes(`{{{keywords}}}`)) {
+        newPrompt = newPrompt.replace(`{{{keywords}}}`, bundleKeywords)
+      }
+
     } else {
       if (newPrompt && newPrompt.includes(`{{{keywords}}}`)) {
 

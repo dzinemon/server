@@ -5,6 +5,10 @@ import {
   ResourceProvider
 } from '@/context/resources'
 
+import {
+  PromptProvider
+} from '@/context/prompts'
+
 export default function App({
   Component,
   pageProps: { session, ...pageProps },
@@ -12,7 +16,9 @@ export default function App({
   return (
     <SessionProvider session={session}>
       <ResourceProvider>
-        <Component {...pageProps} />
+        <PromptProvider>  
+          <Component {...pageProps} />
+        </PromptProvider>
       </ResourceProvider>
     </SessionProvider>
   )

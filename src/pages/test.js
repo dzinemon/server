@@ -1,5 +1,5 @@
 import { Fragment, useState, useEffect, useRef } from 'react'
-import { Listbox, Transition, Tab } from '@headlessui/react'
+import { Listbox, Transition, Tab, Dialog } from '@headlessui/react'
 
 import DiffViewer from 'react-diff-viewer'
 
@@ -15,12 +15,15 @@ import {
   AdjustmentsVerticalIcon,
   ClipboardIcon,
   ClipboardDocumentCheckIcon,
+  TrashIcon,
+  RocketLaunchIcon,
 } from '@heroicons/react/24/solid'
 import ReactMarkdown from 'react-markdown'
 import toast, { Toaster } from 'react-hot-toast'
 
 import Layout from '@/components/layout'
 import { useResources } from '@/context/resources'
+import { usePrompts } from '@/context/prompts'
 import dynamic from 'next/dynamic'
 
 const CustomEditor = dynamic(
@@ -37,67 +40,466 @@ const CustomEditorResult = dynamic(
   { ssr: false }
 )
 
-const prompts = [
-  {
-    id: 0,
-    name: 'Add subject, links keywords to content',
-    content: `I have content in markdown, I need to update the content with the following details:
-      add subject "{{{subject}}}" as Heading level 2,
-      add links {{{link_var}}} for internal linking
-      add keywords {{{keywords}}} for SEO.
-      Keep existing content links, attributes and html tags as is.
-      Please provide just the content without any descriptive text.
-      the content is as follows:
-      {{{document}}}
-      `,
-  },
-  {
-    id: 1,
-    name: 'Generate content with subject, links and keywords',
-    content: `I Need to create content in markdown with the following details:
-      add subject "{{{subject}}}" as Heading level 2,
-      add links {{{link_var}}} for internal linking,
-      add keywords {{{keywords}}} for SEO and for each keyword create a paragraph and related heading level 3.
-      Keep existing content links, attributes and html tags as is.
-      Please just create the content, I do not need any descriptive text.
-      `,
-  },
-  {
-    id: 2,
-    name: 'Healy\'s variant 1 - no subjet and links',
-    content: `I am the marketing manager for a CPA firm that serves venture capital backed startups
-My SEO consultant wants me to modify existing pages to improve the SEO
-He has given me a list of keywords to add to the existing page
-I have content in markdown, I need to update the content with the following details:
-      add keywords {{{keywords}}} for SEO, the keywords are either a single word or a phrase, 
-      they have a number of times to add them, so add each keyword the number of times specified if possible. 
-      For adding keywords, if possible, add them into existing paragraphs in ways that make sense. 
-      You can also add them into the new subject section, but adding them as new sentences or phrases into the existing content is better.
-      While you can change the existing content text, keep the existing content links, attributes and html tags as is.
-      Please provide just the content without any descriptive text.
-      the content is as follows:
-      {{{document}}}
-      `,
-  },
-  {
-    id: 3,
-    name: 'Healy\'s variant 2 - no subjet and links',
-    content: `I am the marketing manager for a CPA firm that serves venture capital backed startups
-My SEO consultant wants me to modify existing pages to improve the SEO
-He has given me a list of keywords to add to the existing page
-I have content in markdown, I need to update the content with the following details:
-      add keywords {{{keywords}}} for SEO, the keywords are either a single word or a phrase, they have a number of times to add them, 
-      so add each keyword the number of times specified, for example if it says to add CPA 3 times, add the term CPA 3 times into the content. 
-      For adding keywords, if possible, add them into existing paragraphs in ways that make sense. 
-      You can also add them into the new subject section, but adding them as new sentences or phrases into the existing content is better.
-      While you can change the existing content text, keep the existing content links, attributes and html tags as is.
-      Please provide just the content without any descriptive text.
-      the content is as follows:
-      {{{document}}}
-      `,
-  },
+export const DialogWrapper = ({ open, setOpen, children }) => {
+  return (
+    <>
+      <Transition appear show={open} as={Fragment}>
+        <Dialog
+          as="div"
+          className="relative z-50"
+          onClose={() => {
+            setOpen(false)
+          }}
+        >
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black/25" />
+          </Transition.Child>
 
-]
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center bg-slate-100/10 backdrop-blur-sm">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-3xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  {children}
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+    </>
+  )
+}
+
+export const DeletePromptDialog = ({ open, setOpen }) => {
+  const { currentPrompt, setCurrentPrompt, fetchPrompts } = usePrompts()
+
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleDelete = async () => {
+    setIsLoading(true)
+    const myHeaders = new Headers()
+    myHeaders.append('Content-Type', 'application/json')
+
+    const requestOptions = {
+      method: 'DELETE',
+      headers: myHeaders,
+      redirect: 'follow',
+    }
+
+    const result = await fetch(
+      `/api/prompts/${currentPrompt.id}`,
+      requestOptions
+    )
+      .then((response) => response)
+      .then((result) => result)
+      .then((result) => {
+        toast('Prompt deleted successfully', {
+          icon: '👏',
+          duration: 2500,
+        })
+      })
+      .catch((error) => {
+        console.log('error', error)
+        toast('Error deleting prompt', {
+          icon: '❌',
+        })
+        setIsLoading(false)
+      })
+      .finally(() => {
+        setIsLoading(false)
+        setOpen(false)
+        fetchPrompts()
+        setCurrentPrompt(null)
+      })
+
+    console.log('result', result)
+  }
+
+  return (
+    <DialogWrapper open={open} setOpen={setOpen}>
+      <Dialog.Title
+        as="h3"
+        className="text-lg font-medium leading-6 text-gray-900 text-center"
+      >
+        Are you sure you want to delete this prompt?
+      </Dialog.Title>
+      <div className="my-1">
+        <p className="text-sm text-gray-500 text-center">
+          {currentPrompt.name}
+        </p>
+      </div>
+      <div className="">
+        <div className="flex justify-center space-x-2">
+          <button
+            className="p-2 bg-rose-400 text-white rounded text-xs"
+            onClick={handleDelete}
+          >
+            {isLoading ? 'Deleting...' : 'Delete'}
+          </button>
+          <button
+            className="p-2 bg-slate-400 text-white rounded text-xs"
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </DialogWrapper>
+  )
+}
+
+export const SaveAsPromptDialog = ({ open, setOpen }) => {
+  const { currentPrompt, setCurrentPrompt, fetchPrompts } = usePrompts()
+
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleSaveAs = async () => {
+    setIsLoading(true)
+    const myHeaders = new Headers()
+    myHeaders.append('Content-Type', 'application/json')
+
+    const requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: JSON.stringify({
+        name: currentPrompt.name,
+        content: currentPrompt.content,
+      }),
+      redirect: 'follow',
+    }
+
+    const result = await fetch(`/api/prompts`, requestOptions)
+      .then((response) => response.json())
+      .then((result) => result)
+      .then((result) => {
+        toast('Prompt saved successfully', {
+          icon: '👏',
+          duration: 2500,
+        })
+      })
+      .catch((error) => {
+        console.log('error', error)
+        toast('Error saving prompt', {
+          icon: '❌',
+        })
+        setIsLoading(false)
+      })
+      .finally(() => {
+        setIsLoading(false)
+        setOpen(false)
+        fetchPrompts()
+      })
+
+    console.log('result', result)
+  }
+
+  return (
+    <DialogWrapper open={open} setOpen={setOpen}>
+      <Dialog.Title
+        as="h3"
+        className="text-lg font-medium leading-6 text-gray-900"
+      >
+        Save Prompt As
+      </Dialog.Title>
+      <div className="my-1">
+        <p className="text-sm text-gray-500">
+          Save the current prompt as a new prompt
+        </p>
+      </div>
+      <div className="">
+        <div className="flex flex-wrap -mx-2 space-y-4">
+          <div className="w-full px-2">
+            <label htmlFor="name" className="block text-left">
+              Name
+            </label>
+            <input
+              type="text"
+              id="name"
+              value={currentPrompt.name}
+              onChange={(e) => {
+                setCurrentPrompt({ ...currentPrompt, name: e.target.value })
+              }}
+              className="w-full border border-gray-300 rounded-lg p-2"
+            />
+          </div>
+          <div className="w-full px-2">
+            <label htmlFor="content" className="block text-left">
+              Content
+            </label>
+            <textarea
+              id="content"
+              value={currentPrompt.content}
+              rows={10}
+              onChange={(e) => {
+                setCurrentPrompt({ ...currentPrompt, content: e.target.value })
+              }}
+              className="w-full border border-gray-300 rounded-lg p-2"
+            ></textarea>
+          </div>
+        </div>
+        <div className="flex justify-center space-x-2">
+          <button
+            className="p-2 bg-blue-500 text-white rounded text-xs"
+            onClick={handleSaveAs}
+          >
+            {isLoading ? 'Saving...' : 'Save'}
+          </button>
+          <button
+            className="p-2 bg-rose-400 text-white rounded text-xs"
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </DialogWrapper>
+  )
+}
+
+export const SavePromptDialog = ({ open, setOpen }) => {
+  const { currentPrompt, setCurrentPrompt, fetchPrompts } = usePrompts()
+
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleSave = async () => {
+    setIsLoading(true)
+    const myHeaders = new Headers()
+    myHeaders.append('Content-Type', 'application/json')
+
+    const requestOptions = {
+      method: 'PUT',
+      headers: myHeaders,
+      body: JSON.stringify({
+        id: currentPrompt.id,
+        name: currentPrompt.name,
+        content: currentPrompt.content,
+      }),
+      redirect: 'follow',
+    }
+
+    const result = await fetch(
+      `/api/prompts/${currentPrompt.id}`,
+      requestOptions
+    )
+      .then((response) => response.json())
+      .then((result) => result)
+      .then((result) => {
+        toast('Prompt saved successfully', {
+          icon: '👏',
+          duration: 2500,
+        })
+      })
+      .catch((error) => {
+        console.log('error', error)
+        toast('Error saving prompt', {
+          icon: '❌',
+        })
+        setIsLoading(false)
+      })
+      .finally(() => {
+        setIsLoading(false)
+        setOpen(false)
+        fetchPrompts()
+      })
+
+    console.log('result', result)
+  }
+
+  return (
+    <DialogWrapper open={open} setOpen={setOpen}>
+      <Dialog.Title
+        as="h3"
+        className="text-lg font-medium leading-6 text-gray-900"
+      >
+        Save Prompt
+      </Dialog.Title>
+      <div className="my-1">
+        <p className="text-sm text-gray-500">
+          Save the current prompt to the database
+        </p>
+      </div>
+      <div className="">
+        <div className="flex flex-wrap -mx-2 space-y-4">
+          <div className="w-full px-2">
+            <label htmlFor="name" className="block text-left">
+              Name
+            </label>
+            <input
+              type="text"
+              id="name"
+              value={currentPrompt.name}
+              onChange={(e) => {
+                setCurrentPrompt({ ...currentPrompt, name: e.target.value })
+              }}
+              className="w-full border border-gray-300 rounded-lg p-2"
+            />
+          </div>
+          <div className="w-full px-2">
+            <label htmlFor="content" className="block text-left">
+              Content
+            </label>
+            <textarea
+              id="content"
+              value={currentPrompt.content}
+              rows={10}
+              onChange={(e) => {
+                setCurrentPrompt({ ...currentPrompt, content: e.target.value })
+              }}
+              className="w-full border border-gray-300 rounded-lg p-2"
+            ></textarea>
+          </div>
+        </div>
+        <div className="flex justify-center space-x-2">
+          <button
+            className="p-2 bg-blue-500 text-white rounded text-xs"
+            onClick={handleSave}
+          >
+            {isLoading ? 'Saving...' : 'Save'}
+          </button>
+          <button
+            className="p-2 bg-rose-400 text-white rounded text-xs"
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </DialogWrapper>
+  )
+}
+
+export const AddPromptDialog = ({ open, setOpen }) => {
+  const { fetchPrompts } = usePrompts()
+
+  const [promptToAdd, setPromptToAdd] = useState({
+    name: '',
+    content: '',
+  })
+
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleSave = async () => {
+    setIsLoading(true)
+    const myHeaders = new Headers()
+    myHeaders.append('Content-Type', 'application/json')
+
+    const requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: JSON.stringify({
+        name: promptToAdd.name,
+        content: promptToAdd.content,
+      }),
+      redirect: 'follow',
+    }
+
+    const result = await fetch(`/api/prompts`, requestOptions)
+      .then((response) => response.json())
+      .then((result) => result)
+      .then((result) => {
+        toast('Prompt saved successfully', {
+          icon: '👏',
+          duration: 2500,
+        })
+      })
+      .catch((error) => {
+        console.log('error', error)
+        toast('Error saving prompt', {
+          icon: '❌',
+        })
+        setIsLoading(false)
+      })
+      .finally(() => {
+        setIsLoading(false)
+        setOpen(false)
+        fetchPrompts()
+        setPromptToAdd({
+          name: '',
+          content: '',
+        })
+      })
+
+    console.log('result', result)
+  }
+
+  return (
+    <DialogWrapper open={open} setOpen={setOpen}>
+      <Dialog.Title
+        as="h3"
+        className="text-lg font-medium leading-6 text-gray-900"
+      >
+        Add Prompt
+      </Dialog.Title>
+      <div className="my-1">
+        <p className="text-sm text-gray-500">
+          Add a new prompt to the database
+        </p>
+      </div>
+      <div className="">
+        <div className="flex flex-wrap -mx-2 space-y-4">
+          <div className="w-full px-2">
+            <label htmlFor="name" className="block text-left">
+              Name
+            </label>
+            <input
+              type="text"
+              id="name"
+              value={promptToAdd.name}
+              onChange={(e) => {
+                setPromptToAdd({ ...promptToAdd, name: e.target.value })
+              }}
+              className="w-full border border-gray-300 rounded-lg p-2"
+            />
+          </div>
+          <div className="w-full px-2">
+            <label htmlFor="content" className="block text-left">
+              Content
+            </label>
+            <textarea
+              id="content"
+              value={promptToAdd.content}
+              rows={10}
+              onChange={(e) => {
+                setPromptToAdd({ ...promptToAdd, content: e.target.value })
+              }}
+              className="w-full border border-gray-300 rounded-lg p-2"
+            ></textarea>
+          </div>
+        </div>
+        <div className="flex justify-center space-x-2">
+          <button
+            className="p-2 bg-blue-500 text-white rounded text-xs"
+            onClick={handleSave}
+          >
+            {isLoading ? 'Saving...' : 'Save'}
+          </button>
+          <button
+            className="p-2 bg-rose-400 text-white rounded text-xs"
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </DialogWrapper>
+  )
+}
 
 export const copyToClipboardRichText = async (element) => {
   if (element) {
@@ -132,17 +534,28 @@ export default function Test() {
   // useRef to get react markdown content
   const markdownContentRef = useRef(null)
 
+  const [openSaveDialog, setOpenSaveDialog] = useState(false)
+
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false)
+
+  const [openSaveAsDialog, setOpenSaveAsDialog] = useState(false)
+
+  const [openAddDialog, setOpenAddDialog] = useState(false)
+
   const [isCopied, setIsCopied] = useState(false)
 
   const [taKeywords, setTaKeywords] = useState('')
 
-  const { text, markdownContent, handleMarkdownChange } = useResources()
+  const { markdownContent, handleMarkdownChange } = useResources()
+
+  const { prompts, fetchPrompts, currentPrompt, setCurrentPrompt } =
+    usePrompts()
 
   const [isLoading, setIsLoading] = useState(false)
 
   const [temperature, setTemperature] = useState(1)
 
-  const [maxTokens, setMaxTokens] = useState(100)
+  const [maxTokens, setMaxTokens] = useState(300)
 
   const [model, setModel] = useState('gpt-4o')
 
@@ -155,8 +568,8 @@ export default function Test() {
   const [keywords, setKeywords] = useState([])
   const [promptLinks, setPromptLinks] = useState([])
   const [promptSubject, setPromptSubject] = useState('')
-  const [prompt, setPrompt] = useState('')
-  const [selectedPrompt, setSelectedPrompt] = useState(prompts[2])
+  
+  const [selectedPrompt, setSelectedPrompt] = useState(null)
 
   const [link, setLink] = useState('')
 
@@ -209,7 +622,7 @@ export default function Test() {
         model,
         temperature,
         instructions,
-        maxTokens
+        maxTokens,
       }),
       redirect: 'follow', // manual, *follow, error
     }
@@ -250,7 +663,7 @@ export default function Test() {
   }
 
   const handleReset = () => {
-    setPrompt(prompts[0])
+    // setPrompt(prompts[0])
     setPromptSubject('')
     setPromptLinks([])
     setKeywords([])
@@ -262,33 +675,27 @@ export default function Test() {
   }
 
   useEffect(() => {
-    let newPrompt = prompt
+    if (currentPrompt === null) return
+
+    let newPrompt = currentPrompt.content
 
     if (promptSubject) {
       newPrompt = newPrompt.replace(`{{{subject}}}`, promptSubject)
     } else {
       // if new prompt contains {{{subject}}}, replace it with empty string
-
-      if ( newPrompt && newPrompt.includes(`{{{subject}}}`)) {
+      if (newPrompt && newPrompt.includes(`{{{subject}}}`)) {
         newPrompt = newPrompt.replace(`{{{subject}}}`, '')
-
       }
-
-
-      
     }
 
     if (markdownContent) {
       newPrompt = newPrompt.replace(
         '{{{document}}}',
-        `
-        
-        ${markdownContent}
+        `${markdownContent}
         `
       )
     } else {
-
-      if ( newPrompt && newPrompt.includes(`{{{document}}}`)) {
+      if (newPrompt && newPrompt.includes(`{{{document}}}`)) {
         newPrompt = newPrompt.replace('{{{document}}}', '')
       }
     }
@@ -316,17 +723,14 @@ export default function Test() {
       if (newPrompt && newPrompt.includes(`{{{keywords}}}`)) {
         newPrompt = newPrompt.replace(`{{{keywords}}}`, bundleKeywords)
       }
-
     } else {
       if (newPrompt && newPrompt.includes(`{{{keywords}}}`)) {
-
         newPrompt = newPrompt.replace(`{{{keywords}}}`, '')
       }
-      
     }
 
     setPromptToGenerate(newPrompt)
-  }, [keywords, promptLinks, promptSubject, prompt, markdownContent])
+  }, [keywords, promptLinks, promptSubject, markdownContent, currentPrompt])
 
   useEffect(() => {
     if (taKeywords === '') return
@@ -357,8 +761,14 @@ export default function Test() {
   }, [taKeywords, keywords])
 
   useEffect(() => {
-    setPrompt(selectedPrompt.content)
+    // setPrompt(selectedPrompt.content)
+
+    setCurrentPrompt(selectedPrompt)
   }, [selectedPrompt])
+
+  useEffect(() => {
+    fetchPrompts()
+  }, [])
 
   return (
     <Layout>
@@ -367,75 +777,152 @@ export default function Test() {
           <div className="w-full lg:w-7/12 px-2 space-y-2">
             <div className="flex flex-wrap items-center -mx-2">
               <div className="w-auto px-2 font-bold">Prompt</div>
-              <div className="w-auto px-2">
-                <Listbox value={selectedPrompt} onChange={setSelectedPrompt}>
-                  <div className="relative">
-                    <Listbox.Button
-                      className={
-                        'relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left  focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm'
-                      }
+              <div className="w-full flex">
+                {prompts.length > 0 && (
+                  <div className="w-64 px-2">
+                    <Listbox
+                      value={selectedPrompt}
+                      onChange={setSelectedPrompt}
                     >
-                      <span className="block truncate">
-                        {selectedPrompt.name}
-                      </span>
-                      <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                        <ChevronUpDownIcon
-                          className="h-5 w-5 text-gray-400"
-                          aria-hidden="true"
-                        />
-                      </span>
-                    </Listbox.Button>
-                    <Transition
-                      as={Fragment}
-                      leave="transition ease-in duration-100"
-                      leaveFrom="opacity-100"
-                      leaveTo="opacity-0"
-                    >
-                      <Listbox.Options
-                        className={
-                          'absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm'
-                        }
-                      >
-                        {prompts.map((prompt) => (
-                          <Listbox.Option
-                            key={prompt.id}
-                            value={prompt}
-                            className={({ active }) =>
-                              `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                                active
-                                  ? 'bg-blue-100 text-blue-900'
-                                  : 'text-slate-900'
-                              }`
+                      <div className="relative">
+                        <Listbox.Button
+                          className={
+                            'relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left  focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm'
+                          }
+                        >
+                          <span className="block truncate">
+                            <DocumentTextIcon className="w-5 h-5 inline" />
+                            {currentPrompt
+                              ? `${currentPrompt.name} `
+                              : 'Select a prompt'}
+                          </span>
+                          <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                            <ChevronUpDownIcon
+                              className="h-5 w-5 text-gray-400"
+                              aria-hidden="true"
+                            />
+                          </span>
+                        </Listbox.Button>
+                        <Transition
+                          as={Fragment}
+                          leave="transition ease-in duration-100"
+                          leaveFrom="opacity-100"
+                          leaveTo="opacity-0"
+                        >
+                          <Listbox.Options
+                            className={
+                              'absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm'
                             }
                           >
-                            {prompt.name}
-                          </Listbox.Option>
-                        ))}
-                      </Listbox.Options>
-                    </Transition>
+                            {prompts.map((prompt) => (
+                              <Listbox.Option
+                                key={prompt.id}
+                                value={prompt}
+                                className={({ active }) =>
+                                  `relative cursor-default select-none py-2 px-4 ${
+                                    active
+                                      ? 'bg-blue-100 text-blue-900'
+                                      : 'text-slate-900'
+                                  }`
+                                }
+                              >
+                                {prompt.name}
+                              </Listbox.Option>
+                            ))}
+                          </Listbox.Options>
+                        </Transition>
+                      </div>
+                    </Listbox>
                   </div>
-                </Listbox>
+                )}
+                <div className="w-auto px-2 space-x-2 grow">
+                  <button
+                    title="Open Modal to Create a New Prompt"
+                    className="p-2 bg-emerald-300 text-white rounded text-xs"
+                    onClick={() => setOpenAddDialog(true)}
+                  >
+                    Add New Prompt
+                  </button>
+                  {currentPrompt && currentPrompt.name && (
+                    <>
+                      <button
+                        className="p-2 bg-slate-400 text-white rounded text-xs"
+                        onClick={() => setOpenSaveDialog(true)}
+                        title="Save Changes to Current Prompt"
+                      >
+                        Save Prompt
+                      </button>
+                      <button
+                        className="p-2 bg-slate-400 text-white rounded text-xs"
+                        title="Save Prompt As / Clone Prompt"
+                        onClick={() => setOpenSaveAsDialog(true)}
+                      >
+                        Save As
+                      </button>
+                      <button
+                        title="Delete Prompt"
+                        onClick={() => setOpenDeleteDialog(true)}
+                        className="p-2 bg-rose-400 text-white rounded text-xs"
+                      >
+                        <TrashIcon className="w-4 h-4 inline" />
+                      </button>
+                    </>
+                  )}
+                </div>
+                <div className="w-auto px-2 hidden">
+                  <button
+                    className="p-2 bg-slate-400 text-white rounded text-xs"
+                    disabled
+                  >
+                    Prompt Manager
+                  </button>
+                </div>
               </div>
             </div>
-            <textarea
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              className="w-full h-64 border border-gray-300 rounded-lg p-2"
-            />
-            <hr className="my-2" />
-            <div>
-              <strong>Prompt preview </strong>(disabled){' '}
-              <EyeIcon className="w-6 h-6 text-blue-500 inline" />
-              <div className="">
-                {/* promptToGenerate */}
+            <AddPromptDialog open={openAddDialog} setOpen={setOpenAddDialog} />
+
+            {currentPrompt && (
+              <>
+                <SavePromptDialog
+                  open={openSaveDialog}
+                  setOpen={setOpenSaveDialog}
+                />
+                <DeletePromptDialog
+                  open={openDeleteDialog}
+                  setOpen={setOpenDeleteDialog}
+                />
+                <SaveAsPromptDialog
+                  open={openSaveAsDialog}
+                  setOpen={setOpenSaveAsDialog}
+                />
+
                 <textarea
-                  value={promptToGenerate}
-                  readOnly={true}
-                  disabled
+                  value={currentPrompt.content}
+                  onChange={(e) => {
+                    setCurrentPrompt({
+                      ...currentPrompt,
+                      content: e.target.value,
+                    })
+                  }}
                   className="w-full h-64 border border-gray-300 rounded-lg p-2"
                 />
-              </div>
-            </div>
+
+                <hr className="my-2" />
+                <div>
+                  <strong>Prompt preview </strong>(disabled){' '}
+                  <EyeIcon className="w-6 h-6 text-blue-500 inline" />
+                  <div className="">
+                    {/* promptToGenerate */}
+                    <textarea
+                      value={promptToGenerate}
+                      readOnly={true}
+                      disabled
+                      className="w-full h-64 border border-gray-300 rounded-lg p-2"
+                    />
+                  </div>
+                </div>
+              </>
+            )}
           </div>
           <div className="w-full lg:w-5/12 space-y-1 px-2">
             <div className="bg-white p-3 rounded-lg">
@@ -682,6 +1169,7 @@ export default function Test() {
                   `}
                       type="button"
                       onClick={handleGenerate}
+                      disabled={isLoading}
                     >
                       {isLoading ? 'Generating...' : 'Generate'}
                     </button>
@@ -758,8 +1246,6 @@ export default function Test() {
                     </div>
                   </div>
                 )}
-
-              
               </div>
             </div>
           </div>
@@ -924,7 +1410,7 @@ export default function Test() {
           </div>
 
           {markdownContent && value && (
-            <div className="">
+            <div className="w-full">
               <h3 className="font-bold">View the Differences</h3>
               {/* <HighlightDifferences
                 oldText={markdownContent} //

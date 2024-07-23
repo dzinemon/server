@@ -18,7 +18,7 @@ const postUrl = async (req, res) => {
 }
 
 export const config = {
-  maxDuration: 50,
+  maxDuration: 60,
 };
 
 export default function handler(req, res) {

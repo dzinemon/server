@@ -555,7 +555,7 @@ export default function Test() {
 
   const [temperature, setTemperature] = useState(1)
 
-  const [maxTokens, setMaxTokens] = useState(300)
+  const [maxTokens, setMaxTokens] = useState(600)
 
   const [model, setModel] = useState('gpt-4o')
 

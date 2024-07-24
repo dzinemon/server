@@ -15,14 +15,14 @@ export default function Navbar() {
   const { data: session } = useSession()
 
   const adminNavItems = [
-    {
-      name: 'Links',
-      slug: 'links',
-    },
-    {
-      name: 'Files',
-      slug: 'files',
-    },
+    // {
+    //   name: 'Links',
+    //   slug: 'links',
+    // },
+    // {
+    //   name: 'Files',
+    //   slug: 'files',
+    // },
     // {
     //   name: 'Text',
     //   slug: 'texts',
@@ -31,7 +31,7 @@ export default function Navbar() {
 
   const navItems = [
     {
-      name: 'Widget',
+      name: 'External QA',
       slug: 'widget',
     },
     {
@@ -39,8 +39,12 @@ export default function Navbar() {
       slug: 'all-questions',
     },
     {
+      name: 'Internal QA',
+      slug: 'internal-qa',
+    },
+    {
       name: 'Generate Content',
-      slug: 'content-gen',
+      slug: 'generate',
     },
   ]
 

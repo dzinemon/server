@@ -670,7 +670,7 @@ export default function Test() {
     setInstructions('')
     setModel('gpt-4o')
     setTemperature(0.1)
-    setMaxTokens(100)
+    setMaxTokens(8000)
     setValue('')
   }
 

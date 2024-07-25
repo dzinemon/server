@@ -40,7 +40,7 @@ const createChatCompletionCustom = async (prompt, model, temperature, instructio
         { role: 'user', content: prompt },
       ],
       stream: false,
-      max_tokens: parseInt(maxTokens),
+      // max_tokens: parseInt(maxTokens),
     })
 
     // console.log(completion.choices)

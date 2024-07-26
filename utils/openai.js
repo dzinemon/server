@@ -31,7 +31,7 @@ const createChatCompletionCustom = async (prompt, model, temperature, instructio
 
     const completion = await openai.chat.completions.create({
       model,
-      temperature: parseInt(temperature) / 100,
+      temperature: parseInt(temperature),
       messages: [
         {
           role: 'system',
@@ -40,7 +40,7 @@ const createChatCompletionCustom = async (prompt, model, temperature, instructio
         { role: 'user', content: prompt },
       ],
       stream: false,
-      // max_tokens: parseInt(maxTokens),
+      max_tokens: parseInt(maxTokens),
     })
 
     // console.log(completion.choices)

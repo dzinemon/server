@@ -10,6 +10,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.24.3",
     "@ckeditor/ckeditor5-react": "^7.0.0",
     "@ckeditor/ckeditor5-watchdog": "^41.4.2",
     "@fortawesome/fontawesome-svg-core": "^6.4.2",

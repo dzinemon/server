@@ -659,8 +659,12 @@ export default function Test() {
                   className="w-full border border-slate-200 p-2"
                 >
                   <option value="gpt-4o">gpt-4o</option>
+                  <option value="gpt-4o-mini">
+                    gpt-4o-mini
+                  </option>
                   <option value="gpt-4-turbo">gpt-4-turbo</option>
                   <option value="gpt-4">gpt-4</option>
+                  <option value="claude-3-5-sonnet-20240620">claude-3-5-sonnet-20240620</option>
                 </select>
               </div>
               <div className="flex items-center">

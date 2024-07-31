@@ -2,6 +2,10 @@ import {
   createChatCompletionCustom
  } from '../../../../utils/openai'
 
+ import {
+  createClaudeCompletion
+ } from '../../../../utils/anthropic'
+
 // import data from '../../../../data/data.json';
 
 // import checkRequestOrigin from '../../../../utils/checkRequestOrigin'
@@ -9,10 +13,23 @@ import {
 const postUrl = async (req, res) => {
   const { 
     prompt, model, temperature, instructions, maxTokens } = req.body
+
+  // if model contains gpt then use openai
+
+  let completion = '';
   
-  const completion = await createChatCompletionCustom(
+  if (model.includes('gpt')) {
+    console.log('using openai')
+  
+  completion = await createChatCompletionCustom(
     prompt, model, temperature, instructions, maxTokens
-  )
+  )} else {
+    console.log('using anthropic')
+    completion = await createClaudeCompletion(
+      prompt, model, temperature, instructions, maxTokens
+    )
+  }
+
 
   res.status(200).json({ completion })
 }

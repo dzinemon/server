@@ -102,7 +102,7 @@ export default function Test() {
 
   const [maxTokens, setMaxTokens] = useState(4096)
 
-  const [model, setModel] = useState('gpt-4o')
+  const [model, setModel] = useState('claude-3-5-sonnet-20240620')
 
   const [instructions, setInstructions] = useState(
     'You are marketing manager for a CPA firm'

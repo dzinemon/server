@@ -12,12 +12,12 @@ import InlineLoading from '@/components/InlineLoading'
 
 import { Listbox } from '@headlessui/react'
 
-const filters = ['website', 'slack']
+const filters = ['website', 'slack', 'internal']
 
 export default function ChatWidget() {
   // const [limitReached, setLimitReached] = useState(false)
 
-  const [filterArray, setFilterArray] = useState([filters[0], filters[1]])
+  const [filterArray, setFilterArray] = useState([filters[0], filters[1], filters[2]])
 
   const [response, setResponse] = useState({})
   const scrollTargetRef = useRef(null)
@@ -329,7 +329,7 @@ export default function ChatWidget() {
                               </Listbox.Button>
                               <Listbox.Options
                                 className={
-                                  'absolute w-24 text-xs top-0 bg-white border border-gray-200 rounded-md shadow-lg z-10'
+                                  'absolute w-24 text-xs top-0 bg-white border border-gray-200 rounded-md shadow-lg z-20'
                                 }
                               >
                                 {filters.map((filter, idx) => (

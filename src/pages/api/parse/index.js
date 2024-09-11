@@ -23,6 +23,9 @@ const  parseUrl = async (req, res) => {
   });
 }
 
+export const config = {
+  maxDuration: 200,
+};
 
 export default function handler(req, res) {
   switch (req.method) {

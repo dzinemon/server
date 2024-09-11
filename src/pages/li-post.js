@@ -15,6 +15,8 @@ import {
 
 import { copyToClipboardRichText } from '@/pages/generate'
 
+import { parseWithCheerio } from '../../utils/cheerio-axios'
+
 const CustomEditorResult = dynamic(
   () => {
     return import('../components/custom-editor-result')
@@ -263,39 +265,61 @@ export default function LiPost() {
 
   const [pageUrl, setPageUrl] = useState('')
 
-  async function handlePageParse() {
-    const url = pageUrl;
-    const myHeaders = new Headers();
-    myHeaders.append('Content-Type', 'application/json');
+  // async function handlePageParse() {
+  //   const url = pageUrl;
+  //   const myHeaders = new Headers();
+  //   myHeaders.append('Content-Type', 'application/json');
 
-    if (!url) {
-      toast.error('Please provide a URL', { duration: 2000 });
-      return;
-    }
+  //   if (!url) {
+  //     toast.error('Please provide a URL', { duration: 2000 });
+  //     return;
+  //   }
 
-    if (!url.startsWith('http')) {
-      toast.error('Please provide a valid URL', { duration: 2000 });
-      return;
-    }
+  //   if (!url.startsWith('http')) {
+  //     toast.error('Please provide a valid URL', { duration: 2000 });
+  //     return;
+  //   }
 
-    const requestOptions = {
-      method: 'POST',
-      headers: myHeaders,
-      body: JSON.stringify({ url }),
-      redirect: 'follow',
-    };
+  //   const requestOptions = {
+  //     method: 'POST',
+  //     headers: myHeaders,
+  //     body: JSON.stringify({ url }),
+  //     redirect: 'follow',
+  //   };
+
+  //   try {
+  //     const res = await fetch('/api/parse', requestOptions);
+  //     const data = await res.json();
+  //     setPageContent(data.pageContent);
+  //     toast.success('Page content Ready', { duration: 2000 });
+  //   } catch (error) {
+  //     console.error('Error parsing page:', error);
+  //     toast.error('Error parsing page content');
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }
+
+
+  const handlePageParse = async () => {
+    // use parseWithCheerio function to get page content
+    setIsLoading(true)
 
     try {
-      const res = await fetch('/api/parse', requestOptions);
-      const data = await res.json();
-      setPageContent(data.pageContent);
-      toast.success('Page content Ready', { duration: 2000 });
-    } catch (error) {
-      console.error('Error parsing page:', error);
-      toast.error('Error parsing page content');
-    } finally {
-      setIsLoading(false);
+      const { pageContent } = await parseWithCheerio(pageUrl)
+
+      setPageContent(pageContent)
+      // setPageUrl(pageUrl)
+      toast.success('Page content Ready', { duration: 2000 })
     }
+    catch (error) {
+      console.error('Error parsing page:', error)
+      toast.error('Error parsing page content')
+    }
+    finally {
+      setIsLoading(false)
+    }
+
   }
 
   const handleGeneratePost = async () => {

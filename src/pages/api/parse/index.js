@@ -1,17 +1,8 @@
 import { parseWithCheerio } from "../../../../utils/cheerio-axios";
 
 const  parseUrl = async (req, res) => {
-  if (req.method !== "POST") {
-    res.status(405).end();
-    return;
-  }
 
   const { url } = req.body;
-
-  if (!url) {
-    res.status(400).json({ error: "URL is required" });
-    return;
-  }
 
   const {
     pageContent,

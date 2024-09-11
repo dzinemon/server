@@ -263,45 +263,39 @@ export default function LiPost() {
 
   const [pageUrl, setPageUrl] = useState('')
 
-  const handlePageParse = async (url) => {
-    // if no url provided and validate https
-
-    const myHeaders = new Headers()
-    myHeaders.append('Content-Type', 'application/json')
+  async function handlePageParse() {
+    const url = pageUrl;
+    const myHeaders = new Headers();
+    myHeaders.append('Content-Type', 'application/json');
 
     if (!url) {
-      toast.error('Please provide a URL', { duration: 2000 })
-      return
+      toast.error('Please provide a URL', { duration: 2000 });
+      return;
     }
 
     if (!url.startsWith('http')) {
-      toast.error('Please provide a valid URL', { duration: 2000 })
-      return
+      toast.error('Please provide a valid URL', { duration: 2000 });
+      return;
     }
 
     const requestOptions = {
       method: 'POST',
       headers: myHeaders,
-      body: JSON.stringify({
-        url,
-      }),
-      redirect: 'follow', // manual, *follow, error
-    }
+      body: JSON.stringify({ url }),
+      redirect: 'follow',
+    };
 
-    const res = await fetch('/api/parse', requestOptions)
-      .then((res) => res.json())
-      .then((data) => {
-        // console.log('Data:', data)
-        setPageContent(data.pageContent)
-        toast.success('Page content Ready', { duration: 2000 })
-      })
-      .catch((error) => {
-        console.error('Error parsing page:', error)
-        toast.error('Error parsing page content')
-      })
-      .finally(() => {
-        setIsLoading(false)
-      })
+    try {
+      const res = await fetch('/api/parse', requestOptions);
+      const data = await res.json();
+      setPageContent(data.pageContent);
+      toast.success('Page content Ready', { duration: 2000 });
+    } catch (error) {
+      console.error('Error parsing page:', error);
+      toast.error('Error parsing page content');
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   const handleGeneratePost = async () => {
@@ -631,7 +625,7 @@ export default function LiPost() {
                     type="button"
                     className={`w-full grow p-2 text-white bg-blue-600 rounded-lg
                       ${pageUrl ? 'bg-blue-500' : 'bg-gray-300'}`}
-                    onClick={() => handlePageParse(pageUrl)}
+                    onClick={() => handlePageParse()}
                   >
                     Parse Content
                   </button>

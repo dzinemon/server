@@ -165,8 +165,8 @@ const repostersPrompts = [
   {
     id: 2,
     name: 'Executives Repost - Basic',
-    content: `Write reposts for Selected Reposters, separate each with solid lines`
-  }
+    content: `Write reposts for Selected Reposters, separate each with solid lines`,
+  },
 ]
 
 const posters = [
@@ -264,7 +264,7 @@ export default function LiPost() {
   const [pageUrl, setPageUrl] = useState('')
 
   const handlePageParse = async (url) => {
-    // if no url provided and validate https 
+    // if no url provided and validate https
 
     const myHeaders = new Headers()
     myHeaders.append('Content-Type', 'application/json')
@@ -287,23 +287,21 @@ export default function LiPost() {
       }),
       redirect: 'follow', // manual, *follow, error
     }
-    
+
     const res = await fetch('/api/parse', requestOptions)
-    .then((res) => res.json())
-    .then((data) => {
-      // console.log('Data:', data)
-      setPageContent(data.pageContent)
-      toast.success('Page content Ready', { duration: 2000 })
-    })
-    .catch((error) => {
-      console.error('Error parsing page:', error)
-      toast.error('Error parsing page content')
-    }
-    )
-    .finally(() => {
-      setIsLoading(false)
-    }
-  )
+      .then((res) => res.json())
+      .then((data) => {
+        // console.log('Data:', data)
+        setPageContent(data.pageContent)
+        toast.success('Page content Ready', { duration: 2000 })
+      })
+      .catch((error) => {
+        console.error('Error parsing page:', error)
+        toast.error('Error parsing page content')
+      })
+      .finally(() => {
+        setIsLoading(false)
+      })
   }
 
   const handleGeneratePost = async () => {
@@ -630,7 +628,7 @@ export default function LiPost() {
                 </div>
                 <div className="flex flex-row">
                   <button
-                    type='button'
+                    type="button"
                     className={`w-full grow p-2 text-white bg-blue-600 rounded-lg
                       ${pageUrl ? 'bg-blue-500' : 'bg-gray-300'}`}
                     onClick={() => handlePageParse(pageUrl)}

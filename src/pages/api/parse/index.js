@@ -6,7 +6,7 @@ const  parseUrl = async (req, res) => {
     return;
   }
 
-  const { url, internal } = req.body || {};
+  const { url } = req.body;
 
   if (!url) {
     res.status(400).json({ error: "URL is required" });
@@ -20,7 +20,7 @@ const  parseUrl = async (req, res) => {
     ogImage,
     pageType,
     source,
-  } = await parseWithCheerio(url, internal);
+  } = await parseWithCheerio(url);
 
   res.status(200).json({
     pageContent,

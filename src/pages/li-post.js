@@ -266,6 +266,9 @@ export default function LiPost() {
   const handlePageParse = async (url) => {
     // if no url provided and validate https 
 
+    const myHeaders = new Headers()
+    myHeaders.append('Content-Type', 'application/json')
+
     if (!url) {
       toast.error('Please provide a URL', { duration: 2000 })
       return
@@ -276,16 +279,17 @@ export default function LiPost() {
       return
     }
 
-    
-    const res = await fetch('/api/parse', {
+    const requestOptions = {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ 
-        url: pageUrl,
-       }),
-    }).then((res) => res.json())
+      headers: myHeaders,
+      body: JSON.stringify({
+        url,
+      }),
+      redirect: 'follow', // manual, *follow, error
+    }
+    
+    const res = await fetch('/api/parse', requestOptions)
+    .then((res) => res.json())
     .then((data) => {
       // console.log('Data:', data)
       setPageContent(data.pageContent)

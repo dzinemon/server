@@ -264,17 +264,42 @@ export default function LiPost() {
   const [pageUrl, setPageUrl] = useState('')
 
   const handlePageParse = async (url) => {
+    // if no url provided and validate https 
+
+    if (!url) {
+      toast.error('Please provide a URL', { duration: 2000 })
+      return
+    }
+
+    if (!url.startsWith('http')) {
+      toast.error('Please provide a valid URL', { duration: 2000 })
+      return
+    }
+
+    
     const res = await fetch('/api/parse', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ url }),
+      body: JSON.stringify({ 
+        url: pageUrl,
+       }),
+    }).then((res) => res.json())
+    .then((data) => {
+      // console.log('Data:', data)
+      setPageContent(data.pageContent)
+      toast.success('Page content Ready', { duration: 2000 })
     })
-
-    const data = await res.json()
-
-    setPageContent(data.pageContent)
+    .catch((error) => {
+      console.error('Error parsing page:', error)
+      toast.error('Error parsing page content')
+    }
+    )
+    .finally(() => {
+      setIsLoading(false)
+    }
+  )
   }
 
   const handleGeneratePost = async () => {
@@ -601,6 +626,7 @@ export default function LiPost() {
                 </div>
                 <div className="flex flex-row">
                   <button
+                    type='button'
                     className={`w-full grow p-2 text-white bg-blue-600 rounded-lg
                       ${pageUrl ? 'bg-blue-500' : 'bg-gray-300'}`}
                     onClick={() => handlePageParse(pageUrl)}
@@ -722,6 +748,7 @@ export default function LiPost() {
           <textarea
             className="w-full h-96 p-2 m-2 border border-gray-300 rounded-lg"
             value={promptToGenerate}
+            readOnly
           ></textarea>
 
           <div className="w-full px-2">

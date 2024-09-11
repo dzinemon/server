@@ -1,6 +1,6 @@
 import { parseWithCheerio } from "../../../../utils/cheerio-axios";
 
-export default async function handler(req, res) {
+const  parseUrl = async (req, res) => {
   if (req.method !== "POST") {
     res.status(405).end();
     return;
@@ -32,3 +32,12 @@ export default async function handler(req, res) {
   });
 }
 
+
+export default function handler(req, res) {
+  switch (req.method) {
+    case 'POST':
+      return parseUrl(req, res)
+    default:
+      return res.status(405).end(`Method ${req.method} Not Allowed`)
+  }
+}

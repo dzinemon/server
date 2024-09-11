@@ -1,5 +1,5 @@
 import axios from 'axios'
-import cheerio from 'cheerio'
+import {load} from 'cheerio'
 
 // need to fetch url , get page title, remove head, header, nav and footer get innerText
 // return object with title and text
@@ -13,7 +13,8 @@ export const getHtml = async (url) => {
 }
 export const getCheerio = async (url) => {
   const html = await getHtml(url)
-  return cheerio.load(html.data)
+  const $ = load(html.data)
+  return $
 }
 
 export const parseWithCheerio = async (url) => {

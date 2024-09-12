@@ -27,10 +27,9 @@ const CustomEditorResult = dynamic(
 const prompts = [
   {
     id: 1,
-    name: 'Creating a viral linkedin post for an article by our CPA firm',
-    content: `Creating a viral linkedin post for an article by our CPA firm
-        You are the social media manager for a CPA firm that serves VC backed startups.
-        CPA firm name = Kruze Consulting;
+    name: 'Create Linkedin post for Article',
+    content: `Creating a viral linkedin post for the Post Author, based on the article below. Mention Post Author's name in the title.
+        You are the social media manager for a CPA firm named Kruze Consulting that serves VC backed startups.
         Your website is full of helpful articles on finance, venture capital, accounting and taxes. 
         Your audience is startup founders;
         Write an eye catching linkedin post that highlights an excerpt from this article.  
@@ -84,19 +83,19 @@ const prompts = [
       Share if you find it as compelling as we do!
 
 
-      Get the Info about the Podcast Guests from Article which is given below as well as get the Original Poster below as a Podcast Host,
+      Get the Info about the Podcast Guests from Article which is given below as well as get the Post Author below as a Podcast Host,
       Get the Link To the Podcast from the Link to article below
 
       
       Now make one for this podcast excerpt
       `,
   },
-  {
-    id: 3,
-    name: 'Create Viral Linkedin Post for YouTube Video',
-    content:
-      'Hey, I just published a new YouTube video on my channel. Check it out here: [YouTube Video Title]',
-  },
+  // {
+  //   id: 3,
+  //   name: 'Create Viral Linkedin Post for YouTube Video',
+  //   content:
+  //     'Hey, I just published a new YouTube video on my channel. Check it out here: [YouTube Video Title]',
+  // },
 ]
 
 const repostersPrompts = [
@@ -207,9 +206,9 @@ founders get ready to fundraise and clean up their books`,
   },
   {
     id: 4,
-    name: 'Kruzeconsulting',
+    name: 'Kruze Consulting',
     title: 'Startup Accounting, Finance & Tax CPA Expertise',
-    description: `Kruze Consulting: We will also need our CPA firm Kruze Consulting. Kruze only works
+    description: `Kruze only works
 with VC-backed startups, and our clients have collectively raised over $15 billion in VC
 funding. The Kruze team has helped over 1000 startups set up their accounting and
 fintech systems.`,
@@ -306,6 +305,15 @@ export default function LiPost() {
     setIsLoading(true)
 
     try {
+          if (!pageUrl) {
+      toast.error('Please provide a URL', { duration: 2000 });
+      return;
+    }
+
+    if (!pageUrl.startsWith('http')) {
+      toast.error('Please provide a valid URL', { duration: 2000 });
+      return;
+    }
       const { pageContent } = await parseWithCheerio(pageUrl)
 
       setPageContent(pageContent)
@@ -365,7 +373,7 @@ export default function LiPost() {
     Article: ${pageContent || 'No content parsed yet'}
     end of article
 
-    Original Poster: ${
+    Post Author: ${
       selectedPoster
         ? `${selectedPoster.name} \n ${selectedPoster.description}`
         : 'No Poster Selected'
@@ -427,9 +435,9 @@ export default function LiPost() {
             {/* Select type of content Video/ Post/ Podcast */}
 
             <div className="w-3/4">
-              <div>Select prompt</div>
+              <div className='font-bold text-xl'>1. Select AI prompt</div>
               <div className="text-sm text-gray-500">
-                Select prompt to generate post
+                Select prompt to generate Linkedin post
               </div>
               <Listbox value={selectedPrompt} onChange={setSelectedPrompt}>
                 <div className="relative">
@@ -470,66 +478,61 @@ export default function LiPost() {
 
             <textarea
               className="w-full h-32 p-2 mt-2 border border-gray-300 rounded-lg"
-              placeholder="Enter the content here"
+              placeholder="Select prompt or Enter the content here"
               value={promptContent}
               onChange={(e) => setPromptContent(e.target.value)}
             ></textarea>
 
-            <div>
-              <div>Select Reposter Prompt</div>
-              <div className="text-sm text-gray-500">
-                Select prompt to generate reposter post
-              </div>
-              <div className="flex flex-row">
-                <Listbox
-                  value={selectedReposterPrompt}
-                  onChange={setSelectedReposterPrompt}
-                >
-                  <div className="relative">
-                    <Listbox.Button className="relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-300 rounded-lg shadow-sm cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                      <span className="block truncate">
-                        {selectedReposterPrompt
-                          ? selectedReposterPrompt.name
-                          : 'Select Reposter Prompt'}
-                      </span>
-                    </Listbox.Button>
-                    <Listbox.Options className="absolute z-10 w-96 py-1 mt-1 overflow-auto text-base bg-white rounded-md shadow-lg max-h-60 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                      {repostersPrompts.map((prompt) => (
-                        <Listbox.Option
-                          key={prompt.id}
-                          className={({ active }) =>
-                            `${
-                              active
-                                ? 'text-white bg-blue-600'
-                                : 'text-gray-900'
-                            }
-                              cursor-default select-none relative py-2 pl-10 pr-4`
-                          }
-                          value={prompt}
-                        >
-                          {({ selected, active }) => (
-                            <>
-                              <span
-                                className={`${
-                                  selected ? 'font-semibold' : 'font-normal'
-                                } block truncate`}
-                              >
-                                {prompt.name}
-                              </span>
-                            </>
-                          )}
-                        </Listbox.Option>
-                      ))}
-                    </Listbox.Options>
-                  </div>
-                </Listbox>
-                <div className="ml-2">
-                  {/* //reset */}
+            
 
-                  {selectedReposterPrompt ? (
+  {/* Add url input to parse the content */}
+            <div>
+              <label className="block  font-medium text-gray-700">
+                <div className='font-bold text-xl'>2. Add URL</div>
+                <div className="text-sm text-gray-500 ">
+                  Add url input to parse the content
+                </div>
+              </label>
+              <input
+                type="text"
+                className="relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-300 rounded-lg shadow-sm cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                placeholder="Enter the URL here"
+                onChange={(e) => setPageUrl(e.target.value)}
+                value={pageUrl || ''}
+              />
+
+              <div className="mt-2">
+                <div className='text-sm text-gray-500'>
+                {pageContent.length > 0
+                      ? `✅ Content Ready`
+                      : 'No content parsed yet'}
+                </div>
+                <div className='max-h-[80px] mb-3 p-2 overflow-hidden relative'>
+                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-white/10 via-white/70 to-white">
+                  
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {pageContent.length > 0 && `${pageContent}`}
+                  </div>
+                </div>
+                <div className="flex flex-row">
+                  <button
+                    type="button"
+                    className={`w-full grow p-2 text-white bg-blue-600 rounded-lg
+                      ${pageUrl ? 'bg-blue-500' : 'bg-gray-300'}`}
+                    onClick={() => handlePageParse()}
+                  >
+                    {
+                      pageContent.length > 0 ? 'Reparse' : 'Parse Content'
+                    }
+                  </button>
+                  {pageContent.length > 0 || pageUrl ? (
                     <button
-                      className="w-full p-2 text-sm text-white bg-red-600 rounded-lg"
-                      onClick={() => setSelectedReposterPrompt('')}
+                      className="w-auto p-2 ml-2 text-white bg-red-600 rounded-lg"
+                      onClick={() => {
+                        setPageUrl('')
+                        setPageContent('')
+                      }}
                     >
                       Reset
                     </button>
@@ -540,19 +543,13 @@ export default function LiPost() {
               </div>
             </div>
 
-            <textarea
-              className="w-full h-32 p-2 mt-2 border border-gray-300 rounded-lg"
-              placeholder="Enter the content here"
-              value={reposterPromptContent}
-              onChange={(e) => setReposterPromptContent(e.target.value)}
-            ></textarea>
 
             <div>
               {/* Select Who is posting the Post */}
 
               <div>
-                <div>
-                  Select Poster
+                <div className='font-bold text-xl'>
+                  3. Select Poster
                   {selectedPoster ? `: ${selectedPoster.name}` : ''}
                 </div>
                 <div className="text-sm text-gray-500">
@@ -621,45 +618,65 @@ export default function LiPost() {
             </div>
           </div>
 
-          <div className="w-full lg:w-1/2 px-2 space-y-6 bg-gray-200 rounded-lg py-2">
-            {/* Add url input to parse the content */}
+          <div className="w-full lg:w-1/2 px-2 space-y-6 rounded-lg">
+          
+            
             <div>
-              <label className="block  font-medium text-gray-700">
-                <div>Add URL</div>
-                <div className="text-sm text-gray-500 ">
-                  Add url input to parse the content
-                </div>
-              </label>
-              <input
-                type="text"
-                className="relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-300 rounded-lg shadow-sm cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="Enter the URL here"
-                onChange={(e) => setPageUrl(e.target.value)}
-                value={pageUrl || ''}
-              />
+              <div className='font-bold text-xl'>
+                4. Select Reposter Prompt</div>
+              <div className="text-sm text-gray-500">
+                Select prompt to generate reposter post
+              </div>
+              <div className="flex flex-row">
+                <Listbox
+                  value={selectedReposterPrompt}
+                  onChange={setSelectedReposterPrompt}
+                >
+                  <div className="relative">
+                    <Listbox.Button className="relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-300 rounded-lg shadow-sm cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                      <span className="block truncate">
+                        {selectedReposterPrompt
+                          ? selectedReposterPrompt.name
+                          : 'Select Reposter Prompt'}
+                      </span>
+                    </Listbox.Button>
+                    <Listbox.Options className="absolute z-10 w-96 py-1 mt-1 overflow-auto text-base bg-white rounded-md shadow-lg max-h-60 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                      {repostersPrompts.map((prompt) => (
+                        <Listbox.Option
+                          key={prompt.id}
+                          className={({ active }) =>
+                            `${
+                              active
+                                ? 'text-white bg-blue-600'
+                                : 'text-gray-900'
+                            }
+                              cursor-default select-none relative py-2 pl-10 pr-4`
+                          }
+                          value={prompt}
+                        >
+                          {({ selected, active }) => (
+                            <>
+                              <span
+                                className={`${
+                                  selected ? 'font-semibold' : 'font-normal'
+                                } block truncate`}
+                              >
+                                {prompt.name}
+                              </span>
+                            </>
+                          )}
+                        </Listbox.Option>
+                      ))}
+                    </Listbox.Options>
+                  </div>
+                </Listbox>
+                <div className="ml-2">
+                  {/* //reset */}
 
-              <div className="mt-2">
-                <div className="text-sm text-gray-500 max-h-[260px] overflow-scroll">
-                  {pageContent.length > 0
-                    ? `Parsed content: ${pageContent}`
-                    : 'No content parsed yet'}
-                </div>
-                <div className="flex flex-row">
-                  <button
-                    type="button"
-                    className={`w-full grow p-2 text-white bg-blue-600 rounded-lg
-                      ${pageUrl ? 'bg-blue-500' : 'bg-gray-300'}`}
-                    onClick={() => handlePageParse()}
-                  >
-                    Parse Content
-                  </button>
-                  {pageContent.length > 0 || pageUrl ? (
+                  {selectedReposterPrompt ? (
                     <button
-                      className="w-auto p-2 ml-2 text-white bg-red-600 rounded-lg"
-                      onClick={() => {
-                        setPageUrl('')
-                        setPageContent('')
-                      }}
+                      className="w-full p-2 text-sm text-white bg-red-600 rounded-lg"
+                      onClick={() => setSelectedReposterPrompt('')}
                     >
                       Reset
                     </button>
@@ -669,34 +686,30 @@ export default function LiPost() {
                 </div>
               </div>
             </div>
-            <div>
-              {/* Add text area to paste the content */}
 
-              {/* <label className="block font-medium text-gray-700">
-                <div>Paste Content</div>
-                <div className="text-sm text-gray-500 ">paste the content</div>
-              </label>
-              <textarea
-                className="w-full h-32 p-2 mt-2 border border-gray-300 rounded-lg"
-                placeholder="Enter the content here"
-              ></textarea> */}
-            </div>
+            <textarea
+              className="w-full h-32 p-2 mt-2 border border-gray-300 rounded-lg"
+              placeholder="Select prompt or Enter the content here"
+              value={reposterPromptContent}
+              onChange={(e) => setReposterPromptContent(e.target.value)}
+            ></textarea>         
 
             <div>
               {/* Add Multiple Select to pick up who Reposts */}
 
               <div>
-                <div>Select Reposter</div>
+                <div className='font-bold text-xl'>
+                  5. Select Reposter</div>
                 <div className="text-sm text-gray-500">
                   Select who is reposting the post
                 </div>
-                <div className="flex flex-row">
+                <div className="flex flex-row w-full">
                   <Listbox
                     value={selectedReposter}
                     onChange={setSelectedReposter}
                     multiple
                   >
-                    <div className="relative">
+                    <div className="relative w-full">
                       <Listbox.Button className="relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-300 rounded-lg shadow-sm cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                         <span className="block truncate">
                           {selectedReposter.length > 0
@@ -765,11 +778,24 @@ export default function LiPost() {
             </div>
           </div>
 
-          <textarea
-            className="w-full h-96 p-2 m-2 border border-gray-300 rounded-lg"
-            value={promptToGenerate}
-            readOnly
-          ></textarea>
+          <div className='border-t border-white mt-6 w-full' />
+          
+          <div className="w-full px-2 space-y-6 rounded-lg mt-6">
+            <div>
+              <div className='font-bold text-xl'>
+                Preview
+              </div>
+              <div className="text-sm text-gray-500">
+                Preview the bundled prompt to generate the post
+              </div>
+              
+              <textarea
+                className="w-full h-96 p-2 border border-gray-300 rounded-lg"
+                value={promptToGenerate}
+                readOnly
+              ></textarea>
+            </div>
+          </div>
 
           <div className="w-full px-2">
             <button
@@ -784,7 +810,9 @@ export default function LiPost() {
             </button>
           </div>
 
-          <div className="w-full">
+          <div className='border-t border-emerald-600 mt-6 w-full' />
+
+          <div className="w-full px-2">
             {aiResponse ? (
               <div>
                 <div className="flex flex-wrap justify-between py-4">

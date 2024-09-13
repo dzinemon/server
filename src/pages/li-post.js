@@ -14,6 +14,8 @@ import {
   ChevronDownIcon,
 } from '@heroicons/react/20/solid'
 
+import Counter from '@/components/common/counter'
+
 import { copyToClipboardRichText } from '@/pages/generate'
 
 import { parseWithCheerio } from '../../utils/cheerio-axios'
@@ -900,7 +902,9 @@ export default function LiPost() {
                 handleGeneratePost()
               }}
             >
-              {isLoading ? 'Generating Post...' : 'Generate Post'}
+              {isLoading ? <>
+                Generating Post... for <Counter /> seconds 
+              </> : 'Generate Post'}
             </button>
           </div>
 

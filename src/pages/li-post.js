@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import Layout from '@/components/layout'
 
-import { Listbox } from '@headlessui/react'
+import { Listbox, Tab } from '@headlessui/react'
 
 import toast, { Toaster } from 'react-hot-toast'
 import ReactMarkdown from 'react-markdown'
@@ -11,6 +11,7 @@ import {
   CheckIcon,
   ClipboardIcon,
   ClipboardDocumentCheckIcon,
+  ChevronDownIcon,
 } from '@heroicons/react/20/solid'
 
 import { copyToClipboardRichText } from '@/pages/generate'
@@ -299,35 +300,31 @@ export default function LiPost() {
   //   }
   // }
 
-
   const handlePageParse = async () => {
     // use parseWithCheerio function to get page content
     setIsLoading(true)
 
     try {
-          if (!pageUrl) {
-      toast.error('Please provide a URL', { duration: 2000 });
-      return;
-    }
+      if (!pageUrl) {
+        toast.error('Please provide a URL', { duration: 2000 })
+        return
+      }
 
-    if (!pageUrl.startsWith('http')) {
-      toast.error('Please provide a valid URL', { duration: 2000 });
-      return;
-    }
+      if (!pageUrl.startsWith('http')) {
+        toast.error('Please provide a valid URL', { duration: 2000 })
+        return
+      }
       const { pageContent } = await parseWithCheerio(pageUrl)
 
       setPageContent(pageContent)
       // setPageUrl(pageUrl)
       toast.success('Page content Ready', { duration: 2000 })
-    }
-    catch (error) {
+    } catch (error) {
       console.error('Error parsing page:', error)
       toast.error('Error parsing page content')
-    }
-    finally {
+    } finally {
       setIsLoading(false)
     }
-
   }
 
   const handleGeneratePost = async () => {
@@ -435,44 +432,65 @@ export default function LiPost() {
             {/* Select type of content Video/ Post/ Podcast */}
 
             <div className="w-3/4">
-              <div className='font-bold text-xl'>1. Select AI prompt</div>
+              <div className="font-bold text-xl">1. Select AI prompt</div>
               <div className="text-sm text-gray-500">
                 Select prompt to generate Linkedin post
               </div>
               <Listbox value={selectedPrompt} onChange={setSelectedPrompt}>
-                <div className="relative">
-                  <Listbox.Button className="relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-300 rounded-lg shadow-sm cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                    <span className="block truncate">
-                      {selectedPrompt?.name || 'Select Prompt to Generate Post'}
-                    </span>
-                  </Listbox.Button>
-                  <Listbox.Options className="absolute z-10 w-96 py-1 mt-1 overflow-auto text-base bg-white rounded-md shadow-lg max-h-60 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                    {prompts.map((prompt) => (
-                      <Listbox.Option
-                        key={prompt.id}
-                        className={({ active }) =>
-                          `${
-                            active ? 'text-white bg-blue-600' : 'text-gray-900'
+                {
+                  ({ open }) => (
+                    <>
+                      <div className="relative">
+                        <Listbox.Button className="relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-300 rounded-lg shadow-sm cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                          <span className="block truncate">
+                            {selectedPrompt?.name || 'Select Prompt to Generate Post'}
+                          </span>
+
+                          <ChevronDownIcon className={`
+                          ${
+                            open ? 'text-gray-600 rotate-180' : 'text-gray-400'
                           }
-                            cursor-default select-none relative py-2 pl-10 pr-4`
-                        }
-                        value={prompt}
-                      >
-                        {({ selected, active }) => (
-                          <>
-                            <span
-                              className={`${
-                                selected ? 'font-semibold' : 'font-normal'
-                              } block truncate`}
+                            absolute w-5 h-5 text-gray-400 right-3 top-1/2 -translate-y-1/2
+                          `} />
+                        </Listbox.Button>
+                        <Listbox.Options className="absolute z-10 w-96 py-1 mt-1 overflow-auto text-base bg-white rounded-md shadow-lg max-h-60 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                          {prompts.map((prompt) => (
+                            <Listbox.Option
+                              key={prompt.id}
+                              className={({ active }) =>
+                                `${
+                                  active ? 'text-white bg-blue-600' : 'text-gray-900'
+                                }
+                                cursor-default select-none relative py-2 pl-10 pr-4`
+                              }
+                              value={prompt}
                             >
-                              {prompt.name}
-                            </span>
-                          </>
-                        )}
-                      </Listbox.Option>
-                    ))}
-                  </Listbox.Options>
-                </div>
+                              {({ selected, active }) => (
+                                <>
+                                  <span
+                                    className={`${
+                                      selected ? 'font-semibold' : 'font-normal'
+                                    } block truncate`}
+                                  >
+                                    {prompt.name}
+                                    {selected && (
+                                      <CheckIcon
+                                        className=" w-6 h-6 text-emerald-600 inline"
+                                        aria-hidden="true"
+                                      />
+                                    )}
+                                  </span>
+                                </>
+                              )}
+                            </Listbox.Option>
+                          ))}
+                        </Listbox.Options>
+                      </div>
+                    </>
+                  )
+                }
+                
+               
               </Listbox>
             </div>
 
@@ -483,49 +501,98 @@ export default function LiPost() {
               onChange={(e) => setPromptContent(e.target.value)}
             ></textarea>
 
-            
-
-  {/* Add url input to parse the content */}
+            {/* Add url input to parse the content */}
             <div>
-              <label className="block  font-medium text-gray-700">
-                <div className='font-bold text-xl'>2. Add URL</div>
-                <div className="text-sm text-gray-500 ">
-                  Add url input to parse the content
-                </div>
-              </label>
-              <input
-                type="text"
-                className="relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-300 rounded-lg shadow-sm cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="Enter the URL here"
-                onChange={(e) => setPageUrl(e.target.value)}
-                value={pageUrl || ''}
-              />
+              <div className="font-bold text-xl">2. Add Content</div>
+              <div className="text-sm text-gray-500">
+                Add content via URL parse or Text Area
+              </div>
+              <Tab.Group>
+                <Tab.List>
+                  <Tab>
+                    {({ selected }) => (
+                      <div
+                        className={`${
+                          selected
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-slate-400 text-white'
+                        } rounded-t-lg px-2 py-1 text-xs`}
+                      >
+                        Url Parse
+                      </div>
+                    )}
+                  </Tab>
+                  <Tab>
+                    {({ selected }) => (
+                      <div
+                        className={`${
+                          selected
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-slate-400 text-white'
+                        } rounded-t-lg px-2 py-1 text-xs`}
+                      >
+                        Text Area Input
+                      </div>
+                    )}
+                  </Tab>
+                </Tab.List>
+                <Tab.Panels>
+                  <Tab.Panel>
+                    <div className="p-2 bg-white border border-blue-500 rounded-b-lg space-y-3">
+                      <label className="block  font-medium text-gray-700">
+                        <div className="text-sm text-gray-500 ">
+                          Add url input to parse the content
+                        </div>
+                      </label>
+                      <input
+                        type="text"
+                        className="relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-300 rounded-lg shadow-sm cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        placeholder="Enter the URL here"
+                        onChange={(e) => setPageUrl(e.target.value)}
+                        value={pageUrl || ''}
+                      />
+
+                      <div className="flex flex-row">
+                        <button
+                          type="button"
+                          className={`w-full grow p-2 text-white bg-blue-600 rounded-lg
+                        ${pageUrl ? 'bg-blue-500' : 'bg-gray-300'}`}
+                          onClick={() => handlePageParse()}
+                        >
+                          {pageContent.length > 0 ? 'Reparse' : 'Parse Content'}
+                        </button>
+                      </div>
+                    </div>
+                  </Tab.Panel>
+                  <Tab.Panel>
+                    <div className="p-2 bg-white border border-blue-500 rounded-b-lg">
+                      <div className="text-sm text-gray-500 ">
+                        Enter the content here
+                      </div>
+                      <textarea
+                        className="w-full h-32 p-2 mt-2 border border-gray-300 rounded-lg"
+                        placeholder="Enter the content here"
+                        value={pageContent}
+                        onChange={(e) => setPageContent(e.target.value)}
+                      ></textarea>
+                    </div>
+                  </Tab.Panel>
+                </Tab.Panels>
+              </Tab.Group>
 
               <div className="mt-2">
-                <div className='text-sm text-gray-500'>
-                {pageContent.length > 0
-                      ? `✅ Content Ready`
-                      : 'No content parsed yet'}
+                <div className="text-sm text-gray-500">
+                  {pageContent.length > 0
+                    ? `✅ Content Ready`
+                    : 'No content added yet'}
                 </div>
-                <div className='max-h-[80px] mb-3 p-2 overflow-hidden relative'>
-                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-white/10 via-white/70 to-white">
-                  
-                  </div>
+                <div className="max-h-[80px] mb-3 p-2 overflow-hidden relative">
+                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-white/10 via-white/70 to-white"></div>
                   <div className="text-xs text-gray-500">
                     {pageContent.length > 0 && `${pageContent}`}
                   </div>
                 </div>
                 <div className="flex flex-row">
-                  <button
-                    type="button"
-                    className={`w-full grow p-2 text-white bg-blue-600 rounded-lg
-                      ${pageUrl ? 'bg-blue-500' : 'bg-gray-300'}`}
-                    onClick={() => handlePageParse()}
-                  >
-                    {
-                      pageContent.length > 0 ? 'Reparse' : 'Parse Content'
-                    }
-                  </button>
                   {pageContent.length > 0 || pageUrl ? (
                     <button
                       className="w-auto p-2 ml-2 text-white bg-red-600 rounded-lg"
@@ -534,7 +601,7 @@ export default function LiPost() {
                         setPageContent('')
                       }}
                     >
-                      Reset
+                      Reset Content
                     </button>
                   ) : (
                     ''
@@ -543,12 +610,11 @@ export default function LiPost() {
               </div>
             </div>
 
-
             <div>
               {/* Select Who is posting the Post */}
 
               <div>
-                <div className='font-bold text-xl'>
+                <div className="font-bold text-xl">
                   3. Select Poster
                   {selectedPoster ? `: ${selectedPoster.name}` : ''}
                 </div>
@@ -557,47 +623,60 @@ export default function LiPost() {
                 </div>
                 <div className="flex flex-row">
                   <Listbox value={selectedPoster} onChange={setSelectedPoster}>
-                    <div className="relative">
-                      <Listbox.Button className="relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-300 rounded-lg shadow-sm cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                        <span className="block truncate">
-                          {selectedPoster?.name || 'Select Poster'}
-                        </span>
-                      </Listbox.Button>
-                      <Listbox.Options className="absolute z-10 w-96 py-1 mt-1 overflow-auto text-base bg-white rounded-md shadow-lg max-h-60 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                        {posters.map((poster) => (
-                          <Listbox.Option
-                            key={poster.id}
-                            className={({ active }) =>
-                              `${
-                                active
-                                  ? 'text-white bg-blue-600'
-                                  : 'text-gray-900'
+                    {({ open }) => (
+                        <div className="relative">
+                        <Listbox.Button className="relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-300 rounded-lg shadow-sm cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                          <span className="block truncate">
+                            {selectedPoster?.name || 'Select Poster'}
+                          </span>
+
+                          <ChevronDownIcon className={` 
+                          ${  
+                            open ? 'text-gray-600 rotate-180' : 'text-gray-400'
+                          }
+                            absolute w-5 h-5 text-gray-400 right-3 top-1/2 -translate-y-1/2
+                          `} />
+
+                        </Listbox.Button>
+                        <Listbox.Options className="absolute z-10 w-96 py-1 mt-1 overflow-auto text-base bg-white rounded-md shadow-lg max-h-60 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                          {posters.map((poster) => (
+                            <Listbox.Option
+                              key={poster.id}
+                              className={({ active }) =>
+                                `${
+                                  active
+                                    ? 'text-white bg-blue-600'
+                                    : 'text-gray-900'
+                                }
+                                cursor-default select-none relative py-2 pl-10 pr-4`
                               }
-                              cursor-default select-none relative py-2 pl-10 pr-4`
-                            }
-                            value={poster}
-                          >
-                            {({ selected, active }) => (
-                              <>
-                                <span
-                                  className={`${
-                                    selected ? 'font-semibold' : 'font-normal'
-                                  } block truncate`}
-                                >
-                                  {poster.name}
-                                  {selected && (
-                                    <CheckIcon
-                                      className=" w-6 h-6 text-emerald-600 inline"
-                                      aria-hidden="true"
-                                    />
-                                  )}
-                                </span>
-                              </>
-                            )}
-                          </Listbox.Option>
-                        ))}
-                      </Listbox.Options>
-                    </div>
+                              value={poster}
+                            >
+                              {({ selected, active }) => (
+                                <>
+                                  <span
+                                    className={`${
+                                      selected ? 'font-semibold' : 'font-normal'
+                                    } block truncate`}
+                                  >
+                                    {poster.name}
+                                    {selected && (
+                                      <CheckIcon
+                                        className=" w-6 h-6 text-emerald-600 inline"
+                                        aria-hidden="true"
+                                      />
+                                    )}
+                                  </span>
+                                </>
+                              )}
+                            </Listbox.Option>
+                          ))}
+                        </Listbox.Options>
+                        </div>
+                    )}
+                    
+                    
+                   
                   </Listbox>
                   <div className="ml-2">
                     {/* //reset */}
@@ -619,11 +698,8 @@ export default function LiPost() {
           </div>
 
           <div className="w-full lg:w-1/2 px-2 space-y-6 rounded-lg">
-          
-            
             <div>
-              <div className='font-bold text-xl'>
-                4. Select Reposter Prompt</div>
+              <div className="font-bold text-xl">4. Select Reposter Prompt</div>
               <div className="text-sm text-gray-500">
                 Select prompt to generate reposter post
               </div>
@@ -632,13 +708,22 @@ export default function LiPost() {
                   value={selectedReposterPrompt}
                   onChange={setSelectedReposterPrompt}
                 >
-                  <div className="relative">
+                  {
+                    ({ open }) => (
+                    <div className="relative">
                     <Listbox.Button className="relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-300 rounded-lg shadow-sm cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                       <span className="block truncate">
                         {selectedReposterPrompt
                           ? selectedReposterPrompt.name
                           : 'Select Reposter Prompt'}
                       </span>
+
+                      <ChevronDownIcon className={`
+                      ${
+                        open ? 'text-gray-600 rotate-180' : 'text-gray-400'
+                      }
+                        absolute w-5 h-5 text-gray-400 right-3 top-1/2 -translate-y-1/2
+                      `} />
                     </Listbox.Button>
                     <Listbox.Options className="absolute z-10 w-96 py-1 mt-1 overflow-auto text-base bg-white rounded-md shadow-lg max-h-60 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                       {repostersPrompts.map((prompt) => (
@@ -669,6 +754,9 @@ export default function LiPost() {
                       ))}
                     </Listbox.Options>
                   </div>
+                    )
+                  }
+                  
                 </Listbox>
                 <div className="ml-2">
                   {/* //reset */}
@@ -692,14 +780,13 @@ export default function LiPost() {
               placeholder="Select prompt or Enter the content here"
               value={reposterPromptContent}
               onChange={(e) => setReposterPromptContent(e.target.value)}
-            ></textarea>         
+            ></textarea>
 
             <div>
               {/* Add Multiple Select to pick up who Reposts */}
 
               <div>
-                <div className='font-bold text-xl'>
-                  5. Select Reposter</div>
+                <div className="font-bold text-xl">5. Select Reposter</div>
                 <div className="text-sm text-gray-500">
                   Select who is reposting the post
                 </div>
@@ -709,7 +796,8 @@ export default function LiPost() {
                     onChange={setSelectedReposter}
                     multiple
                   >
-                    <div className="relative w-full">
+                    {({ open }) => (
+                      <div className="relative w-full">
                       <Listbox.Button className="relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-300 rounded-lg shadow-sm cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                         <span className="block truncate">
                           {selectedReposter.length > 0
@@ -719,6 +807,13 @@ export default function LiPost() {
                             .map((person) => person.name)
                             .join(', ')}
                         </span>
+
+                        <ChevronDownIcon className={`
+                        ${
+                          open ? 'text-gray-600 rotate-180' : 'text-gray-400'
+                        }
+                          absolute w-5 h-5 text-gray-400 right-3 top-1/2 -translate-y-1/2
+                        `} />
                       </Listbox.Button>
                       <Listbox.Options className="absolute z-10 w-96 py-1 mt-1 overflow-auto text-base bg-white rounded-md shadow-lg max-h-60 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                         {posters.map((reposter) => (
@@ -749,6 +844,7 @@ export default function LiPost() {
                         ))}
                       </Listbox.Options>
                     </div>
+                    )}
                   </Listbox>
                   <div className="ml-2">
                     {/* //reset */}
@@ -778,17 +874,15 @@ export default function LiPost() {
             </div>
           </div>
 
-          <div className='border-t border-white mt-6 w-full' />
-          
+          <div className="border-t border-white mt-6 w-full" />
+
           <div className="w-full px-2 space-y-6 rounded-lg mt-6">
             <div>
-              <div className='font-bold text-xl'>
-                Preview
-              </div>
+              <div className="font-bold text-xl">Preview</div>
               <div className="text-sm text-gray-500">
                 Preview the bundled prompt to generate the post
               </div>
-              
+
               <textarea
                 className="w-full h-96 p-2 border border-gray-300 rounded-lg"
                 value={promptToGenerate}
@@ -810,7 +904,7 @@ export default function LiPost() {
             </button>
           </div>
 
-          <div className='border-t border-emerald-600 mt-6 w-full' />
+          <div className="border-t border-emerald-600 mt-6 w-full" />
 
           <div className="w-full px-2">
             {aiResponse ? (

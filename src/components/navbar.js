@@ -46,6 +46,10 @@ export default function Navbar() {
       name: 'Generate Content',
       slug: 'generate',
     },
+    {
+      name: 'Li Post',
+      slug: 'li-post',
+    },
   ]
 
   if (session?.user?.role === 'admin') {

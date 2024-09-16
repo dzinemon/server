@@ -52,6 +52,26 @@ const createChatCompletionCustom = async (prompt, model, temperature, instructio
   }
 }
 
+// create chatCompletionMessages that will accept messages as an array of objects, model, temperature
+
+const chatCompletionMessages = async (messages, model, temperature) => {
+  try {
+    const openai = new OpenAI(configuration)
+
+    const completion = await openai.chat.completions.create({
+      model,
+      temperature: temperature,
+      messages: messages,
+      stream: false,
+    })
+
+    return completion.choices[0].message.content
+  } catch (error) {
+    console.error('Error creating chat completion:', error)
+    throw error
+  }
+}
+
 const createChatCompletion = async (prompt) => {
   try {
     const openai = new OpenAI(configuration)
@@ -80,4 +100,4 @@ const createChatCompletion = async (prompt) => {
   }
 }
 
-export { generateEmbedding, createChatCompletion, createChatCompletionCustom }
+export { generateEmbedding, createChatCompletion, createChatCompletionCustom, chatCompletionMessages }

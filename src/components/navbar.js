@@ -50,6 +50,10 @@ export default function Navbar() {
       name: 'Li Post',
       slug: 'li-post',
     },
+    {
+      name: '🤖 Li Post',
+      slug: 'li-post-stream',
+    },
   ]
 
   if (session?.user?.role === 'admin') {
@@ -59,7 +63,7 @@ export default function Navbar() {
   return (
     <header className="fixed backdrop-blur-lg top-0 w-full z-50">
       <nav
-        className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8"
+        className="mx-auto flex w-full max-w-[1500px] items-center justify-between p-6 lg:px-8"
         aria-label="Global"
       >
         <div className="flex lg:flex-1">
@@ -88,7 +92,7 @@ export default function Navbar() {
               <Link
                 key={`nav-bar-lg-${idx}`}
                 href={`/${item.slug}`}
-                className={`${ pathname.indexOf(item.slug) !== -1 ? 'underline pointer-events-none' : '' } text-sm font-semibold leading-6 text-gray-900`}
+                className={`${ pathname === `/${item.slug}` ? 'underline pointer-events-none' : '' } text-sm font-semibold leading-6 text-gray-900`}
               >
                 {item.name}
               </Link>

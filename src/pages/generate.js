@@ -4,6 +4,11 @@ import { Listbox, Transition, Tab, Dialog } from '@headlessui/react'
 import DiffViewer from 'react-diff-viewer'
 
 // import HighlightDifferences from '@/context/HighlightDifferences'
+
+import {
+  models
+} from '../../utils/hardcoded'
+
 import {
   VariableIcon,
   DocumentTextIcon,
@@ -72,9 +77,15 @@ export const copyToClipboard = async (text) => {
   }
 }
 
-export default function Test() {
+export default function Generate() {
   const myHeaders = new Headers()
   myHeaders.append('Content-Type', 'application/json')
+
+  const [newPromptToSave, setNewPromptToSave] = useState({
+    name: '',
+    content: '',
+    type: 'content',
+  });
 
   // useRef to get react markdown content
   const markdownContentRef = useRef(null)
@@ -93,7 +104,7 @@ export default function Test() {
 
   const { markdownContent, handleMarkdownChange } = useResources()
 
-  const { prompts, fetchPrompts, currentPrompt, setCurrentPrompt } =
+  const { prompts, contentPrompts, fetchPrompts, currentPrompt, setCurrentPrompt } =
     usePrompts()
 
   const [isLoading, setIsLoading] = useState(false)
@@ -307,7 +318,6 @@ export default function Test() {
 
   useEffect(() => {
     // setPrompt(selectedPrompt.content)
-
     setCurrentPrompt(selectedPrompt)
   }, [selectedPrompt])
 
@@ -323,7 +333,7 @@ export default function Test() {
             <div className="flex flex-wrap items-center -mx-2">
               <div className="w-auto px-2 font-bold">Prompt</div>
               <div className="w-full flex">
-                {prompts.length > 0 && (
+                {contentPrompts.length > 0 && (
                   <div className="w-64 px-2">
                     <Listbox
                       value={selectedPrompt}
@@ -337,8 +347,8 @@ export default function Test() {
                         >
                           <span className="block truncate">
                             <DocumentTextIcon className="w-5 h-5 inline" />
-                            {currentPrompt
-                              ? `${currentPrompt.name} `
+                            {selectedPrompt
+                              ? `${selectedPrompt.name} `
                               : 'Select a prompt'}
                           </span>
                           <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
@@ -359,7 +369,7 @@ export default function Test() {
                               'absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm'
                             }
                           >
-                            {prompts.map((prompt) => (
+                            {contentPrompts.map((prompt) => (
                               <Listbox.Option
                                 key={prompt.id}
                                 value={prompt}
@@ -384,11 +394,18 @@ export default function Test() {
                   <button
                     title="Open Modal to Create a New Prompt"
                     className="p-2 bg-emerald-300 text-white rounded text-xs"
-                    onClick={() => setOpenAddDialog(true)}
+                    onClick={() => {
+                      setCurrentPrompt({
+                        name: '',
+                        content: '',
+                        type: 'content',
+                      })
+                      setOpenAddDialog(true)
+                    }}
                   >
                     Add New Prompt
                   </button>
-                  {currentPrompt && currentPrompt.name && (
+                  {currentPrompt && (
                     <>
                       <button
                         className="p-2 bg-slate-400 text-white rounded text-xs"
@@ -414,14 +431,6 @@ export default function Test() {
                     </>
                   )}
                 </div>
-                <div className="w-auto px-2 hidden">
-                  <button
-                    className="p-2 bg-slate-400 text-white rounded text-xs"
-                    disabled
-                  >
-                    Prompt Manager
-                  </button>
-                </div>
               </div>
             </div>
             <AddPromptDialog open={openAddDialog} setOpen={setOpenAddDialog} />
@@ -442,10 +451,11 @@ export default function Test() {
                 />
 
                 <textarea
-                  value={currentPrompt.content}
+                  value={selectedPrompt?.content || ''}
+                  placeholder='Add Prompt content here'
                   onChange={(e) => {
-                    setCurrentPrompt({
-                      ...currentPrompt,
+                    setSelectedPrompt({
+                      ...selectedPrompt,
                       content: e.target.value,
                     })
                   }}
@@ -461,6 +471,7 @@ export default function Test() {
                     <textarea
                       value={promptToGenerate}
                       readOnly={true}
+                      placeholder='Prompt preview'
                       disabled
                       className="w-full h-64 border border-gray-300 rounded-lg p-2"
                     />
@@ -658,13 +669,13 @@ export default function Test() {
                   onChange={(e) => setModel(e.target.value)}
                   className="w-full border border-slate-200 p-2"
                 >
-                  <option value="gpt-4o">gpt-4o</option>
-                  <option value="gpt-4o-mini">
-                    gpt-4o-mini
-                  </option>
-                  <option value="gpt-4-turbo">gpt-4-turbo</option>
-                  <option value="gpt-4">gpt-4</option>
-                  <option value="claude-3-5-sonnet-20240620">claude-3-5-sonnet-20240620</option>
+                  {
+                    models.map((model, idx) => (
+                      <option key={idx} value={model}>
+                        {model}
+                      </option>
+                    ))
+                  }
                 </select>
               </div>
               <div className="flex items-center">

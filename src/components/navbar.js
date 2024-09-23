@@ -47,10 +47,6 @@ export default function Navbar() {
       slug: 'generate',
     },
     {
-      name: 'Li Post',
-      slug: 'li-post',
-    },
-    {
       name: '🤖 Li Post',
       slug: 'li-post-stream',
     },

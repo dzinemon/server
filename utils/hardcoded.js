@@ -147,13 +147,12 @@ const repostersPrompts = [
 const posters = [
   {
     id: 1,
-    name: 'Healy Jones',
-    title: 'VP of Financial Strategy',
-    description: `Healy Jones, VP Financial Strategy of Kruze Consulting. Healy helps Kruze startup
-clients prepare for VC fund raising, and is a startup founder, former VC who has invested
-in dozens of startups, and ran marketing for several startup companies. He knows what
-it’s like to build fast growing sales teams and marketing teams, and also what it’s like to
-negotiate with VCs. He has helped startups raise over one billion dollars.`,
+    name: 'Kruze Consulting',
+    title: 'Startup Accounting, Finance & Tax CPA Expertise',
+    description: `Kruze only works
+with VC-backed startups, and our clients have collectively raised over $15 billion in VC
+funding. The Kruze team has helped over 1000 startups set up their accounting and
+fintech systems.`,
   },
   {
     id: 2,
@@ -180,12 +179,13 @@ founders get ready to fundraise and clean up their books`,
   },
   {
     id: 4,
-    name: 'Kruze Consulting',
-    title: 'Startup Accounting, Finance & Tax CPA Expertise',
-    description: `Kruze only works
-with VC-backed startups, and our clients have collectively raised over $15 billion in VC
-funding. The Kruze team has helped over 1000 startups set up their accounting and
-fintech systems.`,
+    name: 'Healy Jones',
+    title: 'VP of Financial Strategy',
+    description: `Healy Jones, VP Financial Strategy of Kruze Consulting. Healy helps Kruze startup
+clients prepare for VC fund raising, and is a startup founder, former VC who has invested
+in dozens of startups, and ran marketing for several startup companies. He knows what
+it’s like to build fast growing sales teams and marketing teams, and also what it’s like to
+negotiate with VCs. He has helped startups raise over one billion dollars.`,
   },
   {
     id: 5,
@@ -212,4 +212,10 @@ helpful and informative and shows that he cares about the startup ecosystem, sta
   },
 ]
 
-export { prompts, repostersPrompts, posters }
+const models = [
+  'gpt-4o',
+  'gpt-4o-mini',
+  'claude-3-5-sonnet-20240620',
+]
+
+export { prompts, repostersPrompts, posters, models }

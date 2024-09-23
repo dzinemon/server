@@ -1,42 +1,39 @@
-import { 
-  createChatCompletionCustom
- } from '../../../../utils/openai'
+import { createChatCompletionCustom } from '../../../../utils/openai'
 
- import {
-  createClaudeCompletion
- } from '../../../../utils/anthropic'
-
-// import data from '../../../../data/data.json';
-
-// import checkRequestOrigin from '../../../../utils/checkRequestOrigin'
+import { createClaudeCompletion } from '../../../../utils/anthropic'
 
 const postUrl = async (req, res) => {
-  const { 
-    prompt, model, temperature, instructions, maxTokens } = req.body
+  const { prompt, model, temperature, instructions, maxTokens } = req.body
 
-  // if model contains gpt then use openai
+  let completion = ''
 
-  let completion = '';
-  
   if (model.includes('gpt')) {
     console.log('using openai')
-  
-  completion = await createChatCompletionCustom(
-    prompt, model, temperature, instructions, maxTokens
-  )} else {
+
+    completion = await createChatCompletionCustom(
+      prompt,
+      model,
+      temperature,
+      instructions,
+      maxTokens
+    )
+  } else {
     console.log('using anthropic')
     completion = await createClaudeCompletion(
-      prompt, model, temperature, instructions, maxTokens
+      prompt,
+      model,
+      temperature,
+      instructions,
+      maxTokens
     )
   }
-
 
   res.status(200).json({ completion })
 }
 
 export const config = {
   maxDuration: 200,
-};
+}
 
 export default function handler(req, res) {
   switch (req.method) {

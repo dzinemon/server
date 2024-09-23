@@ -13,6 +13,30 @@ export const PromptProvider = ({ children }) => {
 
   const [currentPrompt, setCurrentPrompt] = useState({})
 
+  const [contentPrompts, setContentPrompts] = useState([])
+
+  const [aiPrompts, setAiPrompts] = useState([])
+
+  const [reposterPrompts, setReposterPrompts] = useState([])
+
+  useEffect(() => {
+    // set prompts after prompts change, use type to filter
+    
+    // types: 'ai', 'content', 'reposter'
+
+    const contentPrompts = prompts.filter(prompt => prompt.type === 'content')
+
+    const aiPrompts = prompts.filter(prompt => prompt.type === 'ai')
+
+    const reposterPrompts = prompts.filter(prompt => prompt.type === 'reposter')
+
+    setContentPrompts(contentPrompts)
+    setAiPrompts(aiPrompts)
+    setReposterPrompts(reposterPrompts)
+
+  }, [prompts])
+  
+
   const fetchPrompts = async () => {
     setLoading(true)
     const res = await fetch(promptsUrl)
@@ -24,7 +48,8 @@ export const PromptProvider = ({ children }) => {
   return (
     <PromptContext.Provider value={{ 
       prompts, loading, fetchPrompts, 
-      currentPrompt, setCurrentPrompt
+      currentPrompt, setCurrentPrompt,
+      contentPrompts, aiPrompts, reposterPrompts
       }}>
       {children}
     </PromptContext.Provider>

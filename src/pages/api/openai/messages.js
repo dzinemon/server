@@ -1,16 +1,29 @@
 import { chatCompletionMessages } from '../../../../utils/openai';
 
+import { createClaudeCompletionMessage } from '../../../../utils/anthropic';
+
 const postUrl = async (req, res) => {
   const { messages, model, temperature } = req.body;
 
   try {
     let completion = '';
 
-    completion = await chatCompletionMessages(
-      messages,
-      model,
-      temperature
-    );
+    if (model.includes('gpt')) {
+      console.log('using openai');
+      
+      completion = await chatCompletionMessages(
+        messages,
+        model,
+        temperature
+      );
+    } else {
+      console.log('using anthropic');
+      completion = await createClaudeCompletionMessage(
+        messages,
+        model,
+        temperature
+      );
+    }
 
     res.status(200).json({ completion });
   } catch (error) {

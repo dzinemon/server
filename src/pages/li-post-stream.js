@@ -367,7 +367,7 @@ export default function LiPost() {
                       setOpenAddDialog(true)
                     }}
                   >
-                    Add New Prompt
+                    Add New
                   </button>
                   {currentPrompt && (
                     <>
@@ -379,7 +379,7 @@ export default function LiPost() {
                         }}
                         title="Save Changes to Current Prompt"
                       >
-                        Save Prompt
+                        Save
                       </button>
                     </>
                   )}
@@ -720,7 +720,7 @@ export default function LiPost() {
                       setOpenAddDialog(true)
                     }}
                   >
-                    Add New Prompt
+                    Add New
                   </button>
                   {selectedReposterPrompt && (
                     <>
@@ -732,7 +732,7 @@ export default function LiPost() {
                         }}
                         title="Save Changes to Current Prompt"
                       >
-                        Save Prompt
+                        Save
                       </button>
                     </>
                   )}

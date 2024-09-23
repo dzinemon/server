@@ -77,13 +77,17 @@ const useHandleRequest = (method, url, body, successMessage, errorMessage, callb
 const PromptDialog = ({ open, setOpen, title, description, prompt, setPrompt, handleSave, isLoading }) => (
   <DialogWrapper open={open} setOpen={setOpen}>
     <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 text-center">
-      {title}
+      {title} -
+      {' '}
+      <span class="rounded-full py-1 px-2 bg-slate-200 text-center text-sm font-mono">{
+        prompt?.type
+        }</span>
     </Dialog.Title>
     <div className="my-1">
       <p className="text-sm text-gray-500 text-center">{description}</p>
     </div>
     <div className="flex flex-wrap -mx-2 space-y-4">
-      <div className="w-auto grow px-2">
+      <div className="w-full px-2">
         <label htmlFor="name" className="block text-left">Name</label>
         <input
           type="text"
@@ -93,11 +97,6 @@ const PromptDialog = ({ open, setOpen, title, description, prompt, setPrompt, ha
           onChange={(e) => setPrompt({ ...prompt, name: e.target.value })}
           className="w-full border border-gray-300 rounded-lg p-2"
         />
-      </div>
-      <div className="w-auto px-2 shrink">
-      <div class="rounded-full py-1 px-2 bg-slate-200 text-center">{
-        prompt?.type
-        }</div>
       </div>
       <div className="w-full px-2">
         <label htmlFor="content" className="block text-left">Content</label>

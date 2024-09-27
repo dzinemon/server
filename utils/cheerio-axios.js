@@ -6,14 +6,39 @@ import {load} from 'cheerio'
 
 export const getHtml = async (url) => {
   try {
-    return await axios.get(url)
+    const response = await axios.get(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+      },
+      timeout: 10000 // Optional: specify a timeout for the request
+    });
+
+    if (response.status === 200) {
+      console.log('Response status:', response.status);
+      return response.data;
+    } else {
+      console.error('Unexpected status code:', response.status);
+    }
   } catch (error) {
-    console.error(error)
+    if (error.response) {
+      // Server responded with a status other than 2xx
+      console.error('Error response data:', error.response.data);
+      console.error('Error response status:', error.response.status);
+      console.error('Error response headers:', error.response.headers);
+    } else if (error.request) {
+      // Request was made but no response received
+      console.error('Error request:', error.request);
+    } else {
+      // Something else caused the error
+      console.error('Error message:', error.message);
+    }
+    console.error('Error config:', error.config);
   }
-}
+};
 export const getCheerio = async (url) => {
   const html = await getHtml(url)
-  const $ = load(html.data)
+  console.log('html', html)
+  const $ = load(html)
   return $
 }
 
@@ -87,7 +112,8 @@ export const parseWithCheerio = async (url) => {
       .text()
   } else if (url.startsWith('https://www.irs.gov')) {
     console.log('PARSING IRS ...')
-    ogImage = $('meta[property="og:image"]').attr('content').trim() ? $('meta[property="og:image"]').attr('content').trim() : 'https://www.irs.gov/pub/image/logo_small.jpg'
+    const ogImageMeta = $('meta[property="og:image"]').attr('content');
+    ogImage = ogImageMeta ? ogImageMeta.trim() : 'https://www.irs.gov/pub/image/logo_small.jpg';
     text = $('body')
       .find('nav')
       .remove()

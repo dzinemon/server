@@ -60,6 +60,9 @@ export default function LiPost() {
 
   const { members, currentMember, setCurrentMember } = useMembers()
 
+  const myHeaders = new Headers()
+  myHeaders.append('Content-Type', 'application/json')
+
 
   const [openSaveDialog, setOpenSaveDialog] = useState(false)
 
@@ -117,6 +120,14 @@ export default function LiPost() {
   }
 
   const handlePageParse = async () => {
+
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: pageUrl }),
+      redirect: 'follow'
+    }
+    
     setIsParsing(true)
 
     try {
@@ -130,11 +141,7 @@ export default function LiPost() {
         return
       }
 
-      const response = await fetch('/api/parse', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: pageUrl }),
-      })
+      const response = await fetch('/api/parse', requestOptions)
 
       if (!response.ok) {
         throw new Error('Failed to parse page')

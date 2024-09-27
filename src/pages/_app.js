@@ -9,6 +9,10 @@ import {
   PromptProvider
 } from '@/context/prompts'
 
+import {
+  MembersProvider
+} from '@/context/members'
+
 export default function App({
   Component,
   pageProps: { session, ...pageProps },
@@ -17,7 +21,9 @@ export default function App({
     <SessionProvider session={session}>
       <ResourceProvider>
         <PromptProvider>  
-          <Component {...pageProps} />
+          <MembersProvider>
+            <Component {...pageProps} />
+          </MembersProvider>
         </PromptProvider>
       </ResourceProvider>
     </SessionProvider>

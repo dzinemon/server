@@ -2,7 +2,6 @@ import React, { createContext, useState, useContext, useEffect } from 'react'
 
 import { baseUrl } from '../../utils/config'
 
-
 const PromptContext = createContext()
 
 export const PromptProvider = ({ children }) => {

@@ -22,9 +22,6 @@ const postPrompt = async (req, res) => {
   res.status(200).json(result.rows)
 }
 
-
-
-
 export default async function handler(req, res) {
   switch (req.method) {
     case 'GET':

@@ -4,6 +4,7 @@ import Layout from '@/components/layout'
 import Image from 'next/image'
 
 import { usePrompts } from '@/context/prompts'
+import { useMembers } from '@/context/members'
 
 import { Listbox, Tab, Transition } from '@headlessui/react'
 
@@ -28,6 +29,10 @@ import {
   SavePromptDialog,
   SaveAsPromptDialog,
   AddPromptDialog,
+  AddMemberDialog,
+  SaveMemberDialog,
+  SaveAsMemberDialog,
+  DeleteMemberDialog
 } from '@/components/generate'
 
 import { posters, models } from '../../utils/hardcoded'
@@ -53,6 +58,9 @@ export default function LiPost() {
     fetchPrompts,
   } = usePrompts()
 
+  const { members, currentMember, setCurrentMember } = useMembers()
+
+
   const [openSaveDialog, setOpenSaveDialog] = useState(false)
 
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false)
@@ -60,6 +68,15 @@ export default function LiPost() {
   const [openSaveAsDialog, setOpenSaveAsDialog] = useState(false)
 
   const [openAddDialog, setOpenAddDialog] = useState(false)
+
+  const [openAddMemberDialog, setOpenAddMemberDialog] = useState(false)
+
+  const [openSaveMemberDialog, setOpenSaveMemberDialog] = useState(false)
+
+  const [openSaveAsMemberDialog, setOpenSaveAsMemberDialog] = useState(false)
+
+  const [openDeleteMemberDialog, setOpenDeleteMemberDialog] = useState(false)
+  
 
   const scrollTargetRef = useRef(null)
 
@@ -199,7 +216,7 @@ export default function LiPost() {
 
     Post Author: ${
       selectedPoster
-        ? `${selectedPoster.name} \n ${selectedPoster.description}`
+        ? `${selectedPoster.name} \n ${selectedPoster.content}`
         : 'No Poster Selected'
     }
 
@@ -214,7 +231,7 @@ export default function LiPost() {
       selectedReposter.length === 0
         ? 'No Reposters Selected'
         : selectedReposter
-            .map((person) => `\n ${person.name} \n ${person.description}`)
+            .map((person) => `\n ${person.name} \n ${person.content}`)
             .join(' \n\n')
     }
     `
@@ -265,6 +282,10 @@ export default function LiPost() {
   useEffect(() => {
     setSelectedReposterPrompt(selectedReposterPrompt)
   }, [selectedReposterPrompt, setSelectedReposterPrompt])
+
+  useEffect(() => {
+    setCurrentMember(selectedPoster)
+  }, [selectedPoster, setCurrentMember])
 
   return (
     <Layout>
@@ -564,65 +585,117 @@ export default function LiPost() {
 
               <div>
                 <div className="font-bold text-xl">
-                  3. Select Poster
-                  {selectedPoster ? `: ${selectedPoster.name}` : ''}
+                  3. Select Poster{" "}
+                  {selectedPoster && members.length > 0 ? `: ${selectedPoster.name}` : <span className='text-sm font-normal text-gray-400'>Select or create one</span>}
                 </div>
                 <div className="text-sm text-gray-500">
                   Select who is posting the post
                 </div>
-                <div className="flex flex-row">
-                  <Listbox value={selectedPoster} onChange={setSelectedPoster}>
-                    {({ open }) => (
-                      <div className="relative">
-                        <Listbox.Button className="relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-300 rounded-lg shadow-sm cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                          <span className="block truncate">
-                            {selectedPoster?.name || 'Select Poster'}
-                          </span>
-
-                          <ChevronDownIcon
-                            className={` 
-                          ${open ? 'text-gray-600 rotate-180' : 'text-gray-400'}
-                            absolute w-5 h-5 text-gray-400 right-3 top-1/2 -translate-y-1/2
-                          `}
-                          />
-                        </Listbox.Button>
-                        <Listbox.Options className="absolute z-10 w-96 py-1 mt-1 overflow-auto text-base bg-white rounded-md shadow-lg max-h-60 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                          {posters.map((poster) => (
-                            <Listbox.Option
-                              key={poster.id}
-                              className={({ active }) =>
-                                `${
-                                  active
-                                    ? 'text-white bg-blue-600'
-                                    : 'text-gray-900'
+                <div className="flex flex-row gap-2">
+                  <div className='w-auto'>
+                    {
+                      members.length > 0 ? (
+                      <Listbox value={selectedPoster} onChange={setSelectedPoster}>
+                      {({ open }) => (
+                        <div className="relative">
+                          <Listbox.Button className="relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-300 rounded-lg shadow-sm cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <span className="block truncate">
+                              {selectedPoster?.name || 'Select Poster'}
+                            </span>
+                            <ChevronDownIcon
+                              className={`
+                            ${open ? 'text-gray-600 rotate-180' : 'text-gray-400'}
+                              absolute w-5 h-5 text-gray-400 right-3 top-1/2 -translate-y-1/2
+                            `}
+                            />
+                          </Listbox.Button>
+                          <Listbox.Options className="absolute z-10 w-96 py-1 mt-1 overflow-auto text-base bg-white rounded-md shadow-lg max-h-60 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                            {members.map((poster) => (
+                              <Listbox.Option
+                                key={poster.id}
+                                className={({ active }) =>
+                                  `${
+                                    active
+                                      ? 'text-white bg-blue-600'
+                                      : 'text-gray-900'
+                                  }
+                                  cursor-default select-none relative py-2 pl-10 pr-4`
                                 }
-                                cursor-default select-none relative py-2 pl-10 pr-4`
-                              }
-                              value={poster}
-                            >
-                              {({ selected, active }) => (
-                                <>
-                                  <span
-                                    className={`${
-                                      selected ? 'font-semibold' : 'font-normal'
-                                    } block truncate`}
-                                  >
-                                    {poster.name}
-                                    {selected && (
-                                      <CheckIcon
-                                        className=" w-6 h-6 text-emerald-600 inline"
-                                        aria-hidden="true"
-                                      />
-                                    )}
-                                  </span>
-                                </>
-                              )}
-                            </Listbox.Option>
-                          ))}
-                        </Listbox.Options>
-                      </div>
-                    )}
-                  </Listbox>
+                                value={poster}
+                              >
+                                {({ selected, active }) => (
+                                  <>
+                                    <span
+                                      className={`${
+                                        selected ? 'font-semibold' : 'font-normal'
+                                      } block truncate`}
+                                    >
+                                      {poster.name}
+                                      {selected && (
+                                        <CheckIcon
+                                          className=" w-6 h-6 text-emerald-600 inline"
+                                          aria-hidden="true"
+                                        />
+                                      )}
+                                    </span>
+                                  </>
+                                )}
+                              </Listbox.Option>
+                            ))}
+                          </Listbox.Options>
+                        </div>
+                      )}
+                    </Listbox>
+                    ) : (
+                      'No Posters Found'
+                    )
+                    }
+                  </div>
+                  <div className='w-auto flex gap-1'>
+                    {/* manage members */}
+                    <button
+                      className="p-2 bg-emerald-300 text-white rounded text-xs hover:bg-emerald-500"
+                      onClick={() => {
+                        setCurrentMember({
+                          name: '',
+                          content: '',
+                        })
+                        setOpenAddMemberDialog(true)
+                      }}
+                    >
+                      Add New
+                    </button>
+                  {
+                    currentMember && (
+                      <>
+                        <button
+                          className="p-2 bg-slate-400 text-white rounded text-xs hover:bg-slate-600"
+                          onClick={() => setOpenSaveMemberDialog(true)}
+                        >
+                          Save
+                        </button>
+
+                        <button
+                          className="p-2 bg-slate-400 text-white rounded text-xs hover:bg-slate-600"
+                          onClick={() => setOpenSaveAsMemberDialog(true)}
+                        >
+                          Save As
+                        </button>
+
+                        <button
+                          className="p-2 bg-rose-400 text-white rounded text-xs hover:bg-rose-600"
+                          onClick={() => setOpenDeleteMemberDialog(true)}
+                        >
+                          <TrashIcon className="w-4 h-4 inline" />
+                        </button>
+
+                      </>
+                    )
+
+                  }
+
+                    
+                  </div>
                   <div className="ml-2">
                     {/* //reset */}
 
@@ -787,6 +860,8 @@ export default function LiPost() {
                 </div>
                 <div className="flex flex-wrap w-full gap-2">
                   <div className="max-w-md lg:max-w-none">
+                   { 
+                    members.length > 0 ? (
                     <Listbox
                       value={selectedReposter}
                       onChange={setSelectedReposter}
@@ -811,7 +886,7 @@ export default function LiPost() {
                             />
                           </Listbox.Button>
                           <Listbox.Options className="absolute z-10 w-96 py-1 mt-1 overflow-auto text-base bg-white rounded-md shadow-lg max-h-60 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                            {posters.map((reposter) => (
+                            {members.map((reposter) => (
                               <Listbox.Option
                                 key={reposter.id}
                                 className={({ active }) =>
@@ -843,6 +918,10 @@ export default function LiPost() {
                         </div>
                       )}
                     </Listbox>
+                    ) : ( 
+                      'No Reposters Found, add one in the members section'
+                    )
+                    }
                   </div>
                   <div className="">
                     {/* //reset */}
@@ -977,6 +1056,13 @@ export default function LiPost() {
         </div>
         <Toaster />
       </div>
+      <AddMemberDialog open={openAddMemberDialog} setOpen={setOpenAddMemberDialog} />
+     { currentMember && <>
+     <SaveMemberDialog open={openSaveMemberDialog} setOpen={setOpenSaveMemberDialog} />
+      <SaveAsMemberDialog open={openSaveAsMemberDialog} setOpen={setOpenSaveAsMemberDialog} />
+      <DeleteMemberDialog open={openDeleteMemberDialog} setOpen={setOpenDeleteMemberDialog} />
+     </> 
+      }
     </Layout>
   )
 }

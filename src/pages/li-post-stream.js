@@ -117,7 +117,6 @@ export default function LiPost() {
   }
 
   const handlePageParse = async () => {
-    // use parseWithCheerio function to get page content
     setIsParsing(true)
 
     try {
@@ -130,10 +129,20 @@ export default function LiPost() {
         toast.error('Please provide a valid URL', { duration: 2000 })
         return
       }
-      const { pageContent } = await parseWithCheerio(pageUrl)
+
+      const response = await fetch('/api/parse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: pageUrl }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to parse page')
+      }
+
+      const { pageContent } = await response.json()
 
       setPageContent(pageContent)
-      // setPageUrl(pageUrl)
       toast.success('Page content Ready', { duration: 2000 })
     } catch (error) {
       console.error('Error parsing page:', error)
@@ -375,7 +384,7 @@ export default function LiPost() {
                     </Listbox>
                   </div>
                 )}
-                <div className="w-auto px-2 space-x-2 shrink">
+                <div className="w-auto px-2 space-x-2 shrink flex">
                   <button
                     title="Open Modal to Create a New AI Prompt"
                     className="p-2 bg-emerald-300 text-white rounded text-xs hover:bg-emerald-500"
@@ -780,7 +789,7 @@ export default function LiPost() {
                   )}
                 </div>
 
-                <div className="w-auto px-2 space-x-2 shrink">
+                <div className="w-auto px-2 space-x-2 shrink flex">
                   <button
                     title="Open Modal to Create a New Reposter Prompt"
                     className="p-2 bg-emerald-300 text-white rounded text-xs hover:bg-emerald-500"
@@ -923,7 +932,21 @@ export default function LiPost() {
                     )
                     }
                   </div>
-                  <div className="">
+                  <div className='w-auto flex'>
+                    <button
+                      className="p-2 bg-emerald-300 text-white rounded text-xs hover:bg-emerald-500"
+                      onClick={() => {
+                        setCurrentMember({
+                          name: '',
+                          content: '',
+                        })
+                        setOpenAddMemberDialog(true)
+                      }}
+                    >
+                      Add New
+                    </button>
+                  </div>
+                  <div className="w-auto">
                     {/* //reset */}
 
                     {selectedReposter.length > 0 ? (

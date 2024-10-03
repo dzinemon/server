@@ -213,8 +213,8 @@ helpful and informative and shows that he cares about the startup ecosystem, sta
 ]
 
 const models = [
-  'gpt-4o',
-  'gpt-4o-mini',
+  'gpt-4o-2024-08-06',
+  'gpt-4o-mini-2024-07-18',
   'claude-3-5-sonnet-20240620',
 ]
 

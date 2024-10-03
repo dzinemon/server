@@ -224,7 +224,7 @@ export default function Generate() {
     setPromptLinks([])
     setKeywords([])
     setInstructions('')
-    setModel('gpt-4o')
+    setModel('gpt-4o-2024-08-06')
     setTemperature(0.1)
     setMaxTokens(4096)
     setValue('')

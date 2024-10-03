@@ -79,13 +79,12 @@ export default function LiPost() {
   const [openSaveAsMemberDialog, setOpenSaveAsMemberDialog] = useState(false)
 
   const [openDeleteMemberDialog, setOpenDeleteMemberDialog] = useState(false)
-  
 
   const scrollTargetRef = useRef(null)
 
   const [postGenerated, setPostGenerated] = useState(false)
 
-  const [model, setModel] = useState('gpt-4o')
+  const [model, setModel] = useState('gpt-4o-2024-08-06')
 
   const [messages, setMessages] = useState([])
 
@@ -123,7 +122,7 @@ export default function LiPost() {
 
     const requestOptions = {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: myHeaders,
       body: JSON.stringify({ url: pageUrl }),
       redirect: 'follow'
     }

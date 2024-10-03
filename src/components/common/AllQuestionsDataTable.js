@@ -120,9 +120,6 @@ export default function AllQuestionsDataTable() {
     setFilteredData(filteredData)
   }, [searchTerm])
 
-  useEffect(() => {
-    fetchAllQuestions()
-  }, [])
 
   useEffect(() => {
     setFilteredData(allQuestions)

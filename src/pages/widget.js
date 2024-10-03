@@ -54,16 +54,16 @@ export default function ChatWidget() {
   const myHeaders = new Headers()
   myHeaders.append('Content-Type', 'application/json')
 
-  const makeRequest = async () => {
-    const res = await fetch('/api/questions')
+  // const makeRequest = async () => {
+  //   const res = await fetch('/api/questions')
 
-    setResponse({
-      status: res.status,
-      body: await res.json(),
-      limit: res.headers.get('X-RateLimit-Limit'),
-      remaining: res.headers.get('X-RateLimit-Remaining'),
-    })
-  }
+  //   setResponse({
+  //     status: res.status,
+  //     body: await res.json(),
+  //     limit: res.headers.get('X-RateLimit-Limit'),
+  //     remaining: res.headers.get('X-RateLimit-Remaining'),
+  //   })
+  // }
 
   const handleLike = (question) => {
     // console.log('like', question)
@@ -165,7 +165,7 @@ export default function ChatWidget() {
 
   useEffect(() => {
     // handle localstorage for attempt count and date
-    makeRequest()
+    // makeRequest()
     handleGetAttemtCountLocalStorage()
     handleSetQuestionsFromLocalStorage()
   }, [])
@@ -227,7 +227,7 @@ export default function ChatWidget() {
       .then((result) => result)
       .catch((error) => {
         console.log('error', error)
-        makeRequest()
+        // makeRequest()
       })
 
     console.log('result', result)
@@ -377,12 +377,12 @@ export default function ChatWidget() {
     setIsLoading(false)
 
     handleScrollIntoView()
-    makeRequest()
+    // makeRequest()
   }
 
   useEffect(() => {
     // handle localstorage for attempt count and date
-    makeRequest()
+    // makeRequest()
     handleGetAttemtCountLocalStorage()
     handleSetQuestionsFromLocalStorage()
   }, [])

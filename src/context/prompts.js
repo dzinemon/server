@@ -38,7 +38,7 @@ export const PromptProvider = ({ children }) => {
 
   const fetchPrompts = async () => {
     setLoading(true)
-    const res = await fetch(promptsUrl)
+    const res = await fetch(promptsUrl, { next: { revalidate: 86400 } })
     const prompts = await res.json()
     setPrompts(prompts)
     setLoading(false)

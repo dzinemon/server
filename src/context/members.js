@@ -10,13 +10,9 @@ export const MembersProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [currentMember, setCurrentMember] = useState(null);
 
-  useEffect(() => {
-    fetchMembers();
-  }, []);
-
   const fetchMembers = async () => {
     setLoading(true);
-    const res = await fetch(membersUrl);
+    const res = await fetch(membersUrl, { next: { revalidate: 86400 } });
     const members = await res.json();
     setMembers(members);
     setLoading(false);

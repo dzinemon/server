@@ -35,11 +35,9 @@ import {
   DeleteMemberDialog
 } from '@/components/generate'
 
-import { posters, models } from '../../utils/hardcoded'
+import { models } from '../../utils/hardcoded'
 
 import Counter from '@/components/common/counter'
-
-import { parseWithCheerio } from '../../utils/cheerio-axios'
 
 const CustomEditorResult = dynamic(
   () => {
@@ -58,7 +56,7 @@ export default function LiPost() {
     fetchPrompts,
   } = usePrompts()
 
-  const { members, currentMember, setCurrentMember } = useMembers()
+  const { members, currentMember, setCurrentMember, fetchMembers } = useMembers()
 
   const myHeaders = new Headers()
   myHeaders.append('Content-Type', 'application/json')
@@ -288,6 +286,7 @@ export default function LiPost() {
 
   useEffect(() => {
     fetchPrompts()
+    fetchMembers()
   }, [])
 
   useEffect(() => {
@@ -301,6 +300,52 @@ export default function LiPost() {
   useEffect(() => {
     setCurrentMember(selectedPoster)
   }, [selectedPoster, setCurrentMember])
+
+  // is members are changed check if selected poster is still in the list and if not reset it do the same for reposter
+
+  useEffect(() => {
+    if (selectedPoster && selectedPoster.id) {
+      const member = members.find((member) => member.id === selectedPoster.id)
+      if (!member) {
+        setSelectedPoster('')
+      }
+    }
+
+    if (selectedReposter && selectedReposter.length > 0) {
+      const reposter = selectedReposter.filter((reposter) => {
+        return members.find((member) => member.id === reposter.id)
+      })
+
+      setSelectedReposter(reposter)
+    }
+  }
+  , [members])
+
+
+  // check if selected prompt exists in the list of ai prompts and if not reset it
+
+  useEffect(() => {
+    if (selectedPrompt && selectedPrompt.id) {
+      const prompt = aiPrompts.find((prompt) => prompt.id === selectedPrompt.id)
+      if (!prompt) {
+        setSelectedPrompt('')
+      }
+    }
+  }
+  , [aiPrompts])
+
+  // check if selected reposter prompt exists in the list of reposter prompts and if not reset it
+
+  useEffect(() => {
+    if (selectedReposterPrompt && selectedReposterPrompt.id) {
+      const prompt = reposterPrompts.find((prompt) => prompt.id === selectedReposterPrompt.id)
+      if (!prompt) {
+        setSelectedReposterPrompt('')
+      }
+    }
+  }
+  , [reposterPrompts])
+
 
   return (
     <Layout>

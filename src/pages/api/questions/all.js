@@ -5,14 +5,9 @@ import db from '../../../db'
 
 
 const getAllQa = async (req, res) => {
-  // query database for all question only if request origin is from https://kruze-ai-agent.vercel.app/
 
-  // if (req.headers.origin !== 'https://kruze-ai-agent.vercel.app') {
-  //   return res.status(401).json({ message: 'Unauthorized' })
-  // }
+  const result = await db.query('SELECT * FROM qas ORDER BY id DESC LIMIT 20')
 
-
-  const result = await db.query('SELECT * FROM qas')
   return res.status(200).json(result.rows)
 }
 

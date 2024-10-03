@@ -231,7 +231,7 @@ export default function Generate() {
   }
 
   useEffect(() => {
-    if (currentPrompt === null) return
+    if (!currentPrompt) return
 
     let newPrompt = currentPrompt.content
 
@@ -325,6 +325,19 @@ export default function Generate() {
     fetchPrompts()
   }, [])
 
+  // check if selected prompt exists in contentPrompts, if not reset selectedPrompt
+
+  useEffect(() => {
+    if (selectedPrompt && contentPrompts.length > 0) {
+      const exists = contentPrompts.find((prompt) => prompt.id === selectedPrompt.id)
+      if (!exists) {
+        setSelectedPrompt(null)
+      }
+    }
+  }
+  , [contentPrompts])
+
+
   return (
     <Layout>
       <div className="xl:container">
@@ -409,7 +422,10 @@ export default function Generate() {
                     <>
                       <button
                         className="p-2 bg-slate-400 text-white rounded text-xs"
-                        onClick={() => setOpenSaveDialog(true)}
+                        onClick={() => {
+                          setCurrentPrompt(selectedPrompt)
+                          setOpenSaveDialog(true)
+                        }}
                         title="Save Changes to Current Prompt"
                       >
                         Save Prompt
@@ -417,13 +433,18 @@ export default function Generate() {
                       <button
                         className="p-2 bg-slate-400 text-white rounded text-xs"
                         title="Save Prompt As / Clone Prompt"
-                        onClick={() => setOpenSaveAsDialog(true)}
+                        onClick={() => {
+                          setCurrentPrompt(selectedPrompt)
+                          setOpenSaveAsDialog(true)
+                        }}
                       >
                         Save As
                       </button>
                       <button
                         title="Delete Prompt"
-                        onClick={() => setOpenDeleteDialog(true)}
+                        onClick={() => {
+                          setCurrentPrompt(selectedPrompt)
+                          setOpenDeleteDialog(true)}}
                         className="p-2 bg-rose-400 text-white rounded text-xs"
                       >
                         <TrashIcon className="w-4 h-4 inline" />

@@ -1,86 +1,9 @@
-import { Fragment, useState } from 'react'
-import { Transition, Dialog } from '@headlessui/react'
+import { Dialog } from '@headlessui/react'
 import { usePrompts } from '@/context/prompts'
 import { useMembers } from '@/context/members'
-import toast from 'react-hot-toast'
 
-const DialogWrapper = ({ open, setOpen, children }) => (
-  <Transition appear show={open} as={Fragment}>
-    <Dialog as="div" className="relative z-50" onClose={() => setOpen(false)}>
-      <Transition.Child
-        as={Fragment}
-        enter="ease-out duration-300"
-        enterFrom="opacity-0"
-        enterTo="opacity-100"
-        leave="ease-in duration-200"
-        leaveFrom="opacity-100"
-        leaveTo="opacity-0"
-      >
-        <div className="fixed inset-0 bg-black/25" />
-      </Transition.Child>
-      <div className="fixed inset-0 overflow-y-auto">
-        <div className="flex min-h-full items-center justify-center p-4 text-center bg-slate-100/10 backdrop-blur-sm">
-          <Transition.Child
-            as={Fragment}
-            enter="ease-out duration-300"
-            enterFrom="opacity-0 scale-95"
-            enterTo="opacity-100 scale-100"
-            leave="ease-in duration-200"
-            leaveFrom="opacity-100 scale-100"
-            leaveTo="opacity-0 scale-95"
-          >
-            <Dialog.Panel className="w-full max-w-3xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-              {children}
-            </Dialog.Panel>
-          </Transition.Child>
-        </div>
-      </div>
-    </Dialog>
-  </Transition>
-)
+import DialogWrapper from './common/dialog/wrapper'
 
-const useHandleRequest = (
-  method,
-  url,
-  body,
-  successMessage,
-  errorMessage,
-  callback
-) => {
-  const [isLoading, setIsLoading] = useState(false)
-
-  const handleRequest = async () => {
-    setIsLoading(true)
-    const myHeaders = new Headers()
-    myHeaders.append('Content-Type', 'application/json')
-
-    const requestOptions = {
-      method,
-      headers: myHeaders,
-      body: JSON.stringify(body),
-      redirect: 'follow',
-    }
-
-    try {
-      const response = await fetch(url, requestOptions)
-      if (method !== 'DELETE') {
-        const result = await response.json()
-        toast(successMessage, { icon: '👏', duration: 2500 })
-        callback(result)
-      } else {
-        toast(successMessage, { icon: '👏', duration: 2500 })
-        callback()
-      }
-    } catch (error) {
-      console.error('error', error)
-      toast(errorMessage, { icon: '❌' })
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  return [handleRequest, isLoading]
-}
 
 const PromptDialog = ({
   open,
@@ -150,21 +73,14 @@ const PromptDialog = ({
     </div>
   </DialogWrapper>
 )
-
 export const DeletePromptDialog = ({ open, setOpen }) => {
-  const { currentPrompt, setCurrentPrompt, fetchPrompts } = usePrompts()
-  const [handleDelete, isLoading] = useHandleRequest(
-    'DELETE',
-    `/api/prompts/${currentPrompt.id}`,
-    null,
-    'Prompt deleted successfully',
-    'Error deleting prompt',
-    () => {
-      setOpen(false)
-      fetchPrompts()
-      setCurrentPrompt(null)
-    }
-  )
+  const { currentPrompt, setCurrentPrompt, handlePromptDelete, isLoading } = usePrompts()
+
+  const handleDelete = async () => {
+    await handlePromptDelete(currentPrompt.id)
+    setOpen(false)
+    setCurrentPrompt(null)
+  }
 
   return (
     <DialogWrapper open={open} setOpen={setOpen}>
@@ -198,22 +114,16 @@ export const DeletePromptDialog = ({ open, setOpen }) => {
 }
 
 export const SaveAsPromptDialog = ({ open, setOpen }) => {
-  const { currentPrompt, setCurrentPrompt, fetchPrompts } = usePrompts()
-  const [handleSaveAs, isLoading] = useHandleRequest(
-    'POST',
-    '/api/prompts',
-    {
+  const { currentPrompt, setCurrentPrompt, handlePromptCreate, isLoading } = usePrompts()
+
+  const handleSaveAs = async () => {
+    await handlePromptCreate({
       name: currentPrompt.name,
       content: currentPrompt.content,
       type: currentPrompt.type,
-    },
-    'Prompt saved successfully',
-    'Error saving prompt',
-    () => {
-      setOpen(false)
-      fetchPrompts()
-    }
-  )
+    })
+    setOpen(false)
+  }
 
   return (
     <PromptDialog
@@ -230,23 +140,17 @@ export const SaveAsPromptDialog = ({ open, setOpen }) => {
 }
 
 export const SavePromptDialog = ({ open, setOpen }) => {
-  const { currentPrompt, setCurrentPrompt, fetchPrompts } = usePrompts()
-  const [handleSave, isLoading] = useHandleRequest(
-    'PUT',
-    `/api/prompts/${currentPrompt.id}`,
-    {
+  const { currentPrompt, setCurrentPrompt, handlePromptUpdate, isLoading } = usePrompts()
+
+  const handleSave = async () => {
+    await handlePromptUpdate(currentPrompt.id,{
       id: currentPrompt.id,
       name: currentPrompt.name,
       content: currentPrompt.content,
       type: currentPrompt.type,
-    },
-    'Prompt saved successfully',
-    'Error saving prompt',
-    () => {
-      setOpen(false)
-      fetchPrompts()
-    }
-  )
+    })
+    setOpen(false)
+  }
 
   return (
     <PromptDialog
@@ -263,19 +167,12 @@ export const SavePromptDialog = ({ open, setOpen }) => {
 }
 
 export const AddPromptDialog = ({ open, setOpen }) => {
-  const { currentPrompt, setCurrentPrompt, fetchPrompts } = usePrompts()
+  const { currentPrompt, setCurrentPrompt, handlePromptCreate, isLoading } = usePrompts()
 
-  const [handleSave, isLoading] = useHandleRequest(
-    'POST',
-    '/api/prompts',
-    currentPrompt,
-    'Prompt saved successfully',
-    'Error saving prompt',
-    () => {
-      setOpen(false)
-      fetchPrompts()
-    }
-  )
+  const handleSave = async () => {
+    await handlePromptCreate(currentPrompt)
+    setOpen(false)
+  }
 
   return (
     <PromptDialog
@@ -290,7 +187,6 @@ export const AddPromptDialog = ({ open, setOpen }) => {
     />
   )
 }
-
 const MemberDialog = ({
   open,
   setOpen,
@@ -359,19 +255,13 @@ const MemberDialog = ({
 )
 
 export const DeleteMemberDialog = ({ open, setOpen }) => {
-  const { currentMember, setCurrentMember, fetchMembers } = useMembers()
-  const [handleDelete, isLoading] = useHandleRequest(
-    'DELETE',
-    `/api/members/${currentMember.id}`,
-    null,
-    'Member deleted successfully',
-    'Error deleting member',
-    () => {
-      setOpen(false)
-      fetchMembers()
-      setCurrentMember(null)
-    }
-  )
+  const { currentMember, setCurrentMember, handleMemberDelete, isLoading } = useMembers()
+
+  const handleDelete = async () => {
+    await handleMemberDelete(currentMember.id)
+    setOpen(false)
+    setCurrentMember(null)
+  }
 
   return (
     <DialogWrapper open={open} setOpen={setOpen}>
@@ -405,18 +295,15 @@ export const DeleteMemberDialog = ({ open, setOpen }) => {
 }
 
 export const SaveAsMemberDialog = ({ open, setOpen }) => {
-  const { currentMember, setCurrentMember, fetchMembers } = useMembers()
-  const [handleSaveAs, isLoading] = useHandleRequest(
-    'POST',
-    '/api/members',
-    { name: currentMember.name, content: currentMember.content },
-    'Member saved successfully',
-    'Error saving member',
-    () => {
-      setOpen(false)
-      fetchMembers()
-    }
-  )
+  const { currentMember, setCurrentMember, handleMemberAdd, isLoading } = useMembers()
+
+  const handleSaveAs = async () => {
+    await handleMemberAdd({
+      name: currentMember.name,
+      content: currentMember.content,
+    })
+    setOpen(false)
+  }
 
   return (
     <MemberDialog
@@ -433,22 +320,16 @@ export const SaveAsMemberDialog = ({ open, setOpen }) => {
 }
 
 export const SaveMemberDialog = ({ open, setOpen }) => {
-  const { currentMember, setCurrentMember, fetchMembers } = useMembers()
-  const [handleSave, isLoading] = useHandleRequest(
-    'PUT',
-    `/api/members/${currentMember.id}`,
-    {
+  const { currentMember, setCurrentMember, handleMemberUpdate, isLoading } = useMembers()
+
+  const handleSave = async () => {
+    await handleMemberUpdate(currentMember.id, {
       id: currentMember.id,
       name: currentMember.name,
       content: currentMember.content,
-    },
-    'Member saved successfully',
-    'Error saving member',
-    () => {
-      setOpen(false)
-      fetchMembers()
-    }
-  )
+    })
+    setOpen(false)
+  }
 
   return (
     <MemberDialog
@@ -465,19 +346,12 @@ export const SaveMemberDialog = ({ open, setOpen }) => {
 }
 
 export const AddMemberDialog = ({ open, setOpen }) => {
-  const { currentMember, setCurrentMember, fetchMembers } = useMembers()
+  const { currentMember, setCurrentMember, handleMemberAdd, isLoading } = useMembers()
 
-  const [handleSave, isLoading] = useHandleRequest(
-    'POST',
-    '/api/members',
-    currentMember,
-    'Member added successfully',
-    'Error adding member',
-    () => {
-      setOpen(false)
-      fetchMembers()
-    }
-  )
+  const handleSave = async () => {
+    await handleMemberAdd(currentMember)
+    setOpen(false)
+  }
 
   return (
     <MemberDialog

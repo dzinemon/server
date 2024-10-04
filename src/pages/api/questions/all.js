@@ -6,7 +6,9 @@ import db from '../../../db'
 
 const getAllQa = async (req, res) => {
 
-  const result = await db.query('SELECT * FROM qas ORDER BY id DESC LIMIT 20')
+  // each qna has id , question, answer, resources; for now, we will only return the last 40 items with id and qestion
+
+  const result = await db.query('SELECT id, question FROM qas ORDER BY id DESC LIMIT 40')
 
   return res.status(200).json(result.rows)
 }

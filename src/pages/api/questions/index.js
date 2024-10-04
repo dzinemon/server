@@ -2,87 +2,45 @@
 
 import db from '../../../db'
 
-// http://localhost:3000/api/questions
-
-import rateLimit from '../../../../utils/rate-limit'
-
-const limiter = rateLimit({
-  // interval: 60 * 1000, // 1 minute
-  // interval: 20 * 60 * 60 * 1000, // 20 hrs
-  // ten hours
-  interval: 10 * 60 * 60 * 1000, // 10 hrs
-  uniqueTokenPerInterval: 100, // Max 500 users per minute
-})
-
 const getAllQa = async (req, res) => {
-  if (req.origin == 'http://localhost:3000'  || req.origin == 'https://kruze-ai-agent.vercel.app') {
-    return res.status(200).json({ message: 'OK' })
+  try {
+    const result = await db.query(
+      'SELECT id, question FROM qas ORDER BY id DESC LIMIT 40'
+    )
+    res.status(200).json(result.rows)
+  } catch (error) {
+    return res.status(500).json({ error })
   }
-  const result = await db.query('SELECT * FROM qas')
-  res.status(200).json(result.rows)
 }
 
-const addQa = async (req, res) => {
+const createQuestion = async (req, res) => {
   const { question, answer, resources } = req.body
 
+  if (!question || !answer) {
+    return res.status(400).json({ error: 'Question and answer are required' })
+  }
+
   try {
-    await limiter.check(req, res, 5, 'CACHE_TOKEN') // 5 requests per minute
     const result = await db.query(
       'INSERT INTO qas (question, answer, resources) VALUES ($1, $2, $3) RETURNING *',
       [question, answer, resources]
     )
-    res.status(200).json(result.rows)
+    return res.status(201).json(result.rows[0])
   } catch (error) {
-    console.log('error', error)
-    res.status(429).json({ error: 'Rate limit exceeded' })
+    return res.status(500).json({ error })
   }
 }
 
-const deleteQa = async (req, res) => {
-  const { id } = req.body
-  const result = await db.query('DELETE FROM qas WHERE id = $1 RETURNING *', [
-    id,
-  ])
-  res.status(200).json(result.rows)
-}
+// 'INSERT INTO qas (question, answer, resources) VALUES ($1, $2, $3) RETURNING *'
 
 export default async function handler(req, res) {
-
   switch (req.method) {
     case 'GET':
-      try {
-        await limiter.check(req, res, 5, 'CACHE_TOKEN') // 5 requests per minute
-        return res.status(200).json({ message: 'OK' })
-      } catch (error) {
-        console.log('error', error)
-        return res.status(429).json({
-          error: 'Rate limit exceeded',
-          message: 'Rimit reached',
-        })
-      }
-    case 'POST':
-      try {
-        const { question, answer, resources } = req.body
-
-        await limiter.check(req, res, 5, 'CACHE_TOKEN') // 5 requests per minute
-
-        const result = await db.query(
-          'INSERT INTO qas (question, answer, resources) VALUES ($1, $2, $3) RETURNING *',
-          [question, answer, resources]
-        )
-        return res.status(200).json(result.rows)
-      } catch (error) {
-        console.log('error', error)
-        return res.status(429).json({
-          error: 'Rate limit exceeded',
-          message: 'Rimit reached',
-        })
-      }
-
-    case 'DELETE':
-      await deleteQa(req, res)
+      await getAllQa(req, res)
       break
-
+    case 'POST':
+      await createQuestion(req, res)
+      break
     default:
       res.status(405).end(`Method ${req.method} Not Allowed`)
   }

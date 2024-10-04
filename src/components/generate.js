@@ -21,7 +21,7 @@ const PromptDialog = ({
       className="text-lg font-medium leading-6 text-gray-900 text-center"
     >
       {title} -{' '}
-      <span class="rounded-full py-1 px-2 bg-slate-200 text-center text-sm font-mono">
+      <span className="rounded-full py-1 px-2 bg-slate-200 text-center text-sm font-mono">
         {prompt?.type}
       </span>
     </Dialog.Title>

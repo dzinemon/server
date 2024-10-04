@@ -40,7 +40,7 @@ const postUrl = async (req, res) => {
 
   const promptTempate = (question, context, subQuestions = []) => {
     if (subQuestions.length === 0) {
-      return `Answer the question based on the context below and format the answer with HTML tags:
+      return `Answer the question based on the context below provide answer in Rich Text Format, use headings and bullet points if necessary:
   
       Question: ${question}
       

@@ -2,6 +2,8 @@ import { useEffect, useState, useMemo } from 'react'
 
 import { useResources } from '@/context/resources'
 
+import toast, { Toaster } from 'react-hot-toast'
+
 import {
   useReactTable,
   createColumnHelper,
@@ -24,8 +26,10 @@ import QuestionDialogModal from './QuestionDialogModal'
 const columnHelper = createColumnHelper()
 
 export default function AllQuestionsDataTable() {
-  const { allQuestions, loading, fetchAllQuestions } = useResources()
+  const { allQuestions, loading, fetchAllQuestions, fetchQuestionById, handleQuestionDelete } = useResources()
   const [itemToRemove, setItemToRemove] = useState({})
+
+  const [fetchedItems, setFetchedItems] = useState([])
 
   const [filteredData, setFilteredData] = useState([])
 
@@ -37,22 +41,37 @@ export default function AllQuestionsDataTable() {
     pageIndex: 0, //initial page index
     pageSize: 20, //default page size
   })
+  const handleSetCurrentQuestion = async (id) => {
+    const existingItem = fetchedItems.find(item => item.id === id)
+    if (existingItem) {
+      setItemToRemove(existingItem)
+    } else {
+      const res = await fetchQuestionById(id)
+      console.log(res)
+      setItemToRemove(res)
+      setFetchedItems((prev) => [...prev, res])
+    }
+    setIsDialogOpen(true)
+  }
+
+
 
   const handleRemove = async (id) => {
-    const res = await fetch(`/api/questions/${id}`, {
-      method: 'DELETE',
-    }).then(res => {
-      return res.json()
-    }).then(data => {
-      console.log(data)
-      const qs = allQuestions.filter((link) => {
-        return link.id !== id
-      }
-      )
-      setFilteredData(qs)
-    })
-      .catch(error => console.error('Error:', error))
-    console.log(res)
+    try {
+      await handleQuestionDelete(id)
+      setIsDialogOpen(false)
+      // update fetched Items
+      setFetchedItems((prev) => prev.filter((item) => item.id !== id))
+      // update item to remove
+      setItemToRemove({})
+      
+    } catch (error) {
+      console.error('Error deleting question:', error)
+      toast.error('Error deleting question', {
+        icon: '❌',
+        duration: 2500,
+      })
+    }
   }
 
   const columns = useMemo(
@@ -71,8 +90,7 @@ export default function AllQuestionsDataTable() {
             <button
               className='hover:text-blue-600 cursor-pointer text-sm text-gray-900'
               onClick={() => {
-                setItemToRemove(row.original)
-                setIsDialogOpen(true)
+                handleSetCurrentQuestion(row.original.id)
               }}  
             >
               {row.original.question}
@@ -81,19 +99,19 @@ export default function AllQuestionsDataTable() {
         ),
         header: 'Question',
       }),
-      columnHelper.accessor('resources', {
-        cell: ({ row }) => {
-          const resources = JSON.parse(row.original.resources)
-          return (
-            <div>
-              <p className="text-sm font-semibold text-gray-900">
-                {resources.length}
-              </p>
-            </div>
-          )
-        },
-        header: 'Resources',
-      }),
+      // columnHelper.accessor('resources', {
+      //   cell: ({ row }) => {
+      //     const resources = JSON.parse(row.original.resources)
+      //     return (
+      //       <div>
+      //         <p className="text-sm font-semibold text-gray-900">
+      //           {resources.length}
+      //         </p>
+      //       </div>
+      //     )
+      //   },
+      //   header: 'Resources',
+      // }),
     ],
     [allQuestions]
   )
@@ -143,6 +161,8 @@ export default function AllQuestionsDataTable() {
                   {JSON.stringify(allQuestions.length)}
                 </strong>{' '}
                 Questions
+                {' '}
+                <span className="text-sm font-normal text-slate-400">this page shows 40 latest questions</span>
               </h2>
             </div>
             <div>
@@ -214,8 +234,7 @@ export default function AllQuestionsDataTable() {
                     <DocumentMagnifyingGlassIcon
                       className="w-4 h-4 text-slate-600 hover:text-blue-600 cursor-pointer"
                       onClick={() => {
-                        setItemToRemove(row.original)
-                        setIsDialogOpen(true)
+                        handleSetCurrentQuestion(row.original.id)
                       }}
                     />
                   </td>
@@ -291,7 +310,7 @@ export default function AllQuestionsDataTable() {
           </div>
         </div>
       </div>
-
+      <Toaster />
       <QuestionDialogModal
         data={itemToRemove}
         handleRemove={handleRemove}

@@ -13,6 +13,7 @@ export const MembersProvider = ({ children }) => {
   const [members, setMembers] = useState([])
   const [loading, setLoading] = useState(false)
   const [currentMember, setCurrentMember] = useState(null)
+  const [fetchedMembers, setFetchedMembers] = useState([])
 
   const fetchMembers = async () => {
     try {
@@ -27,6 +28,34 @@ export const MembersProvider = ({ children }) => {
     }
   }
 
+  const fetchMemberById = async (id) => {
+    try {
+      setLoading(true)
+      const res = await fetch(`${membersUrl}/${id}`, {
+        next: { revalidate: 86400 },
+      })
+      const member = await res.json()
+      setCurrentMember(member)
+      setFetchedMembers((prev) => [...prev, member])
+      toast.success('Member loaded', {
+        icon: '✅',
+        duration: 2500,
+      })
+      return member
+    }
+    catch (error) {
+      console.error('Error fetching member:', error)
+      toast.error('Error fetching member', {
+        icon: '❌',
+        duration: 2500,
+      })
+    }
+    finally {
+      setLoading(false)
+    }
+  }
+
+
   const handleMemberDelete = async (id) => {
     try {
       setLoading(true)
@@ -37,7 +66,17 @@ export const MembersProvider = ({ children }) => {
       const data = await res.json()
       const updatedMembers = members.filter((member) => member.id !== id)
       setMembers(updatedMembers)
-      // console.log(data);
+
+      // remove member from currentMember if it's the same
+      if (currentMember && currentMember.id === id) {
+        setCurrentMember(null)
+      }
+
+      // remove member from fetchedMembers if it exists there
+      
+      const updatedFetchedMembers = fetchedMembers.filter((member) => member.id !== id)
+      setFetchedMembers(updatedFetchedMembers)
+
       toast.success('Member deleted', {
         icon: '🗑️',
         duration: 2500,
@@ -69,6 +108,21 @@ export const MembersProvider = ({ children }) => {
       )
       setMembers(updatedMembers)
 
+      // update currentMember if it's the same
+      if (currentMember && currentMember.id === id) {
+        setCurrentMember(updatedMember)
+      }
+
+      // update fetchedMembers if it exists there
+      const exists = fetchedMembers.some((member) => member.id === id)
+      if (exists) {
+        const updatedFetchedMembers = fetchedMembers.map((member) =>
+          member.id === id ? updatedMember : member
+        )
+        setFetchedMembers(updatedFetchedMembers)
+      }
+
+
       toast.success('Member updated', {
         icon: '🔄',
         duration: 2500,
@@ -94,6 +148,8 @@ export const MembersProvider = ({ children }) => {
       })
       const newMember = await res.json()
       setMembers([...members, newMember])
+      setFetchedMembers((prev) => [...prev, newMember])
+      
       toast.success('Member added', {
         icon: '🎉',
         duration: 2500,
@@ -120,6 +176,8 @@ export const MembersProvider = ({ children }) => {
         handleMemberDelete,
         handleMemberUpdate,
         handleMemberAdd,
+        fetchedMembers,
+        fetchMemberById,
       }}
     >
       {children}

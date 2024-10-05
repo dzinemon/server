@@ -1,12 +1,34 @@
 import db from '../../../db'
 
-
 const getPrompts = async (req, res) => {
-  try {
-    const result = await db.query('SELECT * FROM prompts')
-    res.status(200).json(result.rows)
-  } catch (error) {
-    res.status(500).json({ error })
+  const { type } = req.query
+
+  // if type is provided, filter by type
+
+  if (type) {
+    try {
+      // select only id and name from prompts table
+      const result = await db.query(
+        'SELECT id, name, type FROM prompts WHERE type = $1 ORDER BY id DESC',
+        [type]
+      )
+
+      res.status(200).json(result.rows)
+    } catch (error) {
+      res.status(500).json({ error })
+    }
+    return
+  } else {
+    try {
+      // select only id and name from prompts table
+      const result = await db.query(
+        'SELECT id, name, type FROM prompts ORDER BY id DESC'
+      )
+
+      res.status(200).json(result.rows)
+    } catch (error) {
+      res.status(500).json({ error })
+    }
   }
 }
 
@@ -29,7 +51,6 @@ const createPrompt = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error })
   }
-
 }
 
 export default async function handler(req, res) {

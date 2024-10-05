@@ -5,9 +5,7 @@ import DiffViewer from 'react-diff-viewer'
 
 // import HighlightDifferences from '@/context/HighlightDifferences'
 
-import {
-  models
-} from '../../utils/hardcoded'
+import { models } from '../../utils/hardcoded'
 
 import {
   VariableIcon,
@@ -34,7 +32,7 @@ import {
   SavePromptDialog,
   SaveAsPromptDialog,
   AddPromptDialog,
-} from '@/components/generate';
+} from '@/components/generate'
 import dynamic from 'next/dynamic'
 
 const CustomEditor = dynamic(
@@ -85,7 +83,7 @@ export default function Generate() {
     name: '',
     content: '',
     type: 'content',
-  });
+  })
 
   // useRef to get react markdown content
   const markdownContentRef = useRef(null)
@@ -104,8 +102,16 @@ export default function Generate() {
 
   const { markdownContent, handleMarkdownChange } = useResources()
 
-  const { prompts, contentPrompts, fetchPrompts, currentPrompt, setCurrentPrompt } =
-    usePrompts()
+  const {
+    prompts,
+    contentPrompts,
+    fetchPrompts,
+    currentPrompt,
+    setCurrentPrompt,
+    fetchContentPrompts,
+    fetchedPrompts,
+    handlePromptFetch,
+  } = usePrompts()
 
   const [isLoading, setIsLoading] = useState(false)
 
@@ -124,7 +130,7 @@ export default function Generate() {
   const [keywords, setKeywords] = useState([])
   const [promptLinks, setPromptLinks] = useState([])
   const [promptSubject, setPromptSubject] = useState('')
-  
+
   const [selectedPrompt, setSelectedPrompt] = useState(null)
 
   const [link, setLink] = useState('')
@@ -216,6 +222,20 @@ export default function Generate() {
     }
     // setValue(completion)
     console.log('completion', completion)
+  }
+
+  const handleSelectedContentPromptChange = async (e) => {
+    // Check if the prompt already exists in fetched prompts
+    const exists = fetchedPrompts.find((prompt) => prompt.id === e.id)
+    if (exists) {
+      // set current prompt to the selected prompt
+      setSelectedPrompt(exists)
+      return
+    } else {
+      // fetch the prompt
+      const prompt = await handlePromptFetch(e.id)
+      setSelectedPrompt(prompt)
+    }
   }
 
   const handleReset = () => {
@@ -329,14 +349,14 @@ export default function Generate() {
 
   useEffect(() => {
     if (selectedPrompt && contentPrompts.length > 0) {
-      const exists = contentPrompts.find((prompt) => prompt.id === selectedPrompt.id)
+      const exists = contentPrompts.find(
+        (prompt) => prompt.id === selectedPrompt.id
+      )
       if (!exists) {
         setSelectedPrompt(null)
       }
     }
-  }
-  , [contentPrompts])
-
+  }, [contentPrompts])
 
   return (
     <Layout>
@@ -345,64 +365,72 @@ export default function Generate() {
           <div className="w-full lg:w-7/12 px-2 space-y-2">
             <div className="flex flex-wrap items-center -mx-2">
               <div className="w-auto px-2 font-bold">Prompt</div>
+              <div className="w-full">
+                <div>{JSON.stringify(contentPrompts)}</div>
+                <hr className="my-2" />
+                <div>{JSON.stringify(fetchedPrompts)}</div>
+              </div>
               <div className="w-full flex">
-                {contentPrompts.length > 0 && (
-                  <div className="w-64 px-2">
-                    <Listbox
-                      value={selectedPrompt}
-                      onChange={setSelectedPrompt}
-                    >
-                      <div className="relative">
-                        <Listbox.Button
+                <div className="w-64 px-2">
+                  <Listbox
+                    value={selectedPrompt}
+                    onChange={(e) => handleSelectedContentPromptChange(e)}
+                  >
+                    <div className="relative">
+                      <Listbox.Button
+                        className={
+                          'relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left  focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm'
+                        }
+                        onClick={() => {
+                          if (contentPrompts.length === 0) {
+                            fetchContentPrompts()
+                          }
+                        }}
+                      >
+                        <span className="block truncate">
+                          <DocumentTextIcon className="w-5 h-5 inline" />
+                          {selectedPrompt
+                            ? `${selectedPrompt.name} `
+                            : 'Select a prompt'}
+                        </span>
+                        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <ChevronUpDownIcon
+                            className="h-5 w-5 text-gray-400"
+                            aria-hidden="true"
+                          />
+                        </span>
+                      </Listbox.Button>
+                      <Transition
+                        as={Fragment}
+                        leave="transition ease-in duration-100"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                      >
+                        <Listbox.Options
                           className={
-                            'relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left  focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm'
+                            'absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm'
                           }
                         >
-                          <span className="block truncate">
-                            <DocumentTextIcon className="w-5 h-5 inline" />
-                            {selectedPrompt
-                              ? `${selectedPrompt.name} `
-                              : 'Select a prompt'}
-                          </span>
-                          <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                            <ChevronUpDownIcon
-                              className="h-5 w-5 text-gray-400"
-                              aria-hidden="true"
-                            />
-                          </span>
-                        </Listbox.Button>
-                        <Transition
-                          as={Fragment}
-                          leave="transition ease-in duration-100"
-                          leaveFrom="opacity-100"
-                          leaveTo="opacity-0"
-                        >
-                          <Listbox.Options
-                            className={
-                              'absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm'
-                            }
-                          >
-                            {contentPrompts.map((prompt) => (
-                              <Listbox.Option
-                                key={prompt.id}
-                                value={prompt}
-                                className={({ active }) =>
-                                  `relative cursor-default select-none py-2 px-4 ${
-                                    active
-                                      ? 'bg-blue-100 text-blue-900'
-                                      : 'text-slate-900'
-                                  }`
-                                }
-                              >
-                                {prompt.name}
-                              </Listbox.Option>
-                            ))}
-                          </Listbox.Options>
-                        </Transition>
-                      </div>
-                    </Listbox>
-                  </div>
-                )}
+                          {contentPrompts.map((prompt) => (
+                            <Listbox.Option
+                              key={prompt.id}
+                              value={prompt}
+                              className={({ active }) =>
+                                `relative cursor-default select-none py-2 px-4 ${
+                                  active
+                                    ? 'bg-blue-100 text-blue-900'
+                                    : 'text-slate-900'
+                                }`
+                              }
+                            >
+                              {prompt.name}
+                            </Listbox.Option>
+                          ))}
+                        </Listbox.Options>
+                      </Transition>
+                    </div>
+                  </Listbox>
+                </div>
                 <div className="w-auto px-2 space-x-2 grow">
                   <button
                     title="Open Modal to Create a New Prompt"
@@ -444,7 +472,8 @@ export default function Generate() {
                         title="Delete Prompt"
                         onClick={() => {
                           setCurrentPrompt(selectedPrompt)
-                          setOpenDeleteDialog(true)}}
+                          setOpenDeleteDialog(true)
+                        }}
                         className="p-2 bg-rose-400 text-white rounded text-xs"
                       >
                         <TrashIcon className="w-4 h-4 inline" />
@@ -473,7 +502,7 @@ export default function Generate() {
 
                 <textarea
                   value={selectedPrompt?.content || ''}
-                  placeholder='Add Prompt content here'
+                  placeholder="Add Prompt content here"
                   onChange={(e) => {
                     setSelectedPrompt({
                       ...selectedPrompt,
@@ -492,7 +521,7 @@ export default function Generate() {
                     <textarea
                       value={promptToGenerate}
                       readOnly={true}
-                      placeholder='Prompt preview'
+                      placeholder="Prompt preview"
                       disabled
                       className="w-full h-64 border border-gray-300 rounded-lg p-2"
                     />
@@ -690,13 +719,11 @@ export default function Generate() {
                   onChange={(e) => setModel(e.target.value)}
                   className="w-full border border-slate-200 p-2"
                 >
-                  {
-                    models.map((model, idx) => (
-                      <option key={idx} value={model}>
-                        {model}
-                      </option>
-                    ))
-                  }
+                  {models.map((model, idx) => (
+                    <option key={idx} value={model}>
+                      {model}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="flex items-center">

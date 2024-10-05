@@ -18,7 +18,6 @@ import {
   ChevronUpDownIcon,
   ChevronDownIcon,
   TrashIcon,
-  EyeIcon,
   DocumentTextIcon,
 } from '@heroicons/react/20/solid'
 
@@ -32,7 +31,7 @@ import {
   AddMemberDialog,
   SaveMemberDialog,
   SaveAsMemberDialog,
-  DeleteMemberDialog
+  DeleteMemberDialog,
 } from '@/components/generate'
 
 import { models } from '../../utils/hardcoded'
@@ -53,14 +52,23 @@ export default function LiPost() {
     reposterPrompts,
     currentPrompt,
     setCurrentPrompt,
-    fetchPrompts,
+    handlePromptFetch,
+    fetchedPrompts,
+    fetchAiPrompts,
+    fetchReposterPrompts,
   } = usePrompts()
 
-  const { members, currentMember, setCurrentMember, fetchMembers } = useMembers()
+  const {
+    members,
+    currentMember,
+    setCurrentMember,
+    fetchMembers,
+    fetchedMembers,
+    fetchMemberById,
+  } = useMembers()
 
   const myHeaders = new Headers()
   myHeaders.append('Content-Type', 'application/json')
-
 
   const [openSaveDialog, setOpenSaveDialog] = useState(false)
 
@@ -104,11 +112,95 @@ export default function LiPost() {
 
   const [selectedReposter, setSelectedReposter] = useState([])
 
-  const [promptToGenerate, setPromptToGenerate] = useState('')
-
   const [pageContent, setPageContent] = useState('')
 
   const [pageUrl, setPageUrl] = useState('')
+
+  const handleSelectedAiPromptChange = async (e) => {
+    // Check if the prompt already exists in fetched prompts
+    const existingPrompt = fetchedPrompts.find((prompt) => prompt.id === e.id)
+
+    if (existingPrompt) {
+      setSelectedPrompt(existingPrompt)
+      console.log('Selected Prompt from cache:', existingPrompt)
+    } else {
+      // Fetch prompt content by id using handlePromptFetch
+      const p = await handlePromptFetch(e.id)
+
+      console.log('Selected Prompt Fetched:', p)
+
+      if (p) {
+        setSelectedPrompt(p)
+      }
+    }
+  }
+
+  const handleSelectedPosterChange = async (e) => {
+    // check if the selected poster exists in the list of fetched members
+    const existingMember = fetchedMembers.find((member) => member.id === e.id)
+
+    if (existingMember) {
+      setSelectedPoster(existingMember)
+      console.log('Selected Poster from cache:', existingMember)
+    } else {
+      // Fetch member by id using fetchMemberById
+      const m = await fetchMemberById(e.id)
+
+      console.log('Selected Poster Fetched:', m)
+
+      if (m) {
+        setSelectedPoster(m)
+      }
+    }
+  }
+
+  const handleSelectedReposterChange = async (e) => {
+    // check if the selected reposter exists in the list of fetched members
+
+    for (const reposter of e) {
+      const existingMember = fetchedMembers.find(
+        (member) => member.id === reposter.id
+      )
+
+      if (existingMember) {
+        setSelectedReposter((prev) => {
+          if (prev.find((m) => m.id === reposter.id)) {
+            return prev
+          }
+          return [...prev, existingMember]
+        })
+        console.log('Selected Reposter from cache:', existingMember)
+      } else {
+        // Fetch member by id using fetchMemberById
+        const m = await fetchMemberById(reposter.id)
+
+        console.log('Selected Reposter Fetched:', m)
+
+        if (m) {
+          setSelectedReposter((prev) => [...prev, m])
+        }
+      }
+    }
+  }
+
+  const handleSelectedReposterPromptChange = async (e) => {
+    // Check if the prompt already exists in fetched prompts
+    const existingPrompt = fetchedPrompts.find((prompt) => prompt.id === e.id)
+
+    if (existingPrompt) {
+      setSelectedReposterPrompt(existingPrompt)
+      console.log('Selected Reposter Prompt from cache:', existingPrompt)
+    } else {
+      // Fetch prompt content by id using handlePromptFetch
+      const p = await handlePromptFetch(e.id)
+
+      console.log('Selected Reposter Prompt Fetched:', p)
+
+      if (p) {
+        setSelectedReposterPrompt(p)
+      }
+    }
+  }
 
   const handleRestart = () => {
     setMessages([])
@@ -117,14 +209,13 @@ export default function LiPost() {
   }
 
   const handlePageParse = async () => {
-
     const requestOptions = {
       method: 'POST',
       headers: myHeaders,
       body: JSON.stringify({ url: pageUrl }),
-      redirect: 'follow'
+      redirect: 'follow',
     }
-    
+
     setIsParsing(true)
 
     try {
@@ -249,7 +340,7 @@ export default function LiPost() {
     }
     `
 
-    setPromptToGenerate(ptg)
+    // setPromptToGenerate(ptg)
 
     if (!postGenerated) {
       setCurrentMessage(ptg)
@@ -285,11 +376,6 @@ export default function LiPost() {
   }, [selectedReposterPrompt])
 
   useEffect(() => {
-    fetchPrompts()
-    fetchMembers()
-  }, [])
-
-  useEffect(() => {
     setCurrentPrompt(selectedPrompt)
   }, [selectedPrompt, setCurrentPrompt])
 
@@ -318,9 +404,7 @@ export default function LiPost() {
 
       setSelectedReposter(reposter)
     }
-  }
-  , [members])
-
+  }, [members])
 
   // check if selected prompt exists in the list of ai prompts and if not reset it
 
@@ -331,21 +415,20 @@ export default function LiPost() {
         setSelectedPrompt('')
       }
     }
-  }
-  , [aiPrompts])
+  }, [aiPrompts])
 
   // check if selected reposter prompt exists in the list of reposter prompts and if not reset it
 
   useEffect(() => {
     if (selectedReposterPrompt && selectedReposterPrompt.id) {
-      const prompt = reposterPrompts.find((prompt) => prompt.id === selectedReposterPrompt.id)
+      const prompt = reposterPrompts.find(
+        (prompt) => prompt.id === selectedReposterPrompt.id
+      )
       if (!prompt) {
         setSelectedReposterPrompt('')
       }
     }
-  }
-  , [reposterPrompts])
-
+  }, [reposterPrompts])
 
   return (
     <Layout>
@@ -353,6 +436,9 @@ export default function LiPost() {
         <div className="flex min-h-full flex-wrap justify-center px-6 py-12 lg:px-8 -mx-2">
           <div className="w-full lg:w-1/2 px-2 space-y-6">
             {/* Select type of content Video/ Post/ Podcast */}
+            {/* {
+              JSON.stringify(aiPrompts)
+            } */}
             <div>
               <div className="font-bold text-xl">0. Select Model</div>
               <div className="text-sm text-gray-500">
@@ -375,46 +461,55 @@ export default function LiPost() {
               <div className="font-bold text-xl">1. Select AI prompt</div>
               <div className="text-sm text-gray-500">
                 Select prompt to generate Linkedin post
+                {/* 
+                {
+                  JSON.stringify(selectedPrompt)
+                } */}
               </div>
 
               <div className="flex -mx-2">
-                {aiPrompts.length > 0 && (
-                  <div className="w-auto grow px-2">
-                    <Listbox
-                      value={selectedPrompt}
-                      onChange={setSelectedPrompt}
-                    >
-                      <div className="relative">
-                        <Listbox.Button
+                <div className="w-auto grow px-2">
+                  <Listbox
+                    value={selectedPrompt}
+                    onChange={(e) => handleSelectedAiPromptChange(e)}
+                  >
+                    <div className="relative">
+                      <Listbox.Button
+                        className={
+                          'relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left  focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm'
+                        }
+                        onClick={() => {
+                          if (aiPrompts.length === 0) {
+                            fetchAiPrompts()
+                          }
+                        }}
+                      >
+                        <span className="block truncate">
+                          <DocumentTextIcon className="w-5 h-5 inline" />
+                          {selectedPrompt
+                            ? `${selectedPrompt.name} `
+                            : 'Select a prompt'}
+                        </span>
+                        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <ChevronUpDownIcon
+                            className="h-5 w-5 text-gray-400"
+                            aria-hidden="true"
+                          />
+                        </span>
+                      </Listbox.Button>
+                      <Transition
+                        as={Fragment}
+                        leave="transition ease-in duration-100"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                      >
+                        <Listbox.Options
                           className={
-                            'relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left  focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm'
+                            'absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm'
                           }
                         >
-                          <span className="block truncate">
-                            <DocumentTextIcon className="w-5 h-5 inline" />
-                            {selectedPrompt
-                              ? `${selectedPrompt.name} `
-                              : 'Select a prompt'}
-                          </span>
-                          <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                            <ChevronUpDownIcon
-                              className="h-5 w-5 text-gray-400"
-                              aria-hidden="true"
-                            />
-                          </span>
-                        </Listbox.Button>
-                        <Transition
-                          as={Fragment}
-                          leave="transition ease-in duration-100"
-                          leaveFrom="opacity-100"
-                          leaveTo="opacity-0"
-                        >
-                          <Listbox.Options
-                            className={
-                              'absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm'
-                            }
-                          >
-                            {aiPrompts.map((prompt) => (
+                          {aiPrompts &&
+                            aiPrompts.map((prompt) => (
                               <Listbox.Option
                                 key={prompt.id}
                                 value={prompt}
@@ -429,12 +524,11 @@ export default function LiPost() {
                                 {prompt.name}
                               </Listbox.Option>
                             ))}
-                          </Listbox.Options>
-                        </Transition>
-                      </div>
-                    </Listbox>
-                  </div>
-                )}
+                        </Listbox.Options>
+                      </Transition>
+                    </div>
+                  </Listbox>
+                </div>
                 <div className="w-auto px-2 space-x-2 shrink flex">
                   <button
                     title="Open Modal to Create a New AI Prompt"
@@ -645,26 +739,44 @@ export default function LiPost() {
 
               <div>
                 <div className="font-bold text-xl">
-                  3. Select Poster{" "}
-                  {selectedPoster && members.length > 0 ? `: ${selectedPoster.name}` : <span className='text-sm font-normal text-gray-400'>Select or create one</span>}
+                  3. Select Poster{' '}
+                  {selectedPoster && members.length > 0 ? (
+                    `: ${selectedPoster.name}`
+                  ) : (
+                    <span className="text-sm font-normal text-gray-400">
+                      Select or create one
+                    </span>
+                  )}
                 </div>
                 <div className="text-sm text-gray-500">
                   Select who is posting the post
                 </div>
                 <div className="flex flex-row gap-2">
-                  <div className='w-auto'>
-                    {
-                      members.length > 0 ? (
-                      <Listbox value={selectedPoster} onChange={setSelectedPoster}>
+                  <div className="w-auto">
+                    <Listbox
+                      value={selectedPoster}
+                      onChange={(e) => handleSelectedPosterChange(e)}
+                    >
                       {({ open }) => (
                         <div className="relative">
-                          <Listbox.Button className="relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-300 rounded-lg shadow-sm cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                          <Listbox.Button
+                            className="relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-300 rounded-lg shadow-sm cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            onClick={() => {
+                              if (members.length === 0) {
+                                fetchMembers()
+                              }
+                            }}
+                          >
                             <span className="block truncate">
                               {selectedPoster?.name || 'Select Poster'}
                             </span>
                             <ChevronDownIcon
                               className={`
-                            ${open ? 'text-gray-600 rotate-180' : 'text-gray-400'}
+                            ${
+                              open
+                                ? 'text-gray-600 rotate-180'
+                                : 'text-gray-400'
+                            }
                               absolute w-5 h-5 text-gray-400 right-3 top-1/2 -translate-y-1/2
                             `}
                             />
@@ -687,7 +799,9 @@ export default function LiPost() {
                                   <>
                                     <span
                                       className={`${
-                                        selected ? 'font-semibold' : 'font-normal'
+                                        selected
+                                          ? 'font-semibold'
+                                          : 'font-normal'
                                       } block truncate`}
                                     >
                                       {poster.name}
@@ -706,12 +820,8 @@ export default function LiPost() {
                         </div>
                       )}
                     </Listbox>
-                    ) : (
-                      'No Posters Found'
-                    )
-                    }
                   </div>
-                  <div className='w-auto flex gap-1'>
+                  <div className="w-auto flex gap-1">
                     {/* manage members */}
                     <button
                       className="p-2 bg-emerald-300 text-white rounded text-xs hover:bg-emerald-500"
@@ -725,8 +835,7 @@ export default function LiPost() {
                     >
                       Add New
                     </button>
-                  {
-                    currentMember && (
+                    {currentMember && (
                       <>
                         <button
                           className="p-2 bg-slate-400 text-white rounded text-xs hover:bg-slate-600"
@@ -748,13 +857,8 @@ export default function LiPost() {
                         >
                           <TrashIcon className="w-4 h-4 inline" />
                         </button>
-
                       </>
-                    )
-
-                  }
-
-                    
+                    )}
                   </div>
                   <div className="ml-2">
                     {/* //reset */}
@@ -781,43 +885,48 @@ export default function LiPost() {
               </div>
               <div className="flex flex-row">
                 <div className="w-auto shrink">
-                  {reposterPrompts.length > 0 && (
-                    <div className="w-auto grow px-2">
-                      <Listbox
-                        value={selectedReposterPrompt}
-                        onChange={setSelectedReposterPrompt}
-                      >
-                        <div className="relative">
-                          <Listbox.Button
+                  <div className="w-auto grow px-2">
+                    <Listbox
+                      value={selectedReposterPrompt}
+                      onChange={(e) => handleSelectedReposterPromptChange(e)}
+                    >
+                      <div className="relative">
+                        <Listbox.Button
+                          className={
+                            'relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left  focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm'
+                          }
+                          onClick={() => {
+                            if (reposterPrompts.length === 0) {
+                              fetchReposterPrompts()
+                            }
+                          }}
+                        >
+                          <span className="block truncate">
+                            <DocumentTextIcon className="w-5 h-5 inline" />
+                            {selectedReposterPrompt
+                              ? `${selectedReposterPrompt.name} `
+                              : 'Select a prompt'}
+                          </span>
+                          <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                            <ChevronUpDownIcon
+                              className="h-5 w-5 text-gray-400"
+                              aria-hidden="true"
+                            />
+                          </span>
+                        </Listbox.Button>
+                        <Transition
+                          as={Fragment}
+                          leave="transition ease-in duration-100"
+                          leaveFrom="opacity-100"
+                          leaveTo="opacity-0"
+                        >
+                          <Listbox.Options
                             className={
-                              'relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left  focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm'
+                              'absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm'
                             }
                           >
-                            <span className="block truncate">
-                              <DocumentTextIcon className="w-5 h-5 inline" />
-                              {selectedReposterPrompt
-                                ? `${selectedReposterPrompt.name} `
-                                : 'Select a prompt'}
-                            </span>
-                            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                              <ChevronUpDownIcon
-                                className="h-5 w-5 text-gray-400"
-                                aria-hidden="true"
-                              />
-                            </span>
-                          </Listbox.Button>
-                          <Transition
-                            as={Fragment}
-                            leave="transition ease-in duration-100"
-                            leaveFrom="opacity-100"
-                            leaveTo="opacity-0"
-                          >
-                            <Listbox.Options
-                              className={
-                                'absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm'
-                              }
-                            >
-                              {reposterPrompts.map((prompt) => (
+                            {reposterPrompts &&
+                              reposterPrompts.map((prompt) => (
                                 <Listbox.Option
                                   key={prompt.id}
                                   value={prompt}
@@ -832,12 +941,11 @@ export default function LiPost() {
                                   {prompt.name}
                                 </Listbox.Option>
                               ))}
-                            </Listbox.Options>
-                          </Transition>
-                        </div>
-                      </Listbox>
-                    </div>
-                  )}
+                          </Listbox.Options>
+                        </Transition>
+                      </div>
+                    </Listbox>
+                  </div>
                 </div>
 
                 <div className="w-auto px-2 space-x-2 shrink flex">
@@ -920,16 +1028,21 @@ export default function LiPost() {
                 </div>
                 <div className="flex flex-wrap w-full gap-2">
                   <div className="max-w-md lg:max-w-none">
-                   { 
-                    members.length > 0 ? (
                     <Listbox
                       value={selectedReposter}
-                      onChange={setSelectedReposter}
+                      onChange={(e) => handleSelectedReposterChange(e)}
                       multiple
                     >
                       {({ open }) => (
                         <div className="relative w-full">
-                          <Listbox.Button className="relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-300 rounded-lg shadow-sm cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                          <Listbox.Button
+                            className="relative w-full py-2 pl-3 pr-10 text-left bg-white border border-gray-300 rounded-lg shadow-sm cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                            onClick={() => {
+                              if (members.length === 0) {
+                                fetchMembers()
+                              }
+                            }}
+                          >
                             <span className="block truncate">
                               {selectedReposter.length > 0
                                 ? 'Reposters: '
@@ -978,12 +1091,8 @@ export default function LiPost() {
                         </div>
                       )}
                     </Listbox>
-                    ) : ( 
-                      'No Reposters Found, add one in the members section'
-                    )
-                    }
                   </div>
-                  <div className='w-auto flex'>
+                  <div className="w-auto flex">
                     <button
                       className="p-2 bg-emerald-300 text-white rounded text-xs hover:bg-emerald-500"
                       onClick={() => {
@@ -1024,28 +1133,25 @@ export default function LiPost() {
               </div>
             </div>
 
-            <div className='w-full px-2 bg-rose-100 border border-rose-200 py-2 mb-4 rounded-lg'>
-            <div className='flex gap-3 items-center'>
-              <div>
-                <div className="font-bold text-xl">
-                  Restart AI Chat
+            <div className="w-full px-2 bg-rose-100 border border-rose-200 py-2 mb-4 rounded-lg">
+              <div className="flex gap-3 items-center">
+                <div>
+                  <div className="font-bold text-xl">Restart AI Chat</div>
+                  <div className="text-sm text-gray-500 max-w-xs">
+                    Restart the AI Chat and clear all messages, to generate a
+                    new post
+                  </div>
                 </div>
-                <div className="text-sm text-gray-500 max-w-xs">
-                  Restart the AI Chat and clear all messages, to generate a new post
+                <div>
+                  <button
+                    className="w-auto p-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700"
+                    onClick={handleRestart}
+                  >
+                    Restart
+                  </button>
                 </div>
               </div>
-              <div>
-                <button
-                  className="w-auto p-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700"
-                  onClick={handleRestart}
-                >
-                  Restart
-                </button>
-              </div>
-              
             </div>
-          </div>
-            
           </div>
 
           <div className="border-t border-blue-600 my-6 w-full" />
@@ -1113,9 +1219,10 @@ export default function LiPost() {
                   readOnly={!postGenerated}
                   onChange={(e) => setCurrentMessage(e.target.value)}
                 />
-                <button 
+                <button
                   disabled={isLoading}
-                className="bg-blue-600 disabled:bg-slate-800 py-3 px-2.5 rounded-md text-white flex items-center justify-center hover:bg-blue-700">
+                  className="bg-blue-600 disabled:bg-slate-800 py-3 px-2.5 rounded-md text-white flex items-center justify-center hover:bg-blue-700"
+                >
                   {isLoading ? (
                     <span>
                       Generating for <Counter /> seconds
@@ -1130,13 +1237,26 @@ export default function LiPost() {
         </div>
         <Toaster />
       </div>
-      <AddMemberDialog open={openAddMemberDialog} setOpen={setOpenAddMemberDialog} />
-     { currentMember && <>
-     <SaveMemberDialog open={openSaveMemberDialog} setOpen={setOpenSaveMemberDialog} />
-      <SaveAsMemberDialog open={openSaveAsMemberDialog} setOpen={setOpenSaveAsMemberDialog} />
-      <DeleteMemberDialog open={openDeleteMemberDialog} setOpen={setOpenDeleteMemberDialog} />
-     </> 
-      }
+      <AddMemberDialog
+        open={openAddMemberDialog}
+        setOpen={setOpenAddMemberDialog}
+      />
+      {currentMember && (
+        <>
+          <SaveMemberDialog
+            open={openSaveMemberDialog}
+            setOpen={setOpenSaveMemberDialog}
+          />
+          <SaveAsMemberDialog
+            open={openSaveAsMemberDialog}
+            setOpen={setOpenSaveAsMemberDialog}
+          />
+          <DeleteMemberDialog
+            open={openDeleteMemberDialog}
+            setOpen={setOpenDeleteMemberDialog}
+          />
+        </>
+      )}
     </Layout>
   )
 }

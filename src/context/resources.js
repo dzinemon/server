@@ -2,6 +2,8 @@ import React, { createContext, useState, useContext, useEffect } from 'react'
 import { baseUrl } from '../../utils/config'
 import toast from 'react-hot-toast'
 
+import { models } from '../../utils/hardcoded'
+
 const ResourceContext = createContext()
 
 export const ResourceProvider = ({ children }) => {
@@ -11,6 +13,8 @@ export const ResourceProvider = ({ children }) => {
   const url = `${baseUrl}/api/questions/all`
 
   const [resources, setResources] = useState([])
+  const [currentModel, setCurrentModel] = useState(models[0])
+  const [currentThread, setCurrentThread] = useState({})
   const [loading, setLoading] = useState(false)
 
   const [text, setText] = useState('')
@@ -123,6 +127,9 @@ export const ResourceProvider = ({ children }) => {
         handleMarkdownChange,
         fetchQuestionById,
         handleQuestionDelete,
+        currentModel,
+        setCurrentModel,
+        currentThread, setCurrentThread,
       }}
     >
       {children}

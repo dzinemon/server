@@ -13,19 +13,25 @@ import {
   MembersProvider
 } from '@/context/members'
 
+import {
+  UserProvider
+} from '@/context/user'
+
 export default function App({
   Component,
   pageProps: { session, ...pageProps },
 }) {
   return (
     <SessionProvider session={session}>
-      <ResourceProvider>
-        <PromptProvider>  
-          <MembersProvider>
-            <Component {...pageProps} />
-          </MembersProvider>
-        </PromptProvider>
-      </ResourceProvider>
+      <UserProvider>
+        <ResourceProvider>
+          <PromptProvider>
+            <MembersProvider>
+              <Component {...pageProps} />
+            </MembersProvider>
+          </PromptProvider>
+        </ResourceProvider>
+      </UserProvider>
     </SessionProvider>
   )
 }

@@ -13,7 +13,6 @@ const postUrl = async (req, res) => {
     filter.push('website')
   }
   
-  
   const questionEmbedding = await generateEmbedding(question);
 
   const data = await queryEmbedding(questionEmbedding, filter);

@@ -365,11 +365,6 @@ export default function Generate() {
           <div className="w-full lg:w-7/12 px-2 space-y-2">
             <div className="flex flex-wrap items-center -mx-2">
               <div className="w-auto px-2 font-bold">Prompt</div>
-              <div className="w-full">
-                <div>{JSON.stringify(contentPrompts)}</div>
-                <hr className="my-2" />
-                <div>{JSON.stringify(fetchedPrompts)}</div>
-              </div>
               <div className="w-full flex">
                 <div className="w-64 px-2">
                   <Listbox

@@ -1,20 +1,22 @@
-import { useSession } from 'next-auth/react'
 import React, { Fragment, useState, useEffect, useRef } from 'react'
 import Layout from '@/components/layout'
 import Image from 'next/image'
 
 import { usePrompts } from '@/context/prompts'
 import { useMembers } from '@/context/members'
+import { useResources } from '@/context/resources'
 
 import { Listbox, Tab, Transition } from '@headlessui/react'
 
 import toast, { Toaster } from 'react-hot-toast'
 
+import {
+  LoadingLine
+} from '@/components/common/chatloadingstate'
+
 import dynamic from 'next/dynamic'
 import {
   CheckIcon,
-  ClipboardIcon,
-  ClipboardDocumentCheckIcon,
   ChevronUpDownIcon,
   ChevronDownIcon,
   TrashIcon,
@@ -22,6 +24,10 @@ import {
 } from '@heroicons/react/20/solid'
 
 import MessageBubble from '@/components/common/message-bubble'
+
+import ModelPicker from '@/components/common/modelpicker'
+
+import { useUser } from '@/context/user'
 
 import {
   DeletePromptDialog,
@@ -34,8 +40,6 @@ import {
   DeleteMemberDialog,
 } from '@/components/generate'
 
-import { models } from '../../utils/hardcoded'
-
 import Counter from '@/components/common/counter'
 
 const CustomEditorResult = dynamic(
@@ -46,7 +50,10 @@ const CustomEditorResult = dynamic(
 )
 
 export default function LiPost() {
-  const { data: session } = useSession()
+  const { currentUser } = useUser()
+
+  const { currentModel, setCurrentModel } = useResources()
+
   const {
     aiPrompts,
     reposterPrompts,
@@ -255,11 +262,13 @@ export default function LiPost() {
 
   const handleSubmitMessage = async (e) => {
     e.preventDefault()
-    setIsLoading(true)
+   
 
-    if (!currentMessage) {
+    if (!currentMessage || currentMessage.length === 0) {
       return
     }
+
+    setIsLoading(true)
 
     setMessages([...messages, { role: 'user', content: currentMessage }])
     setCurrentMessage('')
@@ -273,7 +282,7 @@ export default function LiPost() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [...messages, { role: 'user', content: currentMessage }],
-          model: model,
+          model: currentModel,
           temperature: 0.1,
         }),
       }
@@ -435,25 +444,11 @@ export default function LiPost() {
       <div className="xl:container">
         <div className="flex min-h-full flex-wrap justify-center px-6 py-12 lg:px-8 -mx-2">
           <div className="w-full lg:w-1/2 px-2 space-y-6">
-            {/* Select type of content Video/ Post/ Podcast */}
-            {/* {
-              JSON.stringify(aiPrompts)
-            } */}
             <div>
               <div className="font-bold text-xl">0. Select Model</div>
               <div className="text-sm text-gray-500">
                 Select model to generate content
-                <select
-                  className="w-full p-2 border border-gray-300 rounded-lg"
-                  value={model}
-                  onChange={(e) => setModel(e.target.value)}
-                >
-                  {models.map((model, idx) => (
-                    <option key={`model-${model}`} value={model}>
-                      {model}
-                    </option>
-                  ))}
-                </select>
+                <ModelPicker />
               </div>
             </div>
 
@@ -461,10 +456,6 @@ export default function LiPost() {
               <div className="font-bold text-xl">1. Select AI prompt</div>
               <div className="text-sm text-gray-500">
                 Select prompt to generate Linkedin post
-                {/* 
-                {
-                  JSON.stringify(selectedPrompt)
-                } */}
               </div>
 
               <div className="flex -mx-2">
@@ -1154,7 +1145,14 @@ export default function LiPost() {
             </div>
           </div>
 
-          <div className="border-t border-blue-600 my-6 w-full" />
+          
+          <div className="w-full block my-6">
+              {
+                isLoading ? <div className="w-full">
+                  <LoadingLine />
+                </div> : <div className="border-t border-blue-600 w-full" />
+              }
+          </div>
 
           <div className="relative bg-white w-full">
             <div className="divide-y divide-gray-300/50 border-t border-gray-300/50">
@@ -1175,7 +1173,7 @@ export default function LiPost() {
                             className="h-8 w-8 rounded-full sticky top-24"
                             width={32}
                             height={32}
-                            src={session.user.image}
+                            src={currentUser?.image}
                             alt=""
                           />
                         ) : item.role === 'system' ? (
@@ -1207,6 +1205,7 @@ export default function LiPost() {
                 </ul>
                 <div ref={scrollTargetRef}></div>
               </div>
+
               <form
                 onSubmit={handleSubmitMessage}
                 className="p-4 flex flex-col gap-2 text-base font-semibold leading-7 h-[300px]"
@@ -1219,6 +1218,7 @@ export default function LiPost() {
                   readOnly={!postGenerated}
                   onChange={(e) => setCurrentMessage(e.target.value)}
                 />
+
                 <button
                   disabled={isLoading}
                   className="bg-blue-600 disabled:bg-slate-800 py-3 px-2.5 rounded-md text-white flex items-center justify-center hover:bg-blue-700"

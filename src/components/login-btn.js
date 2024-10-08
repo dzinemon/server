@@ -1,9 +1,29 @@
+import {useEffect} from 'react';
+
 import { useSession, signIn, signOut } from 'next-auth/react'
 import { Menu, Transition } from '@headlessui/react'
 import Image from 'next/image'
 
+import {
+  useUser
+} from '@/context/user'
+
 export default function Component() {
   const { data: session } = useSession()
+
+  const {
+    currentUser,
+    setCurrentUser
+  } = useUser()
+
+  useEffect(() => {
+    if (session) {
+      setCurrentUser(session.user)
+    }
+  }
+  , [session])
+
+
   if (session) {
     return (
       <>

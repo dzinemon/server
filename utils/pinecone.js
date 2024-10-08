@@ -78,11 +78,11 @@ async function deleteAllVectors() {
   }
 }
 
-async function queryEmbedding(queryVector, filterValues) {
+async function queryEmbedding(queryVector, filterValues, topK = 8) {
   try {
     // const index = client.index(config.index)
     const queryRequest = {
-      topK: 8,
+      topK: topK,
       vector: queryVector,
       filter: { source: { $in: filterValues } },
       includeMetadata: true,

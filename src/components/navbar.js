@@ -2,8 +2,11 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import LoginComponent from './login-btn'
-import { useSession } from 'next-auth/react'
+// import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
+import {
+  useUser
+} from '@/context/user'
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
@@ -12,7 +15,11 @@ export default function Navbar() {
     pathname
   } = useRouter()
 
-  const { data: session } = useSession()
+  // const { data: session } = useSession()
+
+  const {
+    currentUser
+  } = useUser()
 
   const adminNavItems = [
     // {
@@ -43,6 +50,10 @@ export default function Navbar() {
       slug: 'internal-qa',
     },
     {
+      name: 'Internal Chat',
+      slug: 'internal-chat',
+    },
+    {
       name: 'Generate Content',
       slug: 'generate',
     },
@@ -52,7 +63,7 @@ export default function Navbar() {
     },
   ]
 
-  if (session?.user?.role === 'admin') {
+  if (currentUser?.role === 'admin') {
     navItems.push(...adminNavItems)
   }
 

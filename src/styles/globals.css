@@ -18,7 +18,7 @@
 }
 
 main {
-  @apply pt-20;
+  @apply pt-20 lg:pt-24;
 }
 
 .ck-content {

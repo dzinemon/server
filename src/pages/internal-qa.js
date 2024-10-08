@@ -19,9 +19,8 @@ export default function ChatWidget() {
 
   const [filterArray, setFilterArray] = useState([filters[0], filters[1], filters[2]])
 
-  const [response, setResponse] = useState({})
   const scrollTargetRef = useRef(null)
-  const [isAccepted, setIsAccepted] = useState(false)
+  
   const [isLoading, setIsLoading] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [question, setQuestion] = useState('')

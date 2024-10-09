@@ -255,7 +255,7 @@ export default function ChatWidget() {
       body: JSON.stringify({
         question: question,
         sourceFilters: ['website'],
-        typeFilters: null,
+        typeFilters: ['webpage', 'post', 'tip', 'tax_calendar', 'qna'],
         topK: 8,
       }),
       redirect: 'follow', // manual, *follow, error

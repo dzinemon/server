@@ -78,13 +78,33 @@ async function deleteAllVectors() {
   }
 }
 
-async function queryEmbedding(queryVector, filterValues, topK = 8) {
+async function queryEmbedding(queryVector, sourceFilters = ['website'], typeFilters, topK = 8) {
+
+  const currentFilter = () => {
+    if (sourceFilters.length === 0 && (!typeFilters || typeFilters.length === 0)) {
+      return {}
+    } else if (sourceFilters?.length === 0 && typeFilters?.length !== 0) {
+      return { type: { $in: typeFilters } }
+    } else if (sourceFilters?.length !== 0 && (!typeFilters || typeFilters.length === 0)) {
+      return { source: { $in: sourceFilters } }
+    } else {
+      return {
+        $and: [
+          { source: { $in: sourceFilters } },
+          { type: { $in: typeFilters } },
+        ],
+      }
+    }
+  }
+
+  const filterValue = currentFilter() 
+
   try {
     // const index = client.index(config.index)
     const queryRequest = {
       topK: topK,
       vector: queryVector,
-      filter: { source: { $in: filterValues } },
+      filter: filterValue,
       includeMetadata: true,
     }
 

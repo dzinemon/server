@@ -1,21 +1,25 @@
 import {
   generateEmbedding,
-  createChatCompletion,
 } from '../../../../utils/openai'
 import { queryEmbedding } from '../../../../utils/pinecone'
 
 import checkRequestOrigin from '../../../../utils/checkRequestOrigin'
 
 const postUrl = async (req, res) => {
-  const { question, subQuestions, filter } = req.body
-
-  if (filter.length === 0) {
-    filter.push('website')
-  }
+  const { question, 
+    sourceFilters,
+    typeFilters,
+    topK,
+   } = req.body
   
   const questionEmbedding = await generateEmbedding(question);
 
-  const data = await queryEmbedding(questionEmbedding, filter);
+  const data = await queryEmbedding(
+    questionEmbedding, 
+    sourceFilters,
+    typeFilters,
+    topK
+  );
   // get sources array of data
 
   const sources = data.matches
@@ -37,24 +41,13 @@ const postUrl = async (req, res) => {
   // console.log('sources ', sources.length)
   // bundle prompt using data metadata content from all matches
 
-  const promptTempate = (question, context, subQuestions = []) => {
-    if (subQuestions.length === 0) {
-      return `Answer the question based on the context below provide answer in Rich Text Format, use headings and bullet points if necessary:
+  const promptTempate = (question, context) => {
+    return `Answer the question based on the context below provide answer in Rich Text Format, use headings and bullet points if necessary:
   
       Question: ${question}
       
       Context: ${context}
       `
-    } else {
-      return `Answer the main question based on the context below, keep your reply to the previous quesitons and format the answer with HTML tags:
-  
-      Main Question: ${question}
-
-      Previous quesitons: ${subQuestions.join(', ')}
-      
-      Context: ${context}
-      `
-    }
   }
 
   // const thecontext = data.matches
@@ -73,7 +66,7 @@ const postUrl = async (req, res) => {
       }
     }, '')
 
-  const prompt = promptTempate(question, thecontext, subQuestions)
+  const prompt = promptTempate(question, thecontext)
 
   if (thecontext.length === 0) {
     res.status(200).json({

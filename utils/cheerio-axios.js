@@ -49,7 +49,7 @@ export const parseWithCheerio = async (url) => {
   //get og:image content
   let ogImage;
   
-  const pageType = $('meta[property="site:source"]').attr('content') || 'webpage'
+  const pageType = $('meta[property="kruze:source"]').attr('content') || 'webpage'
 
   // get domain name
   const domain = new URL(url).hostname

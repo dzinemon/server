@@ -26,7 +26,7 @@ const searchExamples = [
   'Kruze Pricing',
   'Startup Taxes',
   'Startup Bookkeeping',
-  'C-Corp Tax Deadlines 2023',
+  'C-Corp Tax Deadlines 2024',
   '409A Valuation',
   'Top pre-seed funds',
 ]
@@ -53,17 +53,6 @@ export default function ChatWidget() {
 
   const myHeaders = new Headers()
   myHeaders.append('Content-Type', 'application/json')
-
-  // const makeRequest = async () => {
-  //   const res = await fetch('/api/questions')
-
-  //   setResponse({
-  //     status: res.status,
-  //     body: await res.json(),
-  //     limit: res.headers.get('X-RateLimit-Limit'),
-  //     remaining: res.headers.get('X-RateLimit-Remaining'),
-  //   })
-  // }
 
   const handleLike = (question) => {
     // console.log('like', question)
@@ -265,8 +254,9 @@ export default function ChatWidget() {
       headers: myHeaders,
       body: JSON.stringify({
         question: question,
-        // subQuestions: questions.map((item) => item.question),
-        filter: [],
+        sourceFilters: ['website'],
+        typeFilters: null,
+        topK: 8,
       }),
       redirect: 'follow', // manual, *follow, error
     }

@@ -4,13 +4,15 @@ const postUrl = async (req, res) => {
   try {
     const { 
       embedding,
-      filterValues,
+      sourceFilters,
+      typeFilters,
       topK
     } = req.body
 
     const data = await queryEmbedding(
       embedding,
-      filterValues,
+      sourceFilters,
+      typeFilters,
       topK
     )
 

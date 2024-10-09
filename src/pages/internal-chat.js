@@ -29,7 +29,10 @@ import { promptTemplate } from '../../utils/handleprompts/internal'
 
 import MessageBubble from '@/components/common/message-bubble'
 
-const filters = ['website', 'slack', 'internal']
+import {
+  sourceFilters,
+  typeFilters,
+} from '../../utils/hardcoded'
 
 function ThreadCombobox({ threads, currentThreadId, setCurrentThreadId }) {
   // const [selectedthread, setSelectedthread] = useState(people[0])
@@ -137,10 +140,19 @@ export default function InternalChatPage() {
 
   const { currentUser } = useUser()
 
-  const [filterArray, setFilterArray] = useState([
-    filters[0],
-    filters[1],
-    filters[2],
+  const [filterBySourceArray, setFilterBySourceArray] = useState([
+    sourceFilters[0],
+    sourceFilters[1],
+    sourceFilters[2],
+  ])
+
+  const [filterByTypeArray, setFilterByTypeArray] = useState([
+    typeFilters[0],
+    typeFilters[1],
+    typeFilters[2],
+    typeFilters[3],
+    typeFilters[4],
+    typeFilters[5],
   ])
 
   const scrollTargetRef = useRef(null)
@@ -225,7 +237,8 @@ export default function InternalChatPage() {
       headers: myHeaders,
       body: JSON.stringify({
         embedding: embedding,
-        filterValues: filterArray,
+        sourceFilters: filterBySourceArray,
+        typeFilters: filterByTypeArray,
         topK: 4,
       }),
       redirect: 'follow', // manual, *follow, error
@@ -759,49 +772,94 @@ export default function InternalChatPage() {
                   className="p-2 flex gap-1 text-base font-semibold leading-7 relative"
                 >
                   <div className="w-auto relative">
-                    <Listbox
-                      value={filterArray}
-                      onChange={setFilterArray}
-                      multiple
-                    >
-                      {({ open }) => (
-                        <>
-                          <Listbox.Button
-                            className={`${
-                              filterArray.length > 0
-                                ? 'bg-gray-400 text-white'
-                                : 'bg-gray-200 text-gray-600'
-                            } w-full px-2 py-1.5 border rounded-md flex-1 font-normal focus:outline-none focus:border-gray-400 relative`}
-                          >
-                            <FunnelIcon className="w-6 h-6 inline" />
+                    <div className="flex flex-col space-y-2 h-full items-between">
+                      <Listbox
+                        value={filterBySourceArray}
+                        onChange={setFilterBySourceArray}
+                        multiple
+                      >
+                        {({ open }) => (
+                          <>
+                            <Listbox.Button
+                              className={`${
+                                filterBySourceArray.length > 0
+                                  ? 'bg-gray-400 text-white'
+                                  : 'bg-gray-200 text-gray-600'
+                              } w-full px-2 py-1.5 border rounded-md flex-1 font-normal focus:outline-none focus:border-gray-400 relative`}
+                            >
+                              <FunnelIcon className="w-6 h-6 inline" />
+                              {!open && (
+                                <div className="absolute w-4 h-4 -top-2 -right-2 leading-none flex items-center justify-center rounded-full text-[10px] text-white bg-blue-600">
+                                  {filterBySourceArray.length}
+                                </div>
+                              )}
+                            </Listbox.Button>
+                            <Listbox.Options
+                              className={
+                                'absolute w-24 text-xs top-0 bg-white border border-gray-200 rounded-md shadow-lg z-20'
+                              }
+                            >
+                              {sourceFilters.map((filter, idx) => (
+                                <Listbox.Option
+                                  key={`${filter}-${idx}`}
+                                  value={filter}
+                                  className={'px-4 py-2 hover:bg-gray-100'}
+                                >
+                                  {filter}
+                                  {filterBySourceArray.includes(filter) && (
+                                    <span className="text-gray-600">✓</span>
+                                  )}
+                                </Listbox.Option>
+                              ))}
+                            </Listbox.Options>
+                          </>
+                        )}
+                      </Listbox>
 
-                            {!open && (
-                              <div className="absolute w-4 h-4 -top-2 -right-2 leading-none flex items-center justify-center rounded-full text-[10px] text-white bg-blue-600">
-                                {filterArray.length}
-                              </div>
-                            )}
-                          </Listbox.Button>
-                          <Listbox.Options
-                            className={
-                              'absolute w-24 text-xs top-0 bg-white border border-gray-200 rounded-md shadow-lg z-20'
-                            }
-                          >
-                            {filters.map((filter, idx) => (
-                              <Listbox.Option
-                                key={`${filter}-${idx}`}
-                                value={filter}
-                                className={'px-4 py-2 hover:bg-gray-100'}
-                              >
-                                {filter}
-                                {filterArray.includes(filter) && (
-                                  <span className="text-gray-600">✓</span>
-                                )}
-                              </Listbox.Option>
-                            ))}
-                          </Listbox.Options>
-                        </>
-                      )}
-                    </Listbox>
+                      <Listbox
+                        value={filterByTypeArray}
+                        onChange={setFilterByTypeArray}
+                        multiple
+                      >
+                        {({ open }) => (
+                          <>
+                            <Listbox.Button
+                              className={`${
+                                filterByTypeArray.length > 0
+                                  ? 'bg-gray-400 text-white'
+                                  : 'bg-gray-200 text-gray-600'
+                              } w-full px-2 py-1.5 border rounded-md flex-1 font-normal focus:outline-none focus:border-gray-400 relative`}
+                            >
+                              <FunnelIcon className="w-6 h-6 inline" />
+                              {!open && (
+                                <div className="absolute w-4 h-4 -top-2 -right-2 leading-none flex items-center justify-center rounded-full text-[10px] text-white bg-blue-600">
+                                  {filterByTypeArray.length}
+                                </div>
+                              )}
+                            </Listbox.Button>
+                            <Listbox.Options
+                              className={
+                                'absolute w-24 text-xs top-0 bg-white border border-gray-200 rounded-md shadow-lg z-20'
+                              }
+                            >
+                              {typeFilters.map((filter, idx) => (
+                                <Listbox.Option
+                                  key={`${filter}-${idx}`}
+                                  value={filter}
+                                  className={'px-4 py-2 hover:bg-gray-100'}
+                                >
+                                  {filter}
+                                  {filterByTypeArray.includes(filter) && (
+                                    <span className="text-gray-600">✓</span>
+                                  )}
+                                </Listbox.Option>
+                              ))}
+                            </Listbox.Options>
+                          </>
+                        )}
+                      </Listbox>
+
+                    </div>
                   </div>
 
                   <textarea

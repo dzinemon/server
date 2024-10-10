@@ -11,6 +11,13 @@ module.exports = {
       padding: '1rem',
     },
     extend: {
+      typography: {
+        DEFAULT: {
+          css: {
+            maxWidth: '960px', // add required value here
+          }
+        }
+      },
       colors: {
         kruze: {
           blue: '#4791CE',

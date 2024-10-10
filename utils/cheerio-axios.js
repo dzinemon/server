@@ -37,7 +37,7 @@ export const getHtml = async (url) => {
 };
 export const getCheerio = async (url) => {
   const html = await getHtml(url)
-  console.log('html', html)
+  // console.log('html', html)
   const $ = load(html)
   return $
 }

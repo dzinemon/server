@@ -45,7 +45,7 @@ export const UserMessageWrapper = ({ children, role, onRemove }) => {
         )}
       </div>
       <div className="flex justify-end gap-3 border-t border-slate-300 mt-2 pt-2">
-        <button
+        {/* <button
           title="copy to clipboard"
           onClick={async () => {
             setIsCopied(true)
@@ -60,7 +60,7 @@ export const UserMessageWrapper = ({ children, role, onRemove }) => {
           ) : (
             <ClipboardIcon className="w-3.5 h-3.5" />
           )}
-        </button>
+        </button> */}
 
         <button
           // remove message
@@ -168,7 +168,7 @@ export default function MessageBubble({ message, role, onRemove }) {
       className={`p-3 ${
         role === 'user' ? 'bg-slate-50' : 'bg-white border border-slate-200'
       } ${
-        role === 'assistant' ? 'prose prose-a:text-blue-600' : ''
+        role === 'assistant' ? 'prose prose-hr:my-3 prose-a:text-blue-600' : ''
       } rounded-md w-full`}
     >
       {role === 'user' ? (

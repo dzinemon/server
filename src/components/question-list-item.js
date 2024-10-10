@@ -22,63 +22,12 @@ import {
   CheckIcon,
   XMarkIcon,
   ChatBubbleLeftRightIcon,
+  MicrophoneIcon,
 } from '@heroicons/react/24/solid'
 
 import ReactMarkdown from 'react-markdown'
 
-export const Type = ({ data }) => {
-  switch (data) {
-    case 'webpage':
-      return (
-        <>
-          <DocumentChartBarIcon className="w-3 h-3 mr-1" />
-          Web page
-        </>
-      )
-      break
-    case 'slack':
-      return (
-        <>
-          <ChatBubbleLeftRightIcon className="w-3 h-3 mr-1" />
-          Slack
-        </>
-      )
-      break
-    case 'post':
-      return (
-        <>
-          <DocumentChartBarIcon className="w-3 h-3 mr-1" />
-          Blog post
-        </>
-      )
-      break
-    case 'qna':
-      return (
-        <>
-          <DocumentChartBarIcon className="w-3 h-3 mr-1" />Q & A
-        </>
-      )
-      break
-    case 'tax_calendar':
-      return (
-        <>
-          <CalendarIcon className="w-3 h-3 mr-1" />
-          Tax Calendars
-        </>
-      )
-      break
-    case 'tip':
-      return (
-        <>
-          <DocumentChartBarIcon className="w-3 h-3 mr-1" />
-          Startup Tips
-        </>
-      )
-      break
-    default:
-      console.log('Unknown page')
-  }
-}
+import { Type } from './common/resourcetype'
 
 export default function QuestionListItem({ question, onClick, id }) {
   const [isOpen, setIsOpen] = useState(false)

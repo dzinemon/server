@@ -33,6 +33,8 @@ import {
   faLinkedinIn,
 } from '@fortawesome/free-brands-svg-icons'
 
+import { Type } from '../common/resourcetype'
+
 import ReactMarkdown from 'react-markdown'
 
 export const widgetpage = 'https://kruzeconsulting.com/#ask-kruze-ai-tool'
@@ -41,60 +43,6 @@ export const copyRightHtml = `<p>Generated using Kruze Consulting's experimental
 <p>Copyright © <a className='text-sky-600 hover:border-dashed hover:border-b border-sky-600' href='https://kruzeconsulting.com/' target='_blank' rel='noopener'>Kruze Consulting</a>. Not for commercial use.</p>                      `
 
 const encodedcopyRightHtml = encodeURIComponent(copyRightHtml)
-
-const Type = ({ data }) => {
-  switch (data) {
-    case 'slack':
-      return (
-        <>
-          <ChatBubbleLeftRightIcon className="w-3 h-3 mr-1" />
-          Slack
-        </>
-      )
-      break
-    case 'webpage':
-      return (
-        <>
-          <DocumentChartBarIcon className="w-3 h-3 mr-1" />
-          Web page
-        </>
-      )
-      break
-    case 'post':
-      return (
-        <>
-          <DocumentChartBarIcon className="w-3 h-3 mr-1" />
-          Blog post
-        </>
-      )
-      break
-    case 'qna':
-      return (
-        <>
-          <DocumentChartBarIcon className="w-3 h-3 mr-1" />Q & A
-        </>
-      )
-      break
-    case 'tax_calendar':
-      return (
-        <>
-          <CalendarIcon className="w-3 h-3 mr-1" />
-          Tax Calendars
-        </>
-      )
-      break
-    case 'tip':
-      return (
-        <>
-          <DocumentChartBarIcon className="w-3 h-3 mr-1" />
-          Startup Tips
-        </>
-      )
-      break
-    default:
-      console.log('Unknown page')
-  }
-}
 
 export default function QuestionSearchResult({
   question,

@@ -53,10 +53,10 @@ export default function Navbar() {
       name: 'Internal Chat',
       slug: 'internal-chat',
     },
-    {
-      name: 'Generate Content',
-      slug: 'generate',
-    },
+    // {
+    //   name: 'Generate Content',
+    //   slug: 'generate',
+    // },
     {
       name: '🤖 Li Post',
       slug: 'li-post-stream',
@@ -70,7 +70,7 @@ export default function Navbar() {
   return (
     <header className="fixed backdrop-blur-lg top-0 w-full z-50">
       <nav
-        className="mx-auto flex w-full max-w-[1500px] items-center justify-between p-6 lg:px-8"
+        className="mx-auto flex w-full max-w-[1500px] items-center justify-between p-4 lg:py-3 lg:px-6"
         aria-label="Global"
       >
         <div className="flex lg:flex-1">
@@ -135,15 +135,23 @@ export default function Navbar() {
       </nav>
 
       <div
-        className={`${isOpen ? 'block' : 'hidden'} lg:hidden`}
+        className={`${isOpen ? 'block h-screen lg:h-auto' : 'hidden'} lg:hidden`}
         role="dialog"
         aria-modal="true"
       >
         <div className="fixed inset-0 z-10"></div>
-        <div className="fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
+        <div className="fixed inset-y-0 right-0 z-30 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
           <div className="flex items-center justify-between">
-            <Link href="/home" className="-m-1.5 p-1.5">
-              <span className="sr-only">Logo</span>
+            <Link href="/" className="-m-1.5 p-1.5">
+              <span className="sr-only">Kruze</span>
+              <Image
+                src="/logo-color.png"
+                alt="Kruze Consulting Logo"
+                className="dark:invert"
+                width={15}
+                height={18}
+                priority
+              />
             </Link>
             <button
               onClick={() => setIsOpen(false)}

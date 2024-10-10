@@ -20,7 +20,7 @@ import {
   faLinkedinIn,
 } from '@fortawesome/free-brands-svg-icons'
 import ReactMarkdown from 'react-markdown'
-import { Type } from '../../components/question-list-item'
+import { Type } from '../common/resourcetype'
 
 import { copyRightHtml, widgetpage } from '../web-widget/question-search-result'
 

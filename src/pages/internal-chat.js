@@ -8,6 +8,8 @@ import Layout from '@/components/layout'
 import { useResources } from '@/context/resources'
 import { useUser } from '@/context/user'
 
+import ModelPicker from '@/components/common/modelpicker'
+
 import {
   ArrowPathIcon,
   FunnelIcon,
@@ -463,6 +465,10 @@ export default function InternalChatPage() {
                 <span className="font-bold">Add new thread</span>
                 <SquaresPlusIcon className="w-5 h-5 inline" />
               </button>
+            </div>
+            <div className='w-full mb-3'>
+            <p className="font-bold">Select model</p>
+            <ModelPicker />
             </div>
             <div className="text-sm max-w-full mx-auto mb-3">
               Keep your questions clear and concise for the best results. Use

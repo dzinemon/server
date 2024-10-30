@@ -2,6 +2,8 @@ import { chatCompletionMessages } from '../../../../utils/openai';
 
 import { createClaudeCompletionMessage } from '../../../../utils/anthropic';
 
+import { createPpxtyCompeltionMessage } from '../../../../utils/ppxty';
+
 const postUrl = async (req, res) => {
   const { messages, model, temperature } = req.body;
 
@@ -16,9 +18,16 @@ const postUrl = async (req, res) => {
         model,
         temperature
       );
-    } else {
+    } else if (model.includes('claude')) {
       console.log('using anthropic');
       completion = await createClaudeCompletionMessage(
+        messages,
+        model,
+        temperature
+      );
+    } else {
+      console.log('using ppxty');
+      completion = await createPpxtyCompeltionMessage(
         messages,
         model,
         temperature

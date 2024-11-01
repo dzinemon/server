@@ -421,27 +421,32 @@ export default function InternalChatPage() {
       </div>
       <div className="flex flex-row justify-end items-stretch relative">
         <div
-          className={`w-72 lg:w-1/4 h-screen bg-white border-r border-gray-200 fixed top-14 lg:top-16 left-0 z-10
+          className={`w-72 lg:w-1/4 h-screen flex flex-col bg-white border-r border-gray-200 fixed top-14 lg:top-16 left-0 z-10
           duration-500 ease-in-out transform
           ${sideBarIsOpen ? 'translate-x-0' : '-translate-x-full'}
           `}
+          style={{
+            height: 'calc(100vh - 3.5rem)',
+          }}
         >
-          <button
-            onClick={() => setSideBarOpen(!sideBarIsOpen)}
-            className={`
-                  lg:hidden
-                    absolute top-2 right-0 translate-x-full z-10  text-white p-2 rounded-md
-                    hover:bg-kruze-secondary
-                    ${sideBarIsOpen ? 'bg-yellow-500' : 'bg-kruze-blue'}
-                    `}
-          >
-            {sideBarIsOpen ? (
-              <ChevronDoubleLeftIcon className="w-4 h-4" />
-            ) : (
-              <ChevronDoubleRightIcon className="w-4 h-4" />
-            )}
-          </button>
-          <div className="relative overflow-auto flex flex-col justify-start items-center p-2">
+          <div className='w-full'>
+            <button
+              onClick={() => setSideBarOpen(!sideBarIsOpen)}
+              className={`
+                    lg:hidden
+                      absolute top-2 right-0 translate-x-full z-10  text-white p-2 rounded-md
+                      hover:bg-kruze-secondary
+                      ${sideBarIsOpen ? 'bg-yellow-500' : 'bg-kruze-blue'}
+                      `}
+            >
+              {sideBarIsOpen ? (
+                <ChevronDoubleLeftIcon className="w-4 h-4" />
+              ) : (
+                <ChevronDoubleRightIcon className="w-4 h-4" />
+              )}
+            </button>
+          </div>
+          <div className="grow flex-grow relative flex flex-col justify-start items-center p-2">
             {!isSubmitted && (
               <div className="text-sm text-rose-600 p-2 rounded bg-rose-50">
                 This is in development. Please provide feedback to improve the
@@ -474,6 +479,10 @@ export default function InternalChatPage() {
               Keep your questions clear and concise for the best results. Use
               single sentences or key phrases to get precise answers.
             </div>
+       
+          </div>
+          <div className='flex-grow overflow-y-auto px-2 pb-4'>
+       
             <ThreadCombobox
               threads={threads}
               currentThreadId={currentThreadId}

@@ -173,3 +173,85 @@ export const parseWithCheerio = async (url) => {
     pageType: pageType
   }
 }
+
+
+export const parsePodcastWithCheerio = async (url) => {
+  const $ = await getCheerio(url)
+  const title = $('title').text()
+
+  //get og:image content
+  let ogImage;
+  
+  const pageType = $('meta[property="kruze:source"]').attr('content') || 'webpage'
+
+  // get domain name
+  const domain = new URL(url).hostname
+
+  const source = domain.includes('kruze') ? 'website' : domain.includes('irs') ? 'irs' : 'external'
+
+  ogImage = $('meta[property="og:image"]').attr('content').trim()
+  
+  let text = $('body')
+    .find('nav')
+    .remove()
+    .end()
+    .find('#toc-section')
+    .remove()
+    .end()
+    .find($('iframe'))
+    .remove()
+    .end()
+    .find($('.modal'))
+    .remove()
+    .end()
+    .find($('.global-footer'))
+    .remove()
+    .end()
+    .find($('.dynamic-footer'))
+    .remove()
+    .end()
+    .find($('.sk-ip'))
+    .remove()
+    .end()
+    .find('#contact')
+    .remove()
+    .end()
+    .find($('#pricing').parents('section'))
+    .remove()
+    .end()
+    .find($('#about').parents('section'))
+    .remove()
+    .end()
+    .find($('#rates').parents('section'))
+    .remove()
+    .end()
+    .find('footer')
+    .remove()
+    .end()
+    .find('script')
+    .remove()
+    .end()
+    .find('noscript')
+    .remove()
+    .end()
+    .find('style')
+    .remove()
+    .end()
+    .text()
+    $('tr').filter(function() {
+      return $(this).find('td:first').text().includes('Scott');
+    }).remove();
+
+    const theString = text.trim()
+    const newStr = theString.replace(/\s+/g, ' ')
+    console.log('Text length', newStr.length)
+    return {
+      pageContent: newStr,
+      pageUrl: url,
+      name: title,
+      ogImage: ogImage,
+      source: source,
+      pageType: pageType
+    }
+}
+

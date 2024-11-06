@@ -122,11 +122,11 @@ export const promptTemplatePodcastQuotesV2 = (pageData, source) => {
   // [podcastContent] is content of the podcast
 
   return `I am providing the Podcast Content below,
-    Scan the Podcast Content to find relevant sections where the Interviewee shares an actionable tip, how-to advice, or insightful perspective about the Page Topics provided below:
+    Scan the Podcast Content to find relevant sections where the Interviewee shares an actionable tip, how-to advice, or insightful perspective about the Page Topic or Topics provided below:
     Ensure that the 'Interviewee Quote or Phrase' is a direct and unaltered excerpt from the transcript
     Maintain clarity and brevity, be concise and to the point,
     For each Quote or phrase provide the url as reference.
-    Per each Interviewee Quote or Phrase provide Solid line at the top, Topic it relates to, Page Title, and Page Url as text, Interviewee Name, position and company name at the top of response.
+    Per each Interviewee Quote or Phrase provide Solid line at the top, Topic it relates to or describes, Page Title, and Page Url as text, Interviewee Name, position and company name at the top of response.
 
     Page Topics: ${pageData}
     

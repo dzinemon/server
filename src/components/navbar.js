@@ -38,6 +38,10 @@ export default function Navbar() {
 
   const navItems = [
     {
+      name: 'Quotes',
+      slug: 'podcast-quotes-topic',
+    },
+    {
       name: 'External QA',
       slug: 'widget',
     },

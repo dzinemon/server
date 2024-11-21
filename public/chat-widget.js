@@ -97,6 +97,8 @@
     border: none; 
     position: fixed;
     inset: 8px 8px 8px 8px;
+    height: calc(100% - 8px);
+    width: -moz-available; 
     height: -webkit-fill-available;
     width: -webkit-fill-available; 
     color-scheme: none; 

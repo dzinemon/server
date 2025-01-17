@@ -644,7 +644,7 @@ export default function ChatWidget() {
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
 
-          gtag('config', '${NEXT_PUBLIC_GA4_ID}');`}
+          gtag('config', '${NEXT_PUBLIC_GA4_ID}', { 'cookieFlags': 'SameSite=None; Secure' });`}
           </Script>
         </>
       ) : (

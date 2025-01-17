@@ -95,6 +95,30 @@ export const authOptions = {
       return session
     },
   },
+  useSecureCookies: process.env.VERCEL_ENV === 'production',
+  // cookies: {
+    // sessionToken: {
+    //   name: `__Host-next-auth.session-token`,
+    //   options: {
+    //     httpOnly: process.env.NODE_ENV === 'production',
+    //     sameSite: 'lax',
+    //   },
+    // },
+    // csrfToken: {
+    //   name: `__Host-next-auth.csrf-token`,
+    //   options: {
+    //     httpOnly: false,
+    //     sameSite: 'lax',
+    //   },
+    // },
+    // callbackUrl: {
+    //   name: `__Secure-next-auth.callback-url`,
+    //   options: {
+    //     httpOnly: process.env.NODE_ENV === 'production',
+    //     sameSite: 'lax',
+    //   },
+    // },
+  // },
 }
 
 export default NextAuth(authOptions)

@@ -41,10 +41,10 @@ export default function Navbar() {
       name: 'Quotes',
       slug: 'podcast-quotes-topic',
     },
-    {
-      name: 'External QA',
-      slug: 'widget',
-    },
+    // {
+    //   name: 'External QA',
+    //   slug: 'widget',
+    // },
     {
       name: 'All Questions',
       slug: 'all-questions',

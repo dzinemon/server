@@ -52,6 +52,38 @@ export const ResourceProvider = ({ children }) => {
     }
   }
 
+  const removeMultipleQuestionsById = async (ids) => {
+    setLoading(true)
+    try {
+      const res = await fetch(url, {
+        method: 'DELETE',
+        headers: myHeaders,
+        body: JSON.stringify({ ids }),
+      })
+      await res.json()
+
+      const updatedQuestions = allQuestions.filter(
+        (question) => !ids.includes(question.id)
+      )      
+
+      setAllQuestions(updatedQuestions)
+
+      toast.success('Questions deleted', {
+        icon: '🗑️',
+        duration: 2500,
+      })
+    } catch (error) {
+      console.error('Error deleting questions:', error)
+
+      toast.error('Error deleting questions', {
+        icon: '❌',
+        duration: 2500,
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const fetchQuestionById = async (id) => {
     setLoading(true)
     try {
@@ -121,6 +153,7 @@ export const ResourceProvider = ({ children }) => {
         setResources,
         allQuestions,
         fetchAllQuestions,
+        removeMultipleQuestionsById,
         text,
         handleTextChange,
         markdownContent,
@@ -129,7 +162,8 @@ export const ResourceProvider = ({ children }) => {
         handleQuestionDelete,
         currentModel,
         setCurrentModel,
-        currentThread, setCurrentThread,
+        currentThread,
+        setCurrentThread,
       }}
     >
       {children}

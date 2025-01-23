@@ -1,5 +1,5 @@
 import NextAuth from 'next-auth'
-import CredentialsProvider from 'next-auth/providers/credentials'
+// import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
 
 import db from '../../../db'
@@ -18,6 +18,16 @@ const getUserByEmail = async (email) => {
 }
 const saltRounds = 10
 const salt = await bcrypt.genSalt(saltRounds)
+
+/* create users table */
+
+// CREATE TABLE users (
+//   id SERIAL PRIMARY KEY,
+//   name VARCHAR(255),
+//   email VARCHAR(255) UNIQUE,
+//   role VARCHAR(255),
+//   password VARCHAR(255)
+// );
 
 export const authOptions = {
   // Configure one or more authentication providers
@@ -78,10 +88,21 @@ export const authOptions = {
   callbacks: {
     async signIn({ account, profile }) {
       if (account.provider === 'google') {
-        return (
-          profile.email_verified &&
-          profile.email.endsWith('@kruzeconsulting.com')
-        )
+
+        const email_verified = profile.email_verified
+        const matchesDomain = profile.email.endsWith('@kruzeconsulting.com')
+
+        if (email_verified && matchesDomain) {
+          const existingUser = await getUserByEmail(profile.email)
+
+          if (!existingUser) {
+            await db.query(
+              'INSERT INTO users (name, email, role) VALUES ($1, $2, $3)',
+              [profile.name, profile.email, 'user']
+            )
+          }
+          return true
+        }
       }
       return true // Do different verification for other providers that don't have `email_verified`
     },
@@ -91,34 +112,38 @@ export const authOptions = {
       if (user) {
         session.user.role = user.role
       }
-
       return session
     },
   },
-  useSecureCookies: process.env.VERCEL_ENV === 'production',
   // cookies: {
-    // sessionToken: {
-    //   name: `__Host-next-auth.session-token`,
-    //   options: {
-    //     httpOnly: process.env.NODE_ENV === 'production',
-    //     sameSite: 'lax',
-    //   },
-    // },
-    // csrfToken: {
-    //   name: `__Host-next-auth.csrf-token`,
-    //   options: {
-    //     httpOnly: false,
-    //     sameSite: 'lax',
-    //   },
-    // },
-    // callbackUrl: {
-    //   name: `__Secure-next-auth.callback-url`,
-    //   options: {
-    //     httpOnly: process.env.NODE_ENV === 'production',
-    //     sameSite: 'lax',
-    //   },
-    // },
+  //   sessionToken: {
+  //     name: `__Secure-next-auth.session-token`,
+  //     options: {
+  //       httpOnly: process.env.VERCEL_ENV === 'production',
+  //       sameSite: 'None', // Change this to None
+  //       secure: process.env.VERCEL_ENV === 'production', // Ensure this is true
+  //       path: '/',
+  //     },
+  //   },
+  //   callbackUrl: {
+  //     name: `__Secure-next-auth.callback-url`,
+  //     options: {
+  //       sameSite: 'None', // Change this to None
+  //       secure: process.env.VERCEL_ENV === 'production', // Ensure this is true
+  //       path: '/',
+  //     },
+  //   },
+  //   csrfToken: {
+  //     name: `__Host-next-auth.csrf-token`,
+  //     options: {
+  //       httpOnly: process.env.VERCEL_ENV === 'production',
+  //       sameSite: 'None', // Change this to None
+  //       secure: process.env.VERCEL_ENV === 'production', // Ensure this is true
+  //       path: '/',
+  //     },
+  //   },
   // },
+  useSecureCookies: process.env.VERCEL_ENV === 'production'
 }
 
 export default NextAuth(authOptions)

@@ -103,7 +103,7 @@ export default function Navbar() {
               <Link
                 key={`nav-bar-lg-${idx}`}
                 href={`/${item.slug}`}
-                className={`${ pathname === `/${item.slug}` ? 'underline pointer-events-none' : '' } text-sm font-semibold leading-6 text-gray-900`}
+                className={`${ pathname === `/${item.slug}` ? 'underline pointer-events-none text-kruze-blueDark' : 'text-kruze-dark' } hover:text-kruze-blueLight  text-sm font-semibold leading-6 text-gray-900`}
               >
                 {item.name}
               </Link>

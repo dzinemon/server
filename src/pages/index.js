@@ -40,66 +40,72 @@ export default function Home() {
 
           <div className="mb-32 flex flex-wrap text-center justify-center lg:mb-0 lg:text-left ">
             {[
-          {
-            name: 'Internal',
-            url: 'internal-qa',
-            description: 'AI Question and Answer for internal use. Uses website, slack, internal data, uploaded to pinecone',
-          },
-          { 
-            name: 'Internal Chat',
-            url: 'internal-chat',
-            description: 'Similar to Internal QA but with chat behaviour',
-          },
-          {
-            name: 'LinkedIn Post Generator',
-            url: 'li-post-stream',
-            description: 'Generate LinkedIn posts, reposts based on input',
-          },
-          {
-            name: 'All Questions',
-            url: 'all-questions',
-            description: 'View the questions users have asked on AI Widget',
-          },
-          {
-            name: 'Quotes Generator',
-            url: 'podcast-quotes-topic',
-            description: 'Generate quotes from podcast page to specific topic',
-          }
-        ].map(({ name, url, description }, id) => (
-          <a
-            key={`link-${id}-${name}`}
-            href={url}
-            className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          >
-            <h2 className={`mb-3 text-2xl font-semibold`}>
-              {name}{' '}
-              <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-                -&gt;
-              </span>
-            </h2>
-            <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-              {description}
-            </p>
-          </a>
-        ))}
-
-            {/* <button
-              type="button"
-              id="btn-trigger-chat-section"
-              className="group  rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-            >
-              <h2 className={`mb-3 text-2xl font-semibold pointer-events-none`}>
-                Start Chat{' '}
-                <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-                  -&gt;
-                </span>
-              </h2>
-              <p
-                className={`m-0 max-w-[30ch] text-sm opacity-50 pointer-events-none`}
+              {
+                name: 'Internal',
+                url: 'internal-qa',
+                description:
+                  'AI Question and Answer for internal use. Uses website, slack, internal data, uploaded to pinecone',
+              },
+              {
+                name: 'Internal Chat',
+                url: 'internal-chat',
+                description: 'Similar to Internal QA but with chat behaviour',
+              },
+              {
+                name: 'LinkedIn Post Generator',
+                url: 'li-post-stream',
+                description: 'Generate LinkedIn posts, reposts based on input',
+              },
+              {
+                name: 'All Questions',
+                url: 'all-questions',
+                description: 'View the questions users have asked on AI Widget',
+              },
+              {
+                name: 'Quotes Generator',
+                url: 'podcast-quotes-topic',
+                description:
+                  'Generate quotes from podcast page to specific topic',
+              },
+            ].map(({ name, url, description }, id) => (
+              <a
+                key={`link-${id}-${name}`}
+                href={url}
+                className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
               >
-                use the chat widget to ask questions
-              </p>
-            </button> */}
+                <h2 className={`mb-3 text-2xl font-semibold group-hover:text-kruze-blueLight`}>
+                  {name}{' '}
+                  <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
+                    -&gt;
+                  </span>
+                </h2>
+                <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
+                  {description}
+                </p>
+              </a>
+            ))}
+
+            <div className="hidden">
+              <button
+                type="button"
+                id="btn-trigger-chat-section"
+                className="group  rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
+              >
+                <h2
+                  className={`mb-3 text-2xl font-semibold pointer-events-none`}
+                >
+                  Start Chat{' '}
+                  <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
+                    -&gt;
+                  </span>
+                </h2>
+                <p
+                  className={`m-0 max-w-[30ch] text-sm opacity-50 pointer-events-none`}
+                >
+                  use the chat widget to ask questions
+                </p>
+              </button>
+            </div>
           </div>
 
           <div className="z-10 w-full max-w-5xl items-center justify-between text-sm lg:flex">

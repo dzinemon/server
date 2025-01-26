@@ -106,6 +106,65 @@ const PodcastQuotes = () => {
     return data
   }
 
+  const getPodcastData = async (embedding, sourceFilters, typeFilters) => {
+    const questionRequestOptions = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        embedding: embedding,
+        sourceFilters: sourceFilters,
+        typeFilters: typeFilters,
+        topK: topK,
+        includeMetadata: false,
+        includeValues: false,
+      }),
+
+      redirect: 'follow', // manual, *follow, error
+    }
+
+    const { data } = await fetch(
+      '/api/v1/queryembedding',
+      questionRequestOptions
+    )
+      .then((response) => {
+        if (response.status === 200) {
+          console.log('post success')
+          console.log(response)
+          toast('Data fetched', {
+            icon: '🚀',
+            duration: 2000,
+          })
+        }
+        return response.json()
+      })
+      .then((result) => result)
+      .catch((error) => {
+        console.log('error', error)
+        toast('Error generating completion', {
+          icon: '❌',
+        })
+        return { data: [] }
+      })
+
+    console.log('✅ data ready✅', data)
+
+    return data
+
+  }
+
+  const getSourcesIds = async (data) => {
+    console.log('data', data)
+
+    const ids = await data.matches.map((match) => match.metadata.id)
+
+    console.log('✅ids ready✅', ids)
+
+    return ids
+  }
+
+
   const getSources = async (data) => {
     const sources = await data.matches
       .map((match) => {
@@ -184,7 +243,8 @@ const PodcastQuotes = () => {
   const handleSubmit = async () => {
     setLoading(true)
     const topicsArray = topics.split('\n')
-    setProcessingTopics(topicsArray.length)
+      .filter((topic) => topic.trim().length > 0)
+    setProcessingTopics(topicsArray.map((topic) => topic.trim()).length)
     const promises = topicsArray
       .filter((topic) => topic.trim().length > 0)
       .map(async (topic) => {
@@ -236,7 +296,7 @@ const PodcastQuotes = () => {
           <div>Processing Topics: {processsingTopics}</div>
         </div>
         <p className="mt-1 text-sm leading-6 text-gray-600">
-          Enter the URLs of pages you want to generate quotes for.
+          Enter the Topics you want to generate quotes for, separated by new line.
         </p>
 
         <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
@@ -270,7 +330,7 @@ const PodcastQuotes = () => {
               <textarea
                 value={topics}
                 onChange={handleChange}
-                placeholder="Enter URLs separated by new line"
+                placeholder="Enter Topics separated by new line"
                 rows="4"
                 cols="50"
                 className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
@@ -315,10 +375,12 @@ const PodcastQuotes = () => {
         {processedPages.map((page, idx) => (
           <div key={page.url} className="mb-8">
             <div className="sticky top-16 p-4 shadow-md bg-blue-100">
-              <h2 className="text-xl font-bold">{page.topic}</h2>
-              <p className="text-sm text-gray-500">{page.url}</p>
+              <div className="container">
+                <h2 className="text-xl font-bold">{page.topic}</h2>
+                <p className="text-sm text-gray-500">{page.url}</p>
+              </div>
             </div>
-            <div className="p-4 divide-y divide-y-4 space-y-4">
+            <div className="p-4 divide-y divide-y-4 space-y-4 container">
               <MessageBubble
                 message={page.quotes.join('\n\n')}
                 role="assistant"

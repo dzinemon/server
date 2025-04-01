@@ -26,7 +26,7 @@ const searchExamples = [
   'Kruze Pricing',
   'Startup Taxes',
   'Startup Bookkeeping',
-  'C-Corp Tax Deadlines 2024',
+  'C-Corp Tax Deadlines 2025',
   '409A Valuation',
   'Top pre-seed funds',
 ]

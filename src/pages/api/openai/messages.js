@@ -2,7 +2,7 @@ import { chatCompletionMessages } from '../../../../utils/openai';
 
 import { createClaudeCompletionMessage } from '../../../../utils/anthropic';
 
-import { createPpxtyCompeltionMessage } from '../../../../utils/ppxty';
+import { createPpxtyCompletionMessage } from '../../../../utils/ppxty';
 
 const postUrl = async (req, res) => {
   const { messages, model, temperature } = req.body;
@@ -27,7 +27,7 @@ const postUrl = async (req, res) => {
       );
     } else {
       console.log('using ppxty');
-      completion = await createPpxtyCompeltionMessage(
+      completion = await createPpxtyCompletionMessage(
         messages,
         model,
         temperature

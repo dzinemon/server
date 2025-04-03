@@ -336,7 +336,7 @@ export default function QuestionSearchResult({
                               </div>
                             </div>
                           </div>
-                          <div className="w-auto px-4">
+                          <div className="w-auto px-4 hidden">
                             <div className="flex flex-row -mx-2 items-center text-slate-400">
                               <div className="w-auto px-2">
                                 <div

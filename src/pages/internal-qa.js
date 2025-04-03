@@ -1,23 +1,28 @@
-import React, { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import Image from 'next/image'
+import { useEffect, useRef, useState } from 'react'
 import toast, { Toaster } from 'react-hot-toast'
 
 import Layout from '@/components/layout'
 
 import { ArrowPathIcon, FunnelIcon } from '@heroicons/react/24/solid'
 
-import QuestionSearchResult from '../components/web-widget/question-search-result'
 import InlineLoading from '@/components/InlineLoading'
+import QuestionSearchResult from '../components/web-widget/question-search-result'
 
 import { Listbox } from '@headlessui/react'
+
+import { usedModel } from '../../utils/hardcoded'
 
 import { sourceFilters, typeFilters } from '../../utils/hardcoded'
 
 export default function ChatWidget() {
-  // const [limitReached, setLimitReached] = useState(false)
 
-  const [filterBySourceArray, setFilterBySourceArray] = useState([sourceFilters[0], sourceFilters[1], sourceFilters[2]])
+  const [filterBySourceArray, setFilterBySourceArray] = useState([
+    sourceFilters[0],
+    sourceFilters[1],
+    sourceFilters[2],
+  ])
 
   const [filterByTypeArray, setFilterByTypeArray] = useState([
     typeFilters[0],
@@ -29,7 +34,7 @@ export default function ChatWidget() {
   ])
 
   const scrollTargetRef = useRef(null)
-  
+
   const [isLoading, setIsLoading] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [question, setQuestion] = useState('')
@@ -78,9 +83,6 @@ export default function ChatWidget() {
   }
 
   const handleReport = (question, report) => {
-    // console.log('report', question)
-    // update questions with report
-
     const questions = JSON.parse(localStorage.getItem('localQuestions'))
 
     const updatedQuestions = questions.map((item) => {
@@ -196,13 +198,22 @@ export default function ChatWidget() {
       method: 'POST',
       headers: myHeaders,
       body: JSON.stringify({
-        prompt: prompt,
+        messages: [
+          {
+            role: 'system',
+            content:
+              'You are a helpful startup tax, accounting and bookkeeping assistant.',
+          },
+          { role: 'user', content: prompt },
+        ],
+        model: usedModel,
+        temperature: 0.1,
       }),
       redirect: 'follow', // manual, *follow, error
     }
 
     const { completion } = await fetch(
-      '/api/openai/completion',
+      '/api/v1/singlecompletion',
       promptRequestOptions
     )
       .then((response) => {
@@ -305,7 +316,7 @@ export default function ChatWidget() {
               } w-full max-w-[720px]`}
             >
               <div className="bg-[#6c757d] md:rounded-lg relative z-10 md:border border-slate-200">
-                <div className=''>
+                <div className="">
                   <form
                     onSubmit={askQuestion}
                     className="p-4 flex gap-2 text-base font-semibold leading-7 relative"
@@ -317,43 +328,42 @@ export default function ChatWidget() {
                           onChange={setFilterBySourceArray}
                           multiple
                         >
-                          {
-                            ({ open }) => (
-                              <>
-                                <Listbox.Button
-                                  className={`${
-                                    filterBySourceArray.length > 0
-                                      ? 'bg-gray-400 text-white'
-                                      : 'bg-gray-200 text-gray-600'
-                                  } w-full px-2 py-1.5 border rounded-md flex-1 font-normal focus:outline-none focus:border-gray-400 relative`}
-                                >
-                                  <FunnelIcon className="w-6 h-6 inline" />
-                                  {!open && (<div className="absolute w-4 h-4 -top-2 -right-2 leading-none flex items-center justify-center rounded-full text-[10px] text-white bg-blue-600">
+                          {({ open }) => (
+                            <>
+                              <Listbox.Button
+                                className={`${
+                                  filterBySourceArray.length > 0
+                                    ? 'bg-gray-400 text-white'
+                                    : 'bg-gray-200 text-gray-600'
+                                } w-full px-2 py-1.5 border rounded-md flex-1 font-normal focus:outline-none focus:border-gray-400 relative`}
+                              >
+                                <FunnelIcon className="w-6 h-6 inline" />
+                                {!open && (
+                                  <div className="absolute w-4 h-4 -top-2 -right-2 leading-none flex items-center justify-center rounded-full text-[10px] text-white bg-blue-600">
                                     {filterBySourceArray.length}
-                                  </div>)}
-                        
-                                </Listbox.Button>
-                                <Listbox.Options
-                                  className={
-                                    'absolute w-24 text-xs bottom-0 bg-white border border-gray-200 rounded-md shadow-lg z-20'
-                                  }
-                                >
-                                  {sourceFilters.map((filter, idx) => (
-                                    <Listbox.Option
-                                      key={`${filter}-${idx}`}
-                                      value={filter}
-                                      className={'px-4 py-2 hover:bg-gray-100'}
-                                    >
-                                      {filter}
-                                      {filterBySourceArray.includes(filter) && (
-                                        <span className="text-gray-600">✓</span>
-                                      )}
-                                    </Listbox.Option>
-                                  ))}
-                                </Listbox.Options>
-                              </>
-                            )
-                          }
+                                  </div>
+                                )}
+                              </Listbox.Button>
+                              <Listbox.Options
+                                className={
+                                  'absolute w-24 text-xs bottom-0 bg-white border border-gray-200 rounded-md shadow-lg z-20'
+                                }
+                              >
+                                {sourceFilters.map((filter, idx) => (
+                                  <Listbox.Option
+                                    key={`${filter}-${idx}`}
+                                    value={filter}
+                                    className={'px-4 py-2 hover:bg-gray-100'}
+                                  >
+                                    {filter}
+                                    {filterBySourceArray.includes(filter) && (
+                                      <span className="text-gray-600">✓</span>
+                                    )}
+                                  </Listbox.Option>
+                                ))}
+                              </Listbox.Options>
+                            </>
+                          )}
                         </Listbox>
 
                         <Listbox
@@ -361,47 +371,46 @@ export default function ChatWidget() {
                           onChange={setFilterByTypeArray}
                           multiple
                         >
-                          {
-                            ({ open }) => (
-                              <>
-                                <Listbox.Button
-                                  className={`${
-                                    filterByTypeArray.length > 0
-                                      ? 'bg-gray-400 text-white'
-                                      : 'bg-gray-200 text-gray-600'
-                                  } w-full px-2 py-1.5 border rounded-md flex-1 font-normal focus:outline-none focus:border-gray-400 relative`}
-                                >
-                                  <FunnelIcon className="w-6 h-6 inline" />
-                                  {!open && (<div className="absolute w-4 h-4 -top-2 -right-2 leading-none flex items-center justify-center rounded-full text-[10px] text-white bg-blue-600">
+                          {({ open }) => (
+                            <>
+                              <Listbox.Button
+                                className={`${
+                                  filterByTypeArray.length > 0
+                                    ? 'bg-gray-400 text-white'
+                                    : 'bg-gray-200 text-gray-600'
+                                } w-full px-2 py-1.5 border rounded-md flex-1 font-normal focus:outline-none focus:border-gray-400 relative`}
+                              >
+                                <FunnelIcon className="w-6 h-6 inline" />
+                                {!open && (
+                                  <div className="absolute w-4 h-4 -top-2 -right-2 leading-none flex items-center justify-center rounded-full text-[10px] text-white bg-blue-600">
                                     {filterByTypeArray.length}
-                                  </div>)}
-                                </Listbox.Button>
-                                <Listbox.Options
-                                  className={
-                                    'absolute w-32 text-xs bottom-0 bg-white border border-gray-200 rounded-md shadow-lg z-20'
-                                  }
-                                >
-                                  {typeFilters.map((filter, idx) => (
-                                    <Listbox.Option
-                                      key={`${filter}-${idx}`}
-                                      value={filter}
-                                      className={'px-4 py-2 hover:bg-gray-100'}
-                                    >
-                                      {filter}
-                                      {filterByTypeArray.includes(filter) && (
-                                        <span className="text-gray-600">✓</span>
-                                      )}
-                                    </Listbox.Option>
-                                  ))}
-                                </Listbox.Options>
-                              </>
-                            )
-                          }
+                                  </div>
+                                )}
+                              </Listbox.Button>
+                              <Listbox.Options
+                                className={
+                                  'absolute w-32 text-xs bottom-0 bg-white border border-gray-200 rounded-md shadow-lg z-20'
+                                }
+                              >
+                                {typeFilters.map((filter, idx) => (
+                                  <Listbox.Option
+                                    key={`${filter}-${idx}`}
+                                    value={filter}
+                                    className={'px-4 py-2 hover:bg-gray-100'}
+                                  >
+                                    {filter}
+                                    {filterByTypeArray.includes(filter) && (
+                                      <span className="text-gray-600">✓</span>
+                                    )}
+                                  </Listbox.Option>
+                                ))}
+                              </Listbox.Options>
+                            </>
+                          )}
                         </Listbox>
-
                       </div>
                     </div>
-                    
+
                     <input
                       name="message"
                       onChange={(e) => {
@@ -412,8 +421,6 @@ export default function ChatWidget() {
                       className="px-2 py-1.5 border rounded-md flex-1 font-normal focus:outline-none focus:border-gray-400"
                     />
 
-              
-                    
                     <button
                       disabled={isLoading}
                       id="submit-question"
@@ -449,7 +456,7 @@ export default function ChatWidget() {
                       )}
                     </button>
                   </form>
-                  
+
                   {questions.length > 0 && (
                     <div className="px-4 py-2 relative z-10 border-t border-white">
                       <div className="flex text-xs justify-center">
@@ -469,7 +476,6 @@ export default function ChatWidget() {
             </motion.div>
           </AnimatePresence>
           {/* EXAMPLES */}
-          
         </div>
       </div>
     </Layout>

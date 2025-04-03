@@ -1,17 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react'
+import InlineLoading from '@/components/InlineLoading'
+import { ArrowPathIcon } from '@heroicons/react/24/solid'
 import { AnimatePresence, motion } from 'framer-motion'
 import Image from 'next/image'
-
 import { useRouter } from 'next/router'
-
-import toast, { Toaster } from 'react-hot-toast';
-
 import Script from 'next/script'
-
-import { ArrowPathIcon } from '@heroicons/react/24/solid'
-
+import { useEffect, useRef, useState } from 'react'
+import toast, { Toaster } from 'react-hot-toast'
+import { usedModel } from '../../utils/hardcoded'
 import QuestionSearchResult from '../components/web-widget/question-search-result'
-import InlineLoading from '@/components/InlineLoading'
 
 const questionExamples = [
   'Is QuickBooks good for SaaS Startups?',
@@ -36,7 +32,6 @@ const limitSearchAttempts = 20
 const NEXT_PUBLIC_GA4_ID = process.env.NEXT_PUBLIC_GA4_ID
 
 export default function ChatWidget() {
-  // const [limitReached, setLimitReached] = useState(false)
   const router = useRouter()
   const [response, setResponse] = useState({})
   const scrollTargetRef = useRef(null)
@@ -47,17 +42,12 @@ export default function ChatWidget() {
     router.query.question ? router.query.question : ''
   )
   const [questions, setQuestions] = useState([])
-
   const [attemptCount, setAttemptCount] = useState(0)
-  const [attemptDate, setAttemptDate] = useState('')
 
   const myHeaders = new Headers()
   myHeaders.append('Content-Type', 'application/json')
 
   const handleLike = (question) => {
-    // console.log('like', question)
-    // update questions with like
-
     const questions = JSON.parse(localStorage.getItem('localQuestions'))
 
     const updatedQuestions = questions.map((item) => {
@@ -76,9 +66,6 @@ export default function ChatWidget() {
   }
 
   const handleDislike = (question) => {
-    // console.log('dislike', question)
-    // update questions with dislike
-
     const questions = JSON.parse(localStorage.getItem('localQuestions'))
 
     const updatedQuestions = questions.map((item) => {
@@ -97,9 +84,6 @@ export default function ChatWidget() {
   }
 
   const handleReport = (question, report) => {
-    // console.log('report', question)
-    // update questions with report
-
     const questions = JSON.parse(localStorage.getItem('localQuestions'))
 
     const updatedQuestions = questions.map((item) => {
@@ -117,34 +101,15 @@ export default function ChatWidget() {
   }
 
   const handleGetAttemtCountLocalStorage = () => {
-    const localStorageAttemptCount = localStorage.getItem('attemptCount')  === null ? 0 : localStorage.getItem('attemptCount')
-    const localStorageAttemptDate = localStorage.getItem('lastAttempt')
-
-    // console.log('localStorageAttemptCount', localStorageAttemptCount)
-    // console.log('localStorageAttemptDate', localStorageAttemptDate)
-
-    const dateNow = new Date()
-
-    const latestDate = new Date(localStorageAttemptDate)
-
-    const dateDiff = Math.abs(dateNow - latestDate)
-    // console.log('dateDiff', dateDiff)
-    const diffHours = Math.ceil(dateDiff / (1000 * 60 * 60))
-
-    // console.log('diffHours', diffHours)
-    // console.log('diffDays', diffDays)
-
-    if (localStorageAttemptDate && diffHours > 24) {
-      // console.log('resetting attempt count')
-      handleClearLocalStorageDateCount()
-    } else {
-      setAttemptCount(parseInt(localStorageAttemptCount))
-      setAttemptDate(localStorageAttemptDate)
-    }
+    const sessionStorageAttemptCount =
+      sessionStorage.getItem('attemptCount') === null
+        ? 0
+        : sessionStorage.getItem('attemptCount')
+        
+    setAttemptCount(parseInt(sessionStorageAttemptCount))
   }
 
   const handleSetQuestionsFromLocalStorage = () => {
-    // read localstorage for questions
     const questions = JSON.parse(localStorage.getItem('localQuestions'))
     if (questions && questions.length > 0) {
       setQuestions(questions)
@@ -152,239 +117,206 @@ export default function ChatWidget() {
     }
   }
 
-  useEffect(() => {
-    // handle localstorage for attempt count and date
-    // makeRequest()
-    handleGetAttemtCountLocalStorage()
-    handleSetQuestionsFromLocalStorage()
-  }, [])
-
   const handleClearLocalStorage = () => {
     localStorage.removeItem('localQuestions')
     setIsSubmitted(false)
-
     setQuestions([])
   }
 
   function handleClearLocalStorageDateCount() {
-    localStorage.removeItem('attemptCount')
-    localStorage.removeItem('lastAttempt')
+    sessionStorage.removeItem('attemptCount')
     setAttemptCount(0)
-    setAttemptDate('')
   }
 
   const handleScrollIntoView = () => {
     setTimeout(() => {
-      scrollTargetRef.current.scrollIntoView({ behavior: 'smooth' })
+      if (scrollTargetRef.current) {
+        scrollTargetRef.current.scrollIntoView({ behavior: 'smooth' })
+      }
     }, 100)
   }
 
   const handleSendGoogleAnalyticsEvent = (question) => {
-    window.gtag('event', 'search_widget', {
-      search_term: question,
-    })
-    if (typeof(dataLayer) === 'object') {
-      dataLayer.push({
-        'event': 'extSearch',
-        'searchTerm': question
-      });
-    } else {
-      console.log('GA is not a function');
+    if (typeof window !== 'undefined') {
+      if (window.gtag) {
+        window.gtag('event', 'search_widget', {
+          search_term: question,
+        })
+      }
+      
+      if (typeof window.dataLayer === 'object') {
+        window.dataLayer.push({
+          event: 'extSearch',
+          searchTerm: question,
+        })
+      }
     }
   }
 
   const handleSaveQuestionAnswer = async (question, answer, resources) => {
-    const requestOptions = {
-      method: 'POST',
-      headers: myHeaders,
-      body: JSON.stringify({
-        question: question,
-        answer: answer,
-        resources: resources,
-      }),
-      redirect: 'follow', // manual, *follow, error
+    try {
+      const requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: JSON.stringify({
+          question: question,
+          answer: answer,
+          resources: resources,
+        }),
+        redirect: 'follow',
+      }
+
+      const response = await fetch('/api/questions', requestOptions)
+      const result = await response.json()
+      
+      if (response.status !== 201) {  // Correct check for 201 status
+        console.error('Error saving question:', result)
+        return null;
+      }
+      
+      return result
+    } catch (error) {
+      console.error('Error saving question answer:', error)
+      return null
     }
-
-    const result = await fetch('/api/questions', requestOptions)
-      .then((response) => {
-        if (response.status === 200) {
-          console.log('post success')
-          console.log(response)
-        }
-        return response.json()
-      })
-      .then((result) => result)
-      .catch((error) => {
-        console.log('error', error)
-        // makeRequest()
-      })
-
-    console.log('result', result)
   }
 
   const askQuestion = async (e) => {
-    // console.log('attemptCount', attemptCount)
     router.query = {}
     e.preventDefault()
-    if (question.length === 0) {
+    
+    if (!question.trim().length) {
       return
     }
-    let currentQuesiton = { question: question, answer: '', sources: [] }
-    if (window.gtag !== undefined) {
+
+    let currentQuestion = { question: question, answer: '', sources: [] }
+    
+    if (typeof window !== 'undefined' && window.gtag !== undefined) {
       handleSendGoogleAnalyticsEvent(question)
     }
-    setQuestions(questions.concat([currentQuesiton]))
-    setAttemptCount(attemptCount + 1)
-    // set attempt date to now
-    setAttemptDate(new Date())
-    setQuestion((prev) => {
-      return ''
-    })
+    
+    setQuestions((prev) => [...prev, currentQuestion])
+    setAttemptCount((prev) => prev + 1)
+    setQuestion('')
+    setIsLoading(true)
+    setIsSubmitted(true)
+    
     handleScrollIntoView()
 
-    setIsLoading(true)
+    try {
+      // Get embedding sources
+      const questionRequestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: JSON.stringify({
+          question: question,
+          sourceFilters: ['website'],
+          typeFilters: ['webpage', 'post', 'tip', 'tax_calendar', 'qna'],
+          topK: 8,
+        }),
+        redirect: 'follow',
+      }
 
-    setIsSubmitted(true)
+      const embeddingResponse = await fetch(
+        '/api/openai/embedding',
+        questionRequestOptions
+      )
+      
+      if (!embeddingResponse.ok) {
+        throw new Error('Failed to generate embeddings')
+      }
+      
+      const { sources, prompt } = await embeddingResponse.json()
 
-    // push current question to array of questions
-
-    const questionRequestOptions = {
-      method: 'POST',
-
-      headers: myHeaders,
-      body: JSON.stringify({
-        question: question,
-        sourceFilters: ['website'],
-        typeFilters: ['webpage', 'post', 'tip', 'tax_calendar', 'qna'],
-        topK: 8,
-      }),
-      redirect: 'follow', // manual, *follow, error
-    }
-
-    const { sources, prompt } = await fetch(
-      '/api/openai/embedding',
-      questionRequestOptions
-    )
-      .then((response) => {
-        if (response.status === 200) {
-          console.log('post success')
-          console.log(response)
-        }
-        return response.json()
-      })
-      .then((result) => result)
-      .catch((error) => {
-        console.log('error', error)
-        toast('Error generating embedding',
-          {
-            icon: '❌',
-          }
-        )
-        setIsLoading(false)
-        setQuestions((previous) => {
-          return previous.slice(0, -1)
-        }
-        )
-      })
-
-    // update current question resources
-
-    setQuestions((previous) => {
-      return [
+      // Update sources in question
+      setQuestions((previous) => [
         ...previous.slice(0, -1),
         {
           ...previous[previous.length - 1],
           sources,
         },
-      ]
-    })
+      ])
 
-    handleScrollIntoView()
+      handleScrollIntoView()
 
-    const promptRequestOptions = {
-      method: 'POST',
-      headers: myHeaders,
-      body: JSON.stringify({
-        prompt: prompt,
-      }),
-      redirect: 'follow', // manual, *follow, error
-    }
-
-    const { completion } = await fetch(
-      '/api/openai/completion',
-      promptRequestOptions
-    )
-      .then((response) => {
-        if (response.status === 200) {
-          console.log('post success')
-          console.log(response)
-        }
-        return response.json()
-      })
-      .then((result) => result)
-      .catch((error) =>  {
-        console.log('error', error)
-        toast('Error generating completion',
-          {
-            icon: '❌',
-          }
-        )
-        setIsLoading(false)
-        setQuestions((previous) => {
-          return previous.slice(0, -1)
-        })
-        
+      // Get completion from OpenAI
+      const promptRequestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: JSON.stringify({
+          messages: [
+            {
+              role: 'system',
+              content:
+                'You are a helpful startup tax, accounting and bookkeeping assistant.',
+            },
+            { role: 'user', content: prompt },
+          ],
+          model: usedModel,
+          temperature: 0.1,
+        }),
+        redirect: 'follow',
       }
+
+      const completionResponse = await fetch(
+        '/api/v1/singlecompletion',
+        promptRequestOptions
       )
+      
+      if (!completionResponse.ok) {
+        throw new Error('Failed to generate completion')
+      }
+      
+      const { completion } = await completionResponse.json()
 
-    // update current question answer
+      // Update answer in question
+      setQuestions((previous) => {
+        const currentQuestions = [
+          ...previous.slice(0, -1),
+          {
+            ...previous[previous.length - 1],
+            answer: completion,
+          },
+        ]
 
-    setQuestions((previous) => {
-      const currentQuestions = [
-        ...previous.slice(0, -1),
-        {
-          ...previous[previous.length - 1],
-          answer: completion,
-        },
-      ]
+        localStorage.setItem('localQuestions', JSON.stringify(currentQuestions))
+        sessionStorage.setItem('attemptCount', attemptCount + 1)
 
-      // console.log('attemptCount', attemptCount)
+        return currentQuestions
+      })
 
-      localStorage.setItem('localQuestions', JSON.stringify(currentQuestions))
-      localStorage.setItem('attemptCount', attemptCount + 1)
-      localStorage.setItem('lastAttempt', new Date())
-
-      return currentQuestions
-    })
-
-    // save question answer to db
-    await handleSaveQuestionAnswer(
-      question,
-      completion,
-      JSON.stringify(sources)
-    )
-
-    setIsLoading(false)
-
-    handleScrollIntoView()
-    // makeRequest()
+      // Save to database
+      await handleSaveQuestionAnswer(
+        question,
+        completion,
+        JSON.stringify(sources)
+      )
+    } catch (error) {
+      console.error('Error in askQuestion flow:', error)
+      toast(error.message || 'Error processing your question', {
+        icon: '❌',
+      })
+      
+      // Remove the question if there was an error
+      setQuestions((previous) => previous.slice(0, -1))
+    } finally {
+      setIsLoading(false)
+      handleScrollIntoView()
+    }
   }
 
   useEffect(() => {
-    // handle localstorage for attempt count and date
-    // makeRequest()
+    // Initialize data from localStorage and query parameters
     handleGetAttemtCountLocalStorage()
     handleSetQuestionsFromLocalStorage()
-  }, [])
-
-  useEffect(() => {
-    // router query question
+    
+    // Set question from URL parameter if available
     if (router.query.question) {
       setQuestion(router.query.question)
     }
-  }
-  , [router.query.question])
-  
+    
+  }, [router.query.question]);
+
   return (
     <div className="h-screen w-screen  flex items-center justify-center relative">
       <Toaster />
@@ -398,25 +330,18 @@ export default function ChatWidget() {
           priority
         />
       </div>
-      {/* <div className="absolute  left-4 bottom-4 rounded border p-3 bg-white text-[9px]">
-        {Object.keys(response).length > 0 ? (
+      {process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production' && (
+        <div className="absolute  left-4 bottom-4 rounded border p-3 bg-white text-[9px]">
           <div>
             <div>limit: {response.limit}</div>
             <div>remaining: {response.remaining}</div>
             <div>attemptCount: {attemptCount}</div>
             <div>status: {response.status}</div>
             <div>body: {JSON.stringify(response.body)}</div>
-          <hr />
-          <button
-            onClick={() => {
-              makeRequest()
-            }}
-          >makeRequest</button>
           </div>
-        ) : (
-          ''
-        )}
-      </div> */}
+        </div>
+      )}
+  
 
       <div className="relative overflow-auto pt-8 lg:pt-4 pb-28 w-full h-screen max-w-[720px] mx-auto flex flex-col justify-start items-center">
         <motion.div

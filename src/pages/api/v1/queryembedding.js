@@ -2,38 +2,25 @@ import { queryEmbedding } from '../../../../utils/pinecone'
 
 const postUrl = async (req, res) => {
   try {
-    const { 
+    const {
       embedding,
       sourceFilters,
       typeFilters,
-      topK
+      topK,
+      includeMetadata,
+      includeValues,
     } = req.body
 
     const data = await queryEmbedding(
       embedding,
       sourceFilters,
       typeFilters,
-      topK
+      topK,
+      includeMetadata,
+      includeValues
     )
 
-    // const sources = data.matches.map((match) => {
-    //   return {
-    //     id: match.metadata.id,
-    //     title: match.metadata.title,
-    //     type: match.metadata.type,
-    //     image: match.metadata.image || '',
-    //     source: match.metadata.source,
-    //     url: match.metadata.url,
-    //     score: match.score,
-    //   }
-    // }
-    // )
-    // .filter(
-    //   (item, idx, arr) => arr.findIndex((t) => t.url === item.url) === idx
-    // )
-
     res.status(200).json({ data })
-
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error' })
   }
@@ -47,4 +34,3 @@ export default function handler(req, res) {
       res.status(405).end()
   }
 }
-

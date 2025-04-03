@@ -1,24 +1,23 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { useResources } from '@/context/resources'
 
 import toast, { Toaster } from 'react-hot-toast'
 
 import {
-  useReactTable,
   createColumnHelper,
   flexRender,
-  getRowModel,
   getCoreRowModel,
   getPaginationRowModel,
+  useReactTable,
 } from '@tanstack/react-table'
 
 import {
-  DocumentMagnifyingGlassIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
   ChevronDoubleLeftIcon,
   ChevronDoubleRightIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  DocumentMagnifyingGlassIcon,
 } from '@heroicons/react/24/solid'
 
 import QuestionDialogModal from './QuestionDialogModal'
@@ -157,33 +156,32 @@ export default function AllQuestionsDataTable() {
       <div className="lg:container mt-4">
         <div className="bg-white p-3 rounded-xl">
           <div className="flex justify-between mb-4">
-            <div>
-              <h2 className="text-2xl font-semibold text-gray-900">
+            <div className='flex items-center justify-between w-full'>
+              <h2 className="text-2xl font-semibold text-gray-900 grow">
                 <strong className="text-slate-400">
                   {JSON.stringify(allQuestions.length)}
                 </strong>{' '}
                 Questions{' '}
-                <span className="text-sm font-normal text-slate-400">
-                  this page shows 40 latest questions
-                </span>
+            
               </h2>
-            </div>
-            <div>
-              {loading && (
-                <div className="text-xs text-slate-500">Loading...</div>
-              )}
-              {!loading && (
-                <div className="text-xs flex items-center text-slate-500 space-x-2">
-                  <div>Last updated: {new Date().toLocaleString()}</div>
+              <div className='px-2  w-auto'>
+              {loading ?  (
+                    <div className="text-xs text-slate-500">Loading...</div>
+                  ) : (
+                    <div className="text-xs flex flex-col items-start text-slate-500">
+                      
 
-                  <button
-                    onClick={() => fetchAllQuestions()}
-                    className="border rounded p-1 bg-slate-100 hover:bg-slate-200 text-slate-500"
-                  >
-                    Refresh
-                  </button>
-                </div>
-              )}
+                      <button
+                        onClick={() => fetchAllQuestions()}
+                        className="border border-slate-200 rounded px-1 py-0.5 bg-slate-50 hover:bg-slate-200 text-slate-800"
+                      >
+                        Pull Latest Questions
+                      </button>
+                      <div className='text-xs'>Last updated: {new Date().toLocaleString()}</div>
+                    </div>
+                  )}
+
+              </div>
             </div>
           </div>
           <div className="flex flex-wrap gap-4">
@@ -191,14 +189,15 @@ export default function AllQuestionsDataTable() {
               <div>Search </div>
               <input
                 type="text"
+                name="search"
                 placeholder="search by name"
                 value={searchTerm}
                 className="border p-1 rounded w-64"
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-              {selectedItems.length > 0 && (
-            <div className="w-auto lg:w-1/4">
+            {selectedItems.length > 0 && (
+              <div className="w-auto lg:w-1/4">
                 <div className="bg-rose-50 p-3 rounded-lg mb-4">
                   <strong className="text-slate-600">
                     {selectedItems.length} items selected
@@ -214,7 +213,7 @@ export default function AllQuestionsDataTable() {
                   </button>
                 </div>
               </div>
-              )}
+            )}
           </div>
 
           <table className="table-auto bg-white w-full">
@@ -225,6 +224,7 @@ export default function AllQuestionsDataTable() {
                     Select
                     <input
                       className="hidden"
+                      id={`select-header-${idx}`}
                       type="checkbox"
                       onChange={(e) => {
                         if (e.target.checked) {
@@ -259,6 +259,7 @@ export default function AllQuestionsDataTable() {
                   <td className="px-2 py-1 border text-center">
                     <input
                       type="checkbox"
+                      id={`select-body-${idx}`}
                       checked={selectedItems.includes(row.original.id)}
                       className="cursor-pointer"
                       onChange={(e) => {
@@ -336,6 +337,7 @@ export default function AllQuestionsDataTable() {
               | Go to page:
               <input
                 type="number"
+                id={`page-${table.getState().pagination.pageIndex}`}
                 defaultValue={table.getState().pagination.pageIndex + 1}
                 onChange={(e) => {
                   const page = e.target.value ? Number(e.target.value) - 1 : 0

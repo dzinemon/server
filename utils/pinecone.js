@@ -12,74 +12,59 @@ const client = new Pinecone({
 
 const index = client.index(config.index)
 
-// const indexes = await client.listIndexes()
-
-// console.log(indexes)
-
-// write function to loop through each document and return vectors used to upsert
-
 async function generateVectors(docs) {
   try {
-    const promises = await docs.map(async (doc, idx) => {
-      const { content } = doc.metadata
+    const vectors = await Promise.all(
+      docs.map(async (doc) => {
+        const { content } = doc.metadata
+        const embd = await generateEmbedding(content)
 
-      const embd = await generateEmbedding(content)
-
-      const vector = {
-        id: doc.metadata.id,
-        values: embd,
-        metadata: {
-          content: content,
+        return {
           id: doc.metadata.id,
-          image: doc.metadata.image,
-          source: doc.metadata.source,
-          title: doc.metadata.title,
-          type: doc.metadata.type,
-          url: doc.metadata.url,
-        },
-      }
-
-      return vector
-    })
-    const vectors = await Promise.all(promises)
+          values: embd,
+          metadata: {
+            content,
+            id: doc.metadata.id,
+            image: doc.metadata.image,
+            source: doc.metadata.source,
+            title: doc.metadata.title,
+            type: doc.metadata.type,
+            url: doc.metadata.url,
+          },
+        }
+      })
+    )
     return vectors
   } catch (error) {
-    console.error(error)
+    console.error('Error generating vectors:', error)
     throw error
   }
 }
 
 async function upsertEmbedding(docs) {
   try {
-    // const index = client.index(config.index)
     const vectors = await generateVectors(docs)
-    
     const response = await index.upsert(vectors)
-
     return response
   } catch (error) {
-    // Handle the error here
-    console.error(error)
+    console.error('Error upserting embeddings:', error)
     throw error
   }
 }
 
 async function deleteAllVectors() {
   try {
-    // const index = client.index(config.index)
-    const response = await index.delete1({
-      deleteAll: true,
-    })
-
+    const response = await index.delete1({ deleteAll: true })
     return response
   } catch (error) {
-    console.error(error)
+    console.error('Error deleting all vectors:', error)
     throw error
   }
 }
 
-async function queryEmbedding(queryVector, sourceFilters = ['website'], typeFilters, topK = 8) {
-
+async function queryEmbedding(queryVector, sourceFilters = ['website'], typeFilters, topK = 8, 
+  includeMetadata = true, includeValues = true
+) {
   const currentFilter = () => {
     if (sourceFilters.length === 0 && (!typeFilters || typeFilters.length === 0)) {
       return {}
@@ -97,36 +82,61 @@ async function queryEmbedding(queryVector, sourceFilters = ['website'], typeFilt
     }
   }
 
-  const filterValue = currentFilter() 
+  const filterValue = currentFilter()
 
   try {
-    // const index = client.index(config.index)
     const queryRequest = {
-      topK: topK,
+      topK,
       vector: queryVector,
       filter: filterValue,
-      includeMetadata: true,
+      includeMetadata,
+      includeValues,
     }
 
     const response = await index.query(queryRequest)
-
     return response
   } catch (error) {
-    console.error(error)
+    console.error('Error querying embeddings:', error)
+    throw error
+  }
+}
+
+async function queryEmbeddingById(
+  id,
+  sourceFilters = ['website'],
+  typeFilters,
+  topK = 8,
+  includeMetadata = true,
+  includeValues = true
+) {
+  try {
+    const queryRequest = {
+      topK,
+      id,
+      filter: {
+        source: { $in: sourceFilters },
+        type: { $in: typeFilters },
+      },
+      includeMetadata,
+      includeValues,
+    }
+
+    const response = await index.query(queryRequest)
+    return response
+  } catch (error) {
+    console.error('Error querying embedding by ID:', error)
     throw error
   }
 }
 
 async function deleteEmbedding(ids) {
   try {
-    // const index = client.index(config.index)
     const response = await index.deleteMany(ids)
-
     return response
   } catch (error) {
-    console.error(error)
+    console.error('Error deleting embeddings:', error)
     throw error
   }
 }
 
-export { upsertEmbedding, deleteEmbedding, deleteAllVectors, queryEmbedding }
+export { upsertEmbedding, deleteEmbedding, deleteAllVectors, queryEmbedding, queryEmbeddingById }

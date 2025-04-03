@@ -44,7 +44,10 @@ export const getCheerio = async (url) => {
 
 export const parseWithCheerio = async (url) => {
   const $ = await getCheerio(url)
-  const title = $('title').text()
+  let title = $('title').text()
+  if (title.length > 255) {
+    title = title.substring(0, 252) + '...';
+  }
 
   //get og:image content
   let ogImage;
@@ -177,7 +180,10 @@ export const parseWithCheerio = async (url) => {
 
 export const parsePodcastWithCheerio = async (url) => {
   const $ = await getCheerio(url)
-  const title = $('title').text()
+  let title = $('title').text();
+  if (title.length > 255) {
+    title = title.substring(0, 252) + '...';
+  }
 
   //get og:image content
   let ogImage;

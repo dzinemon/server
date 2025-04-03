@@ -38,7 +38,7 @@ export default function Home() {
             />
           </div>
 
-          <div className="mb-32 flex flex-wrap text-center justify-center lg:mb-0 lg:text-left ">
+          <div className="mb-32 flex flex-wrap justify-center lg:mb-0 lg:text-left ">
             {[
               {
                 name: 'Internal',
@@ -85,14 +85,14 @@ export default function Home() {
               </a>
             ))}
 
-            <div className="hidden">
+            <div className="text-left hidden">
               <button
                 type="button"
                 id="btn-trigger-chat-section"
-                className="group  rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
+                className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
               >
                 <h2
-                  className={`mb-3 text-2xl font-semibold pointer-events-none`}
+                  className={`mb-3 text-2xl font-semibold group-hover:text-kruze-blueLight`}
                 >
                   Start Chat{' '}
                   <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
@@ -102,7 +102,7 @@ export default function Home() {
                 <p
                   className={`m-0 max-w-[30ch] text-sm opacity-50 pointer-events-none`}
                 >
-                  use the chat widget to ask questions
+                  Use the chat widget to ask questions
                 </p>
               </button>
             </div>

@@ -10,9 +10,7 @@ import { Listbox, Tab, Transition } from '@headlessui/react'
 
 import toast, { Toaster } from 'react-hot-toast'
 
-import {
-  LoadingLine
-} from '@/components/common/chatloadingstate'
+import { LoadingLine } from '@/components/common/chatloadingstate'
 
 import dynamic from 'next/dynamic'
 import {
@@ -96,8 +94,6 @@ export default function LiPost() {
   const scrollTargetRef = useRef(null)
 
   const [postGenerated, setPostGenerated] = useState(false)
-
-  const [model, setModel] = useState('gpt-4o-2024-08-06')
 
   const [messages, setMessages] = useState([])
 
@@ -262,7 +258,6 @@ export default function LiPost() {
 
   const handleSubmitMessage = async (e) => {
     e.preventDefault()
-   
 
     if (!currentMessage || currentMessage.length === 0) {
       return
@@ -461,7 +456,7 @@ export default function LiPost() {
               <div className="flex -mx-2">
                 <div className="w-auto grow px-2">
                   <Listbox
-                    value={selectedPrompt}
+                    value={selectedPrompt ? selectedPrompt : ''}
                     onChange={(e) => handleSelectedAiPromptChange(e)}
                   >
                     <div className="relative">
@@ -745,7 +740,7 @@ export default function LiPost() {
                 <div className="flex flex-row gap-2">
                   <div className="w-auto">
                     <Listbox
-                      value={selectedPoster}
+                      value={selectedPoster ? selectedPoster : ''}
                       onChange={(e) => handleSelectedPosterChange(e)}
                     >
                       {({ open }) => (
@@ -878,7 +873,9 @@ export default function LiPost() {
                 <div className="w-auto shrink">
                   <div className="w-auto grow px-2">
                     <Listbox
-                      value={selectedReposterPrompt}
+                      value={
+                        selectedReposterPrompt ? selectedReposterPrompt : ''
+                      }
                       onChange={(e) => handleSelectedReposterPromptChange(e)}
                     >
                       <div className="relative">
@@ -1020,7 +1017,7 @@ export default function LiPost() {
                 <div className="flex flex-wrap w-full gap-2">
                   <div className="max-w-md lg:max-w-none">
                     <Listbox
-                      value={selectedReposter}
+                      value={selectedReposter ? selectedReposter : ''}
                       onChange={(e) => handleSelectedReposterChange(e)}
                       multiple
                     >
@@ -1145,13 +1142,14 @@ export default function LiPost() {
             </div>
           </div>
 
-          
           <div className="w-full block my-6">
-              {
-                isLoading ? <div className="w-full">
-                  <LoadingLine />
-                </div> : <div className="border-t border-blue-600 w-full" />
-              }
+            {isLoading ? (
+              <div className="w-full">
+                <LoadingLine />
+              </div>
+            ) : (
+              <div className="border-t border-blue-600 w-full" />
+            )}
           </div>
 
           <div className="relative bg-white w-full">

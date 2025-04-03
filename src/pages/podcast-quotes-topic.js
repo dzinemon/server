@@ -1,9 +1,11 @@
-import React, { useState } from 'react'
+import { LoadingLine } from '@/components/common/chatloadingstate'
+import Counter from '@/components/common/counter'
 import Layout from '@/components/layout'
+import { useState } from 'react'
 import toast, { Toaster } from 'react-hot-toast'
 import { promptTemplatePodcastQuotesV2 } from '../../utils/handleprompts/internal'
-import Counter from '@/components/common/counter'
-import { LoadingLine } from '@/components/common/chatloadingstate'
+
+import { usedModel } from '../../utils/hardcoded'
 
 import { parsePodcastWithCheerio } from '../../utils/cheerio-axios'
 
@@ -151,7 +153,6 @@ const PodcastQuotes = () => {
     console.log('✅ data ready✅', data)
 
     return data
-
   }
 
   const getSourcesIds = async (data) => {
@@ -163,7 +164,6 @@ const PodcastQuotes = () => {
 
     return ids
   }
-
 
   const getSources = async (data) => {
     const sources = await data.matches
@@ -205,14 +205,23 @@ const PodcastQuotes = () => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        prompt: prompt,
+        messages: [
+          {
+            role: 'system',
+            content:
+              'You are a helpful startup tax, accounting and bookkeeping assistant.',
+          },
+          { role: 'user', content: prompt },
+        ],
+        model: usedModel,
+        temperature: 0.1,
       }),
       redirect: 'follow',
     }
 
     try {
       const response = await fetch(
-        '/api/openai/completion',
+        '/api/v1/singlecompletion',
         promptRequestOptions
       )
 
@@ -242,7 +251,8 @@ const PodcastQuotes = () => {
 
   const handleSubmit = async () => {
     setLoading(true)
-    const topicsArray = topics.split('\n')
+    const topicsArray = topics
+      .split('\n')
       .filter((topic) => topic.trim().length > 0)
     setProcessingTopics(topicsArray.map((topic) => topic.trim()).length)
     const promises = topicsArray
@@ -296,7 +306,8 @@ const PodcastQuotes = () => {
           <div>Processing Topics: {processsingTopics}</div>
         </div>
         <p className="mt-1 text-sm leading-6 text-gray-600">
-          Enter the Topics you want to generate quotes for, separated by new line.
+          Enter the Topics you want to generate quotes for, separated by new
+          line.
         </p>
 
         <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">

@@ -11,6 +11,11 @@ const postUrl = async (req, res) => {
       includeValues,
     } = req.body
 
+    // Validate input parameters
+    if (!embedding || !Array.isArray(embedding)) {
+      return res.status(400).json({ error: 'Invalid or missing embedding array' })
+    }
+
     const data = await queryEmbedding(
       embedding,
       sourceFilters,
@@ -22,7 +27,8 @@ const postUrl = async (req, res) => {
 
     res.status(200).json({ data })
   } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' })
+    console.error('Error querying embedding:', error)
+    res.status(500).json({ error: 'Failed to query embedding', message: error.message })
   }
 }
 
@@ -31,6 +37,6 @@ export default function handler(req, res) {
     case 'POST':
       return postUrl(req, res)
     default:
-      res.status(405).end()
+      res.status(405).end(`Method ${req.method} Not Allowed`)
   }
 }

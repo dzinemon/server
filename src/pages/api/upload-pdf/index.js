@@ -33,9 +33,7 @@ const postUrl = async (req, res) => {
       const loader = new PDFLoader(newPath)
 
       // load the document
-
       const docs = await loader.load()
-
       const processedDocs = []
 
       // Convert the JSON into the desired format
@@ -45,8 +43,8 @@ const postUrl = async (req, res) => {
 
         const item = {
           id: uid,
-          url: `${originalname} Page ${index + 1}`,
-          title: `${originalname} Page  ${index + 1}`,
+          url: `${name} Page ${index + 1}`,
+          title: `${name} Page  ${index + 1}`,
           content: page.text,
         }
 
@@ -54,11 +52,14 @@ const postUrl = async (req, res) => {
       })
 
       const pineconeResult = await upsertEmbedding(processedDocs)
-      console.log('PINECONE RESULT', pineconeResult)
+      
+      if (pineconeResult && pineconeResult.upsertedCount) {
+        console.log('Pinecone UpsertCount: ', pineconeResult.upsertedCount)
+      }
 
       const result = await db.query(
         'INSERT INTO pdf_file (name, url, uuids) VALUES ($1, $2, $3) RETURNING *',
-        [originalname, originalname, uuids_array]
+        [name, name, uuids_array]
       )
 
       // res.status(200).json(result.rows);

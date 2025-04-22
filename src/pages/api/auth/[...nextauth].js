@@ -103,6 +103,7 @@ export const authOptions = {
           }
           return true
         }
+        return false // Reject unverified emails or wrong domain
       }
       return true // Do different verification for other providers that don't have `email_verified`
     },

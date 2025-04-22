@@ -3,43 +3,30 @@ import db from '../../../db'
 const getPrompts = async (req, res) => {
   const { type } = req.query
 
-  // if type is provided, filter by type
-
-  if (type) {
-    try {
-      // select only id and name from prompts table
-      const result = await db.query(
-        'SELECT id, name, type FROM prompts WHERE type = $1 ORDER BY id DESC',
-        [type]
-      )
-
-      res.status(200).json(result.rows)
-    } catch (error) {
-      res.status(500).json({ error })
+  try {
+    let query = 'SELECT id, name, type FROM prompts'
+    const params = []
+    
+    if (type) {
+      query += ' WHERE type = $1'
+      params.push(type)
     }
-    return
-  } else {
-    try {
-      // select only id and name from prompts table
-      const result = await db.query(
-        'SELECT id, name, type FROM prompts ORDER BY id DESC'
-      )
-
-      res.status(200).json(result.rows)
-    } catch (error) {
-      res.status(500).json({ error })
-    }
+    
+    query += ' ORDER BY id DESC'
+    
+    const result = await db.query(query, params)
+    res.status(200).json(result.rows)
+  } catch (error) {
+    console.error('Error fetching prompts:', error)
+    res.status(500).json({ error: 'Failed to fetch prompts' })
   }
 }
 
 const createPrompt = async (req, res) => {
-  // INSERT INTO prompts (name, content) VALUES ('Test Prompt', 'This is a test prompt content.');
-
   const { name, content, type } = req.body
 
   if (!name || !content) {
-    res.status(400).json({ error: 'Name and content are required' })
-    return
+    return res.status(400).json({ error: 'Name and content are required' })
   }
 
   try {
@@ -49,7 +36,8 @@ const createPrompt = async (req, res) => {
     )
     res.status(201).json(result.rows[0])
   } catch (error) {
-    res.status(500).json({ error })
+    console.error('Error creating prompt:', error)
+    res.status(500).json({ error: 'Failed to create prompt' })
   }
 }
 
@@ -59,8 +47,7 @@ export default async function handler(req, res) {
       return getPrompts(req, res)
     case 'POST':
       return createPrompt(req, res)
-
     default:
-      res.status(405).end()
+      res.status(405).end(`Method ${req.method} Not Allowed`)
   }
 }

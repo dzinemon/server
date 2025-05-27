@@ -4,6 +4,7 @@ import { parseUrls } from '../../utils/links'
 import { removeAllUrls, removeUrl, fetchUrls, addUrls } from '../../utils/api'
 
 import {
+  ArrowPathIcon,
   CheckIcon,
   LinkIcon,
   TrashIcon,
@@ -11,6 +12,7 @@ import {
 } from '@heroicons/react/24/solid'
 
 import DataTable from './common/DataTable'
+import toast from 'react-hot-toast'
 
 import Loading from './Loading'
 
@@ -61,6 +63,95 @@ function LinksList() {
       .then((data) => setData(data))
       .catch((error) => console.log(error))
   }
+
+  const handleRemove = async (id) => {
+    // remove the item by id
+    const item = data.find((item) => item.id === id)
+    if (!item) return
+
+    try {
+      await removeUrl(item.id, item.uuids)
+      // Refresh the data after removing
+      const updatedData = await fetchUrls()
+      setData(updatedData)
+
+      toast.success(`Removed url ${item.url} successfully!`, {
+        duration: 2000,
+        icon: '✅',
+      })
+    } catch (error) {
+      console.error('Error removing item:', error)
+      toast.error(`Failed to remove url ${item.url}`, {
+        duration: 2000,
+        icon: '❌',
+      })
+    }
+  }
+
+  const handleReUpload = async (id) => {
+    // reupload the item by removing it and adding it again
+    const item = data.find((item) => item.id === id)
+    if (!item) return
+
+    // Check if the item has a valid URL
+    if (!item.url || item.url.trim() === '') {
+      console.error('Item has no valid URL to reupload')
+      toast.error(`Item with id ${item.id} has no valid URL to reupload`, {
+        duration: 2000,
+        icon: '❌',
+      })
+      return
+    }
+
+    try {
+      await removeUrl(item.id, item.uuids)
+      // re-add the item by parsing the url and uploading it again
+      const urls = parseUrls(item.url)
+      if (urls.length === 0) {
+        console.error('No valid URLs found to reupload')
+        return
+      }
+
+      await addUrls(urls, false) // assuming internal is false for reupload
+
+      // Refresh the data after reuploading
+      const updatedData = await fetchUrls()
+      setData(updatedData)
+
+      toast.success(`Reuploaded url ${item.url} successfully!`, {
+        duration: 2000,
+        icon: '✅',
+      })
+    } catch (error) {
+      console.error('Error reuploading item:', error)
+      toast.error(`Failed to reupload url ${item.url}`, {
+        duration: 2000,
+        icon: '❌',
+      })
+    }
+  }
+
+  // Define actions for DataTable
+  const actions = [
+    {
+      key: 'remove',
+      icon: TrashIcon,
+      iconClassName: 'w-4 h-4 text-red-600 cursor-pointer',
+      title: 'Remove Item',
+      handler: handleRemove,
+      showInBulk: true,
+      className: 'ml-2',
+    },
+    {
+      key: 'reupload',
+      icon: ArrowPathIcon,
+      iconClassName: 'w-4 h-4 text-blue-600 cursor-pointer',
+      title: 'Reupload Item',
+      handler: handleReUpload,
+      showInBulk: true,
+      className: 'ml-2',
+    },
+  ]
 
   useEffect(() => {
     fetchUrls()
@@ -167,7 +258,7 @@ function LinksList() {
         {data && data.length === 0 ? (
           <p className="italic opacity-60 text-center">No uploaded URLs</p>
         ) : (
-          <DataTable items={data} />
+          <DataTable items={data} actions={actions} />
         )}
       </div>
     </div>

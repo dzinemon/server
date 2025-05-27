@@ -2,7 +2,8 @@ import Papa from 'papaparse'
 import { useEffect, useState } from 'react'
 import Loading from '../Loading'
 import DataTable from '../common/DataTable'
-
+import { TrashIcon } from '@heroicons/react/24/solid'
+import toast from 'react-hot-toast'
 
 import { sourceFilters, typeFilters } from '../../../utils/hardcoded'
 
@@ -39,25 +40,50 @@ const Upload = () => {
     console.log('items to be deleted', uuids)
   }
 
-  const handleRemove = async (id, ids) => {
-    const res = await fetch(
-      `/api/upload-csv/${id}?ids=${JSON.stringify(ids)}`,
-      delRequsetOptions
-    )
-      .then((response) => {
-        if (response.status === 200) {
-          console.log(`deleted item with id ${id} successfully`)
-          const newData = data.filter((link) => link.id !== id)
-          setData(newData)
-        }
-        return response.text()
+  const handleRemove = async (id) => {
+    // Find the item to get its uuids
+    const item = data.find((item) => item.id === id)
+    if (!item) return
+
+    try {
+      const res = await fetch(
+        `/api/upload-csv/${id}?ids=${JSON.stringify(item.uuids)}`,
+        delRequsetOptions
+      )
+      
+      if (res.status === 200) {
+        console.log(`deleted item with id ${id} successfully`)
+        const newData = data.filter((item) => item.id !== id)
+        setData(newData)
+        
+        toast.success(`Removed item ${item.name} successfully!`, {
+          duration: 2000,
+          icon: '✅',
+        })
+      } else {
+        throw new Error(`Failed to delete item: ${res.status}`)
+      }
+    } catch (error) {
+      console.error('Error removing item:', error)
+      toast.error(`Failed to remove item ${item.name}`, {
+        duration: 2000,
+        icon: '❌',
       })
-      .then((result) => {
-        console.log(result)
-      })
-      .catch((error) => console.log('error', error))
-    console.log(res)
+    }
   }
+
+  // Define actions for DataTable (CSV files only need remove action)
+  const actions = [
+    {
+      key: 'remove',
+      icon: TrashIcon,
+      iconClassName: 'w-4 h-4 text-red-600 cursor-pointer',
+      title: 'Remove Item',
+      handler: handleRemove,
+      showInBulk: true,
+      className: 'ml-2'
+    }
+  ]
 
   const handleFileChange = (e) => {
     const file = e.target.files[0]
@@ -238,7 +264,7 @@ const Upload = () => {
       {data && data.length === 0 ? (
         <p className="italic opacity-60 text-center">No Uploaded items</p>
       ) : (
-        <DataTable items={data} handleRemove={handleRemove} />
+        <DataTable items={data} actions={actions} />
       )}
     </div>
   )

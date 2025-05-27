@@ -1,12 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 
-import {
-  addUrls,
-  removeUrl
-} from '../../../utils/api'
-
-import { parseUrls } from '../../../utils/links'
-
 import toast, { Toaster } from 'react-hot-toast'
 
 import {
@@ -18,7 +11,6 @@ import {
 } from '@tanstack/react-table'
 
 import {
-  ArrowPathIcon,
   ChevronDoubleLeftIcon,
   ChevronDoubleRightIcon,
   ChevronLeftIcon,
@@ -31,7 +23,12 @@ import DialogModal from './DialogModal'
 
 const columnHelper = createColumnHelper()
 
-export default function DataTable({ items }) {
+export default function DataTable({ 
+  items, 
+  actions = [], 
+  onDataChange = () => {},
+  confirmationModal = null 
+}) {
   const [itemToRemove, setItemToRemove] = useState({})
 
   const [selectedItems, setSelectedItems] = useState([])
@@ -44,78 +41,17 @@ export default function DataTable({ items }) {
 
   const [searchTerm, setSearchTerm] = useState('')
 
-  const handleReUpload = async (id) => {
-    // reupload the item by removing it and adding it again
-    const item = data.find((item) => item.id === id)
-    if (!item) return
+  // Update data when items prop changes
+  useEffect(() => {
+    setData(items)
+    setFilteredData(items)
+  }, [items])
 
-    // Check if the item has a valid URL
+  // Get actions that support bulk operations
+  const bulkActions = actions.filter(action => action.showInBulk)
 
-    if (!item.url || item.url.trim() === '') {
-      console.error('Item has no valid URL to reupload')
-      toast.error(`Item with id ${item.id} has no valid URL to reupload`, {
-        duration: 2000,
-        icon: '❌',
-      })
-      return
-    }
-
-    try {
-      await removeUrl(item.id, item.uuids)
-      // re-add the item by parsing the url and uploading it again
-      const urls = parseUrls(item.url)
-      if (urls.length === 0) {
-        console.error('No valid URLs found to reupload')
-        return
-      }
-
-      await addUrls(urls, false) // assuming internal is false for reupload
-
-      toast.success(`Reuploaded url ${item.url} successfully!`, {
-        duration: 2000,
-        icon: '✅',
-      })
-      // re-fetch the data after reuploading
-      // const updatedData = await fetchUrls()
-      // setData(updatedData)
-      // setFilteredData(updatedData)
-      // setSelectedItems((prev) => prev.filter((itemId) => itemId !== id))
-    } catch (error) {
-      console.error('Error reuploading item:', error)
-      toast.error(`Failed to reupload url ${item.url}`, {
-        duration: 2000,
-        icon: '❌',
-      })
-    }
-  }
-
-  const handleRemove = async (id) => {
-    // remove the item by id
-    const item = data.find((item) => item.id === id)
-    if (!item) return
-
-    try {
-      await removeUrl(item.id, item.uuids)
-      // filter out the removed item from the data
-      // const newData = data.filter((item) => item.id !== id)
-      // setData(newData)
-      // setFilteredData(newData)
-      // also remove from selected items if it was selected
-
-      setSelectedItems((prev) => prev.filter((itemId) => itemId !== id))
-
-      toast.success(`Removed url ${item.url} successfully!`, {
-        duration: 2000,
-        icon: '✅',
-      })
-    } catch (error) {
-      console.error('Error removing item:', error)
-      toast.error(`Failed to remove url ${item.url}`, {
-        duration: 2000,
-        icon: '❌',
-      })
-    }
-  }
+  // Get the remove action for confirmation modal
+  const removeAction = actions.find(action => action.key === 'remove')
 
   const [pagination, setPagination] = useState({
     pageIndex: 0, //initial page index
@@ -227,49 +163,31 @@ export default function DataTable({ items }) {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          {selectedItems.length > 0 && (
+          {selectedItems.length > 0 && bulkActions.length > 0 && (
             <div className="w-auto lg:w-1/4">
               <div className="bg-rose-50 p-3 rounded-lg mb-4">
                 <strong className="text-slate-600">
                   {selectedItems.length} items selected
                 </strong>
-                <button
-                  title="Remove Selected Items"
-                  aria-label="Remove Selected Items"
-                  onClick={() => {
-                    // remove selected items
-                    selectedItems.forEach((id) => {
-                      handleRemove(id)
-                    })
-                    setSelectedItems([])
-                  }}
-                  className=""
-                >
-                  <TrashIcon
-                    className="
-                      w-4 h-4 inline text-red-600"
-                  />
-                </button>
-                {/* reupload selected items */}
-
-                <button
-                  title="Reupload Selected Items"
-                  aria-label="Reupload Selected Items"
-                  onClick={() => {
-                    // reupload selected items
-                    selectedItems.forEach((id) => {
-                      handleReUpload(id)
-                    })
-                    // clear selected items after reuploading
-                    setSelectedItems([])
-                  }}
-                  className="ml-2"
-                >
-                  <ArrowPathIcon
-                    className="
-                      w-4 h-4 inline text-blue-600"
-                  />
-                </button>
+                {bulkActions.map((action) => {
+                  const IconComponent = action.icon
+                  return (
+                    <button
+                      key={action.key}
+                      title={action.title}
+                      aria-label={action.title}
+                      onClick={() => {
+                        selectedItems.forEach((id) => {
+                          action.handler(id)
+                        })
+                        setSelectedItems([])
+                      }}
+                      className={action.className || "ml-2"}
+                    >
+                      <IconComponent className={action.iconClassName || "w-4 h-4 inline"} />
+                    </button>
+                  )
+                })}
               </div>
             </div>
           )}
@@ -351,22 +269,25 @@ export default function DataTable({ items }) {
                 })}
                 <td className="px-2 py-1 border ">
                   <div className="flex items-center gap-2">
-                    <TrashIcon
-                      className="w-4 h-4 text-red-600 cursor-pointer"
-                      title="Remove Item"
-                      aria-label="Remove Item"
-                      onClick={() => {
-                        setItemToRemove(row.original)
-                        setIsDialogOpen(true)
-                      }}
-                    />
-                    {/* Add reupload action to remove and add the url again by parsing and uploading to database */}
-                    <ArrowPathIcon
-                      className="w-4 h-4 text-blue-600 cursor-pointer ml-2"
-                      title="Reupload Item"
-                      aria-label="Reupload Item"
-                      onClick={() => handleReUpload(row.original.id)}
-                    />
+                    {actions.map((action) => {
+                      const IconComponent = action.icon
+                      return (
+                        <IconComponent
+                          key={action.key}
+                          className={action.iconClassName || "w-4 h-4 cursor-pointer"}
+                          title={action.title}
+                          aria-label={action.title}
+                          onClick={() => {
+                            if (action.key === 'remove') {
+                              setItemToRemove(row.original)
+                              setIsDialogOpen(true)
+                            } else {
+                              action.handler(row.original.id)
+                            }
+                          }}
+                        />
+                      )
+                    })}
                   </div>
                 </td>
               </tr>
@@ -478,7 +399,9 @@ export default function DataTable({ items }) {
             type="button"
             className="inline-flex items-center justify-center rounded-md border border-transparent bg-rose-100 px-4 py-2 text-sm font-medium text-rose-500 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
             onClick={() => {
-              handleRemove(itemToRemove.id, itemToRemove.uuids)
+              if (removeAction && removeAction.handler) {
+                removeAction.handler(itemToRemove.id)
+              }
               setIsDialogOpen(false)
             }}
           >

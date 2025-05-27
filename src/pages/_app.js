@@ -1,21 +1,13 @@
 import '@/styles/globals.css'
 
 import { SessionProvider } from 'next-auth/react'
-import {
-  ResourceProvider
-} from '@/context/resources'
+import { ResourceProvider } from '@/context/resources'
 
-import {
-  PromptProvider
-} from '@/context/prompts'
+import { PromptProvider } from '@/context/prompts'
 
-import {
-  MembersProvider
-} from '@/context/members'
+import { MembersProvider } from '@/context/members'
 
-import {
-  UserProvider
-} from '@/context/user'
+import { UserProvider } from '@/context/user'
 
 export default function App({
   Component,

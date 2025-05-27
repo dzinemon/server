@@ -1,10 +1,9 @@
-import { useState, useRef } from 'react'
+import { Menu } from '@headlessui/react'
 import { AnimatePresence, motion } from 'framer-motion'
 import Image from 'next/image'
-import InlineLoading from '../InlineLoading'
-import { Fragment } from 'react'
-import { Menu } from '@headlessui/react'
+import { Fragment, useRef, useState } from 'react'
 import CopyToClipboard from '../copy-to-clipboard'
+import InlineLoading from '../InlineLoading'
 
 const links = [
   { val: 'innacurate', label: 'Inaccurate' },
@@ -12,26 +11,21 @@ const links = [
 ]
 
 import {
-  DocumentTextIcon,
   ArrowTopRightOnSquareIcon,
   ChatBubbleBottomCenterTextIcon,
   ChevronDownIcon,
-  DocumentChartBarIcon,
-  CalendarIcon,
+  DocumentTextIcon,
+  EnvelopeIcon,
   FlagIcon,
   HandThumbDownIcon,
-  HandThumbUpIcon,
-  EnvelopeIcon,
-  ChatBubbleLeftRightIcon
+  HandThumbUpIcon
 } from '@heroicons/react/24/solid'
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faEnvelope } from '@fortawesome/free-regular-svg-icons'
 import {
-  faTwitter,
-  faLinkedin,
   faLinkedinIn,
+  faTwitter
 } from '@fortawesome/free-brands-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import { Type } from '../common/resourcetype'
 
@@ -380,7 +374,6 @@ export default function QuestionSearchResult({
                         </div>
                       </div>
                     </motion.div>
-                    
                   </>
                 )}
               </AnimatePresence>

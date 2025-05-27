@@ -1,6 +1,6 @@
-import React, { createContext, useState, useContext, useEffect } from 'react'
-import { baseUrl } from '../../utils/config'
+import { createContext, useContext, useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
+import { baseUrl } from '../../utils/config'
 
 import { models } from '../../utils/hardcoded'
 
@@ -64,7 +64,7 @@ export const ResourceProvider = ({ children }) => {
 
       const updatedQuestions = allQuestions.filter(
         (question) => !ids.includes(question.id)
-      )      
+      )
 
       setAllQuestions(updatedQuestions)
 

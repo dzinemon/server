@@ -4,7 +4,6 @@ import { useMembers } from '@/context/members'
 
 import DialogWrapper from './common/dialog/wrapper'
 
-
 const PromptDialog = ({
   open,
   setOpen,
@@ -74,7 +73,8 @@ const PromptDialog = ({
   </DialogWrapper>
 )
 export const DeletePromptDialog = ({ open, setOpen }) => {
-  const { currentPrompt, setCurrentPrompt, handlePromptDelete, isLoading } = usePrompts()
+  const { currentPrompt, setCurrentPrompt, handlePromptDelete, isLoading } =
+    usePrompts()
 
   const handleDelete = async () => {
     await handlePromptDelete(currentPrompt.id)
@@ -114,7 +114,8 @@ export const DeletePromptDialog = ({ open, setOpen }) => {
 }
 
 export const SaveAsPromptDialog = ({ open, setOpen }) => {
-  const { currentPrompt, setCurrentPrompt, handlePromptCreate, isLoading } = usePrompts()
+  const { currentPrompt, setCurrentPrompt, handlePromptCreate, isLoading } =
+    usePrompts()
 
   const handleSaveAs = async () => {
     await handlePromptCreate({
@@ -140,10 +141,11 @@ export const SaveAsPromptDialog = ({ open, setOpen }) => {
 }
 
 export const SavePromptDialog = ({ open, setOpen }) => {
-  const { currentPrompt, setCurrentPrompt, handlePromptUpdate, isLoading } = usePrompts()
+  const { currentPrompt, setCurrentPrompt, handlePromptUpdate, isLoading } =
+    usePrompts()
 
   const handleSave = async () => {
-    await handlePromptUpdate(currentPrompt.id,{
+    await handlePromptUpdate(currentPrompt.id, {
       id: currentPrompt.id,
       name: currentPrompt.name,
       content: currentPrompt.content,
@@ -167,7 +169,8 @@ export const SavePromptDialog = ({ open, setOpen }) => {
 }
 
 export const AddPromptDialog = ({ open, setOpen }) => {
-  const { currentPrompt, setCurrentPrompt, handlePromptCreate, isLoading } = usePrompts()
+  const { currentPrompt, setCurrentPrompt, handlePromptCreate, isLoading } =
+    usePrompts()
 
   const handleSave = async () => {
     await handlePromptCreate(currentPrompt)
@@ -255,7 +258,8 @@ const MemberDialog = ({
 )
 
 export const DeleteMemberDialog = ({ open, setOpen }) => {
-  const { currentMember, setCurrentMember, handleMemberDelete, isLoading } = useMembers()
+  const { currentMember, setCurrentMember, handleMemberDelete, isLoading } =
+    useMembers()
 
   const handleDelete = async () => {
     await handleMemberDelete(currentMember.id)
@@ -295,7 +299,8 @@ export const DeleteMemberDialog = ({ open, setOpen }) => {
 }
 
 export const SaveAsMemberDialog = ({ open, setOpen }) => {
-  const { currentMember, setCurrentMember, handleMemberAdd, isLoading } = useMembers()
+  const { currentMember, setCurrentMember, handleMemberAdd, isLoading } =
+    useMembers()
 
   const handleSaveAs = async () => {
     await handleMemberAdd({
@@ -320,7 +325,8 @@ export const SaveAsMemberDialog = ({ open, setOpen }) => {
 }
 
 export const SaveMemberDialog = ({ open, setOpen }) => {
-  const { currentMember, setCurrentMember, handleMemberUpdate, isLoading } = useMembers()
+  const { currentMember, setCurrentMember, handleMemberUpdate, isLoading } =
+    useMembers()
 
   const handleSave = async () => {
     await handleMemberUpdate(currentMember.id, {
@@ -346,7 +352,8 @@ export const SaveMemberDialog = ({ open, setOpen }) => {
 }
 
 export const AddMemberDialog = ({ open, setOpen }) => {
-  const { currentMember, setCurrentMember, handleMemberAdd, isLoading } = useMembers()
+  const { currentMember, setCurrentMember, handleMemberAdd, isLoading } =
+    useMembers()
 
   const handleSave = async () => {
     await handleMemberAdd(currentMember)

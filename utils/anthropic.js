@@ -10,10 +10,8 @@ const createClaudeCompletion = async (
   temperature,
   instructions,
   maxTokens
-)  => {
-
+) => {
   try {
-
     const response = await anthropic.messages.create({
       model,
       max_tokens: parseInt(maxTokens),
@@ -25,43 +23,36 @@ const createClaudeCompletion = async (
           content: [
             {
               type: 'text',
-              text: prompt
-            }
-          ]
-        }
-      ]
-    });
-  
-    console.log(response);
-    return response.content[0].text;
+              text: prompt,
+            },
+          ],
+        },
+      ],
+    })
+
+    console.log(response)
+    return response.content[0].text
   } catch (error) {
-    console.error('Error creating completion:', error);
-    throw error;
+    console.error('Error creating completion:', error)
+    throw error
   }
 }
 
-const createClaudeCompletionMessage = async (
-  messages,
-  model,
-  temperature
-)  => {
-
+const createClaudeCompletionMessage = async (messages, model, temperature) => {
   try {
-
     const response = await anthropic.messages.create({
       model,
       max_tokens: 8192,
       temperature: parseInt(temperature),
-      messages
-    });
-  
-    console.log(response);
-    return response.content[0].text;
+      messages,
+    })
+
+    console.log(response)
+    return response.content[0].text
   } catch (error) {
-    console.error('Error creating completion:', error);
-    throw error;
+    console.error('Error creating completion:', error)
+    throw error
   }
 }
 
-export { createClaudeCompletion, createClaudeCompletionMessage };
-
+export { createClaudeCompletion, createClaudeCompletionMessage }

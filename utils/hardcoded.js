@@ -1,4 +1,3 @@
-
 const models = [
   'sonar',
   'sonar-pro',

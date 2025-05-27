@@ -1,17 +1,10 @@
-import { parseWithCheerio } from "../../../../utils/cheerio-axios";
+import { parseWithCheerio } from '../../../../utils/cheerio-axios'
 
-const  parseUrl = async (req, res) => {
+const parseUrl = async (req, res) => {
+  const { url } = req.body
 
-  const { url } = req.body;
-
-  const {
-    pageContent,
-    pageUrl,
-    name,
-    ogImage,
-    pageType,
-    source,
-  } = await parseWithCheerio(url);
+  const { pageContent, pageUrl, name, ogImage, pageType, source } =
+    await parseWithCheerio(url)
 
   res.status(200).json({
     pageContent,
@@ -20,12 +13,12 @@ const  parseUrl = async (req, res) => {
     ogImage,
     pageType,
     source,
-  });
+  })
 }
 
 export const config = {
   maxDuration: 200,
-};
+}
 
 export default function handler(req, res) {
   switch (req.method) {

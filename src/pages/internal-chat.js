@@ -429,7 +429,7 @@ export default function InternalChatPage() {
             height: 'calc(100vh - 3.5rem)',
           }}
         >
-          <div className='w-full'>
+          <div className="w-full">
             <button
               onClick={() => setSideBarOpen(!sideBarIsOpen)}
               className={`
@@ -471,18 +471,16 @@ export default function InternalChatPage() {
                 <SquaresPlusIcon className="w-5 h-5 inline" />
               </button>
             </div>
-            <div className='w-full mb-3'>
-            <p className="font-bold">Select model</p>
-            <ModelPicker />
+            <div className="w-full mb-3">
+              <p className="font-bold">Select model</p>
+              <ModelPicker />
             </div>
             <div className="text-sm max-w-full mx-auto mb-3">
               Keep your questions clear and concise for the best results. Use
               single sentences or key phrases to get precise answers.
             </div>
-       
           </div>
-          <div className='flex-grow overflow-y-auto px-2 pb-4'>
-       
+          <div className="flex-grow overflow-y-auto px-2 pb-4">
             <ThreadCombobox
               threads={threads}
               currentThreadId={currentThreadId}

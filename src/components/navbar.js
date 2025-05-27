@@ -2,24 +2,56 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import LoginComponent from './login-btn'
-// import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
-import {
-  useUser
-} from '@/context/user'
+import { useUser } from '@/context/user'
+import { NavDropdown, MobileNavSection, useNavDropdowns } from './navigation/nav-components'
 
 export default function Navbar() {
+  // Main mobile menu state
   const [isOpen, setIsOpen] = useState(false)
+  
+  // Use our custom hook to manage dropdown states - ensures only one dropdown is open at a time
+  const { isOpen: isDropdownOpen, toggleDropdown, closeDropdown } = useNavDropdowns(['upload', 'quotes'])
 
-  const {
-    pathname
-  } = useRouter()
+  const { pathname } = useRouter()
 
   // const { data: session } = useSession()
 
-  const {
-    currentUser
-  } = useUser()
+  const { currentUser } = useUser()
+
+  const uploadItems = [
+    {
+      name: 'Upload Links',
+      slug: 'links',
+    },
+    {
+      name: 'Upload Files',
+      slug: 'files',
+    },
+    {
+      name: 'Upload Text',
+      slug: 'texts',
+    },
+  ]
+  
+  const quotesItems = [
+    {
+      name: 'Quotes by Topic',
+      slug: 'podcast-quotes-topic',
+    },
+    {
+      name: 'Podcast Quotes',
+      slug: 'podcast-quotes',
+    },
+    {
+      name: 'Podcast Quotes v2',
+      slug: 'podcast-quotes-v2',
+    },
+    {
+      name: 'Categories Quotes',
+      slug: 'categories-quotes',
+    },
+  ]
 
   const adminNavItems = [
     // {
@@ -37,10 +69,7 @@ export default function Navbar() {
   ]
 
   const navItems = [
-    {
-      name: 'Quotes',
-      slug: 'podcast-quotes-topic',
-    },
+    // Quotes moved to dropdown
     // {
     //   name: 'External QA',
     //   slug: 'widget',
@@ -67,6 +96,7 @@ export default function Navbar() {
     },
   ]
 
+  // We'll keep these items separate for admin access control
   if (currentUser?.role === 'admin') {
     navItems.push(...adminNavItems)
   }
@@ -98,17 +128,45 @@ export default function Navbar() {
         </div>
 
         <div className="hidden lg:flex lg:gap-x-12">
+          {/* Quotes Dropdown - Available for all users */}
+          <NavDropdown 
+            label="Quotes"
+            items={quotesItems}
+            isOpen={isDropdownOpen('quotes')}
+            toggleDropdown={() => toggleDropdown('quotes')}
+            pathname={pathname}
+            closeDropdown={() => closeDropdown('quotes')}
+            id="quotes"
+          />
+          
           {navItems.map((item, idx) => {
             return (
               <Link
                 key={`nav-bar-lg-${idx}`}
                 href={`/${item.slug}`}
-                className={`${ pathname === `/${item.slug}` ? 'underline pointer-events-none text-kruze-blueDark' : 'text-kruze-dark' } hover:text-kruze-blueLight  text-sm font-semibold leading-6 text-gray-900`}
+                className={`${
+                  pathname === `/${item.slug}`
+                    ? 'underline pointer-events-none text-kruze-blueDark'
+                    : 'text-kruze-dark'
+                } hover:text-kruze-blueLight  text-sm font-semibold leading-6 text-gray-900`}
               >
                 {item.name}
               </Link>
             )
           })}
+          
+          {/* Upload Dropdown - Only visible for admin users */}
+          {currentUser?.role === 'admin' && (
+            <NavDropdown
+              label="Upload"
+              items={uploadItems}
+              isOpen={isDropdownOpen('upload')}
+              toggleDropdown={() => toggleDropdown('upload')}
+              pathname={pathname}
+              closeDropdown={() => closeDropdown('upload')}
+              id="upload"
+            />
+          )}
         </div>
         <div className={`lg:flex lg:flex-1 lg:justify-end hidden items-center`}>
           <LoginComponent />
@@ -139,7 +197,9 @@ export default function Navbar() {
       </nav>
 
       <div
-        className={`${isOpen ? 'block h-screen lg:h-auto' : 'hidden'} lg:hidden`}
+        className={`${
+          isOpen ? 'block h-screen lg:h-auto' : 'hidden'
+        } lg:hidden`}
         role="dialog"
         aria-modal="true"
       >
@@ -182,17 +242,39 @@ export default function Navbar() {
           <div className="mt-6 flow-root">
             <div className="-my-6 divide-y divide-gray-500/10">
               <div className="space-y-2 py-6">
+                {/* Quotes Section in Mobile Menu */}
+                <MobileNavSection
+                  title="Quotes"
+                  items={quotesItems}
+                  pathname={pathname}
+                  onItemClick={() => setIsOpen(false)}
+                />
+                
                 {navItems.map((item, idx) => {
                   return (
                     <Link
                       key={`nav-bar-lg-${idx}`}
                       href={`/${item.slug}`}
-                      className={`${ pathname.indexOf(item.slug) !== -1 ? 'underline pointer-events-none' : '' } -mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50`}
+                      className={`${
+                        pathname.indexOf(item.slug) !== -1
+                          ? 'underline pointer-events-none'
+                          : ''
+                      } -mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50`}
                     >
                       {item.name}
                     </Link>
                   )
                 })}
+                
+                {/* Upload Section in Mobile Menu - Only visible for admin users */}
+                {currentUser?.role === 'admin' && (
+                  <MobileNavSection
+                    title="Upload Options"
+                    items={uploadItems}
+                    pathname={pathname}
+                    onItemClick={() => setIsOpen(false)}
+                  />
+                )}
               </div>
               <div className="py-6">
                 <LoginComponent />

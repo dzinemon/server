@@ -88,7 +88,6 @@ export const authOptions = {
   callbacks: {
     async signIn({ account, profile }) {
       if (account.provider === 'google') {
-
         const email_verified = profile.email_verified
         const matchesDomain = profile.email.endsWith('@kruzeconsulting.com')
 
@@ -144,7 +143,7 @@ export const authOptions = {
   //     },
   //   },
   // },
-  useSecureCookies: process.env.VERCEL_ENV === 'production'
+  useSecureCookies: process.env.VERCEL_ENV === 'production',
 }
 
 export default NextAuth(authOptions)

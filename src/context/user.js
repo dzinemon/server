@@ -10,7 +10,11 @@ export const UserProvider = ({ children }) => {
 
   const [currentUser, setCurrentUser] = useState(session?.user)
 
-  return <UserContext.Provider value={{ currentUser, setCurrentUser }}>{children}</UserContext.Provider>
+  return (
+    <UserContext.Provider value={{ currentUser, setCurrentUser }}>
+      {children}
+    </UserContext.Provider>
+  )
 }
 
 export const useUser = () => {

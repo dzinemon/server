@@ -156,31 +156,29 @@ export default function AllQuestionsDataTable() {
       <div className="lg:container mt-4">
         <div className="bg-white p-3 rounded-xl">
           <div className="flex justify-between mb-4">
-            <div className='flex items-center justify-between w-full'>
+            <div className="flex items-center justify-between w-full">
               <h2 className="text-2xl font-semibold text-gray-900 grow">
                 <strong className="text-slate-400">
                   {JSON.stringify(allQuestions.length)}
                 </strong>{' '}
                 Questions{' '}
-            
               </h2>
-              <div className='px-2  w-auto'>
-              {loading ?  (
-                    <div className="text-xs text-slate-500">Loading...</div>
-                  ) : (
-                    <div className="text-xs flex flex-col items-start text-slate-500">
-                      
-
-                      <button
-                        onClick={() => fetchAllQuestions()}
-                        className="border border-slate-200 rounded px-1 py-0.5 bg-slate-50 hover:bg-slate-200 text-slate-800"
-                      >
-                        Pull Latest Questions
-                      </button>
-                      <div className='text-xs'>Last updated: {new Date().toLocaleString()}</div>
+              <div className="px-2  w-auto">
+                {loading ? (
+                  <div className="text-xs text-slate-500">Loading...</div>
+                ) : (
+                  <div className="text-xs flex flex-col items-start text-slate-500">
+                    <button
+                      onClick={() => fetchAllQuestions()}
+                      className="border border-slate-200 rounded px-1 py-0.5 bg-slate-50 hover:bg-slate-200 text-slate-800"
+                    >
+                      Pull Latest Questions
+                    </button>
+                    <div className="text-xs">
+                      Last updated: {new Date().toLocaleString()}
                     </div>
-                  )}
-
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -217,13 +215,12 @@ export default function AllQuestionsDataTable() {
           </div>
 
           <table className="table-auto bg-white w-full">
-            <thead>
+            <thead className="bg-slate-100">
               {table.getHeaderGroups().map((headerGroup, idx) => (
                 <tr key={headerGroup.id}>
                   <th className="px-2 py-1 border w-20">
-                    Select
                     <input
-                      className="hidden"
+                      className=""
                       id={`select-header-${idx}`}
                       type="checkbox"
                       onChange={(e) => {
@@ -285,12 +282,18 @@ export default function AllQuestionsDataTable() {
                     )
                   })}
                   <td className="px-2 py-1 border">
-                    <DocumentMagnifyingGlassIcon
-                      className="w-4 h-4 text-slate-600 hover:text-blue-600 cursor-pointer"
-                      onClick={() => {
-                        handleSetCurrentQuestion(row.original.id)
-                      }}
-                    />
+                    <div className="flex items-center justify-center gap-2">
+                      <button
+                        title="View Question Details"
+                        aria-label="View Question Details"
+                        className="text-slate-600 hover:text-blue-600 cursor-pointer"
+                        onClick={() => {
+                          handleSetCurrentQuestion(row.original.id)
+                        }}
+                      >
+                        <DocumentMagnifyingGlassIcon className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

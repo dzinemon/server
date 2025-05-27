@@ -1,6 +1,6 @@
-import React, { createContext, useState, useContext } from 'react'
-import { baseUrl } from '../../utils/config'
+import { createContext, useContext, useState } from 'react'
 import toast from 'react-hot-toast'
+import { baseUrl } from '../../utils/config'
 
 const PromptContext = createContext()
 
@@ -33,7 +33,9 @@ export const PromptProvider = ({ children }) => {
 
   const fetchPrompts = async () => {
     try {
-      const prompts = await fetchData(promptsUrl, { next: { revalidate: 86400 } })
+      const prompts = await fetchData(promptsUrl, {
+        next: { revalidate: 86400 },
+      })
       setPrompts(prompts)
     } catch (error) {
       console.error('Failed to fetch prompts:', error)
@@ -103,7 +105,9 @@ export const PromptProvider = ({ children }) => {
         headers: myHeaders,
         body: JSON.stringify(data),
       })
-      setPrompts((prev) => prev.map((prompt) => (prompt.id === id ? updatedPrompt : prompt)))
+      setPrompts((prev) =>
+        prev.map((prompt) => (prompt.id === id ? updatedPrompt : prompt))
+      )
       setFetchedPrompts((prev) => {
         const exists = prev.some((p) => p.id === id)
         if (exists) {

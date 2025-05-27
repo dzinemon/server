@@ -1,7 +1,7 @@
 import Navbar from './navbar'
 // import Footer from './footer'
+import { useSession } from 'next-auth/react'
 import { Inter } from 'next/font/google'
-import { useSession, signIn, signOut } from 'next-auth/react'
 import Loading from './Loading'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -30,7 +30,7 @@ export default function Layout({ children }) {
       Not signed in <br />
       <button
         className="hover:bg-sky-700 text-sm font-semibold leading-6  text-gray-100 px-6 bg-sky-600 rounded-lg py-2 mx-5"
-        onClick={() => signIn()}
+        onClick={() => import('next-auth/react').then(mod => mod.signIn())}
       >
         Sign in
       </button>

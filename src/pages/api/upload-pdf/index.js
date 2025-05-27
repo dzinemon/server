@@ -52,7 +52,7 @@ const postUrl = async (req, res) => {
       })
 
       const pineconeResult = await upsertEmbedding(processedDocs)
-      
+
       if (pineconeResult && pineconeResult.upsertedCount) {
         console.log('Pinecone UpsertCount: ', pineconeResult.upsertedCount)
       }

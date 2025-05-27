@@ -6,14 +6,14 @@ const getPrompts = async (req, res) => {
   try {
     let query = 'SELECT id, name, type FROM prompts'
     const params = []
-    
+
     if (type) {
       query += ' WHERE type = $1'
       params.push(type)
     }
-    
+
     query += ' ORDER BY id DESC'
-    
+
     const result = await db.query(query, params)
     res.status(200).json(result.rows)
   } catch (error) {

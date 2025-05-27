@@ -143,7 +143,10 @@
         const btn = buttonsByClass[i]
         if (btn.getAttribute('data-question')) {
           btn.addEventListener('click', () => {
-            sessionStorage.setItem('question', btn.getAttribute('data-question'))
+            sessionStorage.setItem(
+              'question',
+              btn.getAttribute('data-question')
+            )
             // open chat widget
             openWidget()
           })

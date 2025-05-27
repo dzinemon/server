@@ -105,7 +105,7 @@ export default function ChatWidget() {
       sessionStorage.getItem('attemptCount') === null
         ? 0
         : sessionStorage.getItem('attemptCount')
-        
+
     setAttemptCount(parseInt(sessionStorageAttemptCount))
   }
 
@@ -143,7 +143,7 @@ export default function ChatWidget() {
           search_term: question,
         })
       }
-      
+
       if (typeof window.dataLayer === 'object') {
         window.dataLayer.push({
           event: 'extSearch',
@@ -168,12 +168,13 @@ export default function ChatWidget() {
 
       const response = await fetch('/api/questions', requestOptions)
       const result = await response.json()
-      
-      if (response.status !== 201) {  // Correct check for 201 status
+
+      if (response.status !== 201) {
+        // Correct check for 201 status
         console.error('Error saving question:', result)
-        return null;
+        return null
       }
-      
+
       return result
     } catch (error) {
       console.error('Error saving question answer:', error)
@@ -184,23 +185,23 @@ export default function ChatWidget() {
   const askQuestion = async (e) => {
     router.query = {}
     e.preventDefault()
-    
+
     if (!question.trim().length) {
       return
     }
 
     let currentQuestion = { question: question, answer: '', sources: [] }
-    
+
     if (typeof window !== 'undefined' && window.gtag !== undefined) {
       handleSendGoogleAnalyticsEvent(question)
     }
-    
+
     setQuestions((prev) => [...prev, currentQuestion])
     setAttemptCount((prev) => prev + 1)
     setQuestion('')
     setIsLoading(true)
     setIsSubmitted(true)
-    
+
     handleScrollIntoView()
 
     try {
@@ -221,11 +222,11 @@ export default function ChatWidget() {
         '/api/openai/embedding',
         questionRequestOptions
       )
-      
+
       if (!embeddingResponse.ok) {
         throw new Error('Failed to generate embeddings')
       }
-      
+
       const { sources, prompt } = await embeddingResponse.json()
 
       // Update sources in question
@@ -262,11 +263,11 @@ export default function ChatWidget() {
         '/api/v1/singlecompletion',
         promptRequestOptions
       )
-      
+
       if (!completionResponse.ok) {
         throw new Error('Failed to generate completion')
       }
-      
+
       const { completion } = await completionResponse.json()
 
       // Update answer in question
@@ -296,7 +297,7 @@ export default function ChatWidget() {
       toast(error.message || 'Error processing your question', {
         icon: '❌',
       })
-      
+
       // Remove the question if there was an error
       setQuestions((previous) => previous.slice(0, -1))
     } finally {
@@ -309,13 +310,12 @@ export default function ChatWidget() {
     // Initialize data from localStorage and query parameters
     handleGetAttemtCountLocalStorage()
     handleSetQuestionsFromLocalStorage()
-    
+
     // Set question from URL parameter if available
     if (router.query.question) {
       setQuestion(router.query.question)
     }
-    
-  }, [router.query.question]);
+  }, [router.query.question])
 
   return (
     <div className="h-screen w-screen  flex items-center justify-center relative">
@@ -341,7 +341,6 @@ export default function ChatWidget() {
           </div>
         </div>
       )}
-  
 
       <div className="relative overflow-auto pt-8 lg:pt-4 pb-28 w-full h-screen max-w-[720px] mx-auto flex flex-col justify-start items-center">
         <motion.div

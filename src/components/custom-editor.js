@@ -1,21 +1,21 @@
 // components/custom-editor.js
 
-import React, { useState, useEffect } from 'react'
 import { CKEditor } from '@ckeditor/ckeditor5-react'
 import {
-  ClassicEditor,
-  SourceEditing,
-  Markdown,
-  Heading,
-  Link,
   Bold,
+  ClassicEditor,
   Essentials,
+  Heading,
   Italic,
+  Link,
+  List,
+  Markdown,
   Mention,
   Paragraph,
-  List,
+  SourceEditing,
   Undo,
 } from 'ckeditor5'
+import { useState } from 'react'
 
 import 'ckeditor5/ckeditor5.css'
 

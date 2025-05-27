@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import Image from 'next/image'
 import Script from 'next/script'
 import { Inter } from 'next/font/google'
-import { useSession, signIn, signOut } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import Navbar from '../components/navbar'
 import Loading from '../components/Loading'
 
@@ -73,7 +73,9 @@ export default function Home() {
                 href={url}
                 className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
               >
-                <h2 className={`mb-3 text-2xl font-semibold group-hover:text-kruze-blueLight`}>
+                <h2
+                  className={`mb-3 text-2xl font-semibold group-hover:text-kruze-blueLight`}
+                >
                   {name}{' '}
                   <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
                     -&gt;
@@ -152,7 +154,7 @@ export default function Home() {
       Not signed in <br />
       <button
         className="hover:bg-sky-700 text-sm font-semibold leading-6  text-gray-100 px-6 bg-sky-600 rounded-lg py-2 mx-5"
-        onClick={() => signIn()}
+        onClick={() => import('next-auth/react').then(mod => mod.signIn())}
       >
         Sign in
       </button>

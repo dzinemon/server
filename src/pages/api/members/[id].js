@@ -3,7 +3,10 @@ import db from '../../../db'
 const getMemberById = async (req, res) => {
   const { id } = req.query
   try {
-    const result = await db.query('SELECT id, name, content FROM members WHERE id = $1', [id])
+    const result = await db.query(
+      'SELECT id, name, content FROM members WHERE id = $1',
+      [id]
+    )
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Member not found' })
     }
@@ -33,7 +36,10 @@ const updateMemberById = async (req, res) => {
 const deleteMemberById = async (req, res) => {
   const { id } = req.query
   try {
-    const result = await db.query('DELETE FROM members WHERE id = $1 RETURNING id, name, content', [id])
+    const result = await db.query(
+      'DELETE FROM members WHERE id = $1 RETURNING id, name, content',
+      [id]
+    )
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Member not found' })
     }

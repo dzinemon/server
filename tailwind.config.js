@@ -15,8 +15,8 @@ module.exports = {
         DEFAULT: {
           css: {
             maxWidth: '960px', // add required value here
-          }
-        }
+          },
+        },
       },
       colors: {
         kruze: {
@@ -29,7 +29,7 @@ module.exports = {
           danger: '#D9534F',
           warning: '#F0AD4E',
           success: '#4cae4c',
-        }
+        },
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

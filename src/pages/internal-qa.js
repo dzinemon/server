@@ -17,7 +17,6 @@ import { usedModel } from '../../utils/hardcoded'
 import { sourceFilters, typeFilters } from '../../utils/hardcoded'
 
 export default function ChatWidget() {
-
   const [filterBySourceArray, setFilterBySourceArray] = useState([
     sourceFilters[0],
     sourceFilters[1],

@@ -1,26 +1,21 @@
-import { Fragment } from 'react'
-import { Dialog, Transition, Menu } from '@headlessui/react'
-import Image from 'next/image'
-import { motion } from 'framer-motion'
+import { Dialog, Menu, Transition } from '@headlessui/react'
 import {
   ArrowTopRightOnSquareIcon,
-  HandThumbDownIcon,
-  HandThumbUpIcon,
   EnvelopeIcon,
-  Bars3Icon,
-  TrashIcon,
+  TrashIcon
 } from '@heroicons/react/24/solid'
+import { motion } from 'framer-motion'
+import Image from 'next/image'
+import { Fragment } from 'react'
 
-import CopyToClipboard from '../copy-to-clipboard'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faEnvelope } from '@fortawesome/free-regular-svg-icons'
 import {
-  faTwitter,
-  faLinkedin,
   faLinkedinIn,
+  faTwitter
 } from '@fortawesome/free-brands-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import ReactMarkdown from 'react-markdown'
 import { Type } from '../common/resourcetype'
+import CopyToClipboard from '../copy-to-clipboard'
 
 import { copyRightHtml, widgetpage } from '../web-widget/question-search-result'
 
@@ -256,7 +251,7 @@ export default function QuestionDialogModal({
                           <div className="flex flex-row -mx-2 items-center text-slate-400">
                             <div className="w-auto px-2">
                               <Menu as={'div'} className={'relative'}>
-                                <Menu.Button className="inline-flex justify-center rounded-sm p-1 bg-slate-200 text-sm font-medium text-gray-900 hover:bg-rose-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2">  
+                                <Menu.Button className="inline-flex justify-center rounded-sm p-1 bg-slate-200 text-sm font-medium text-gray-900 hover:bg-rose-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2">
                                   <TrashIcon className="w-4 h-4 text-white" />
                                 </Menu.Button>
                                 <Menu.Items className="absolute bottom-10 bg-rose-50 right-0 mt-2 w-64 p-2 origin-bottom-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none">

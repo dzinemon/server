@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from "react"
-import Layout from "@/components/layout"
-import AllQuestionsDataTable from "@/components/common/AllQuestionsDataTable"
+import AllQuestionsDataTable from '@/components/common/AllQuestionsDataTable'
+import Layout from '@/components/layout'
 
 export default function AllQuestions() {
   return (
     <Layout>
       <AllQuestionsDataTable />
     </Layout>
-  
   )
 }

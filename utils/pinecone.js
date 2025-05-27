@@ -62,15 +62,26 @@ async function deleteAllVectors() {
   }
 }
 
-async function queryEmbedding(queryVector, sourceFilters = ['website'], typeFilters, topK = 8, 
-  includeMetadata = true, includeValues = true
+async function queryEmbedding(
+  queryVector,
+  sourceFilters = ['website'],
+  typeFilters,
+  topK = 8,
+  includeMetadata = true,
+  includeValues = true
 ) {
   const currentFilter = () => {
-    if (sourceFilters.length === 0 && (!typeFilters || typeFilters.length === 0)) {
+    if (
+      sourceFilters.length === 0 &&
+      (!typeFilters || typeFilters.length === 0)
+    ) {
       return {}
     } else if (sourceFilters?.length === 0 && typeFilters?.length !== 0) {
       return { type: { $in: typeFilters } }
-    } else if (sourceFilters?.length !== 0 && (!typeFilters || typeFilters.length === 0)) {
+    } else if (
+      sourceFilters?.length !== 0 &&
+      (!typeFilters || typeFilters.length === 0)
+    ) {
       return { source: { $in: sourceFilters } }
     } else {
       return {
@@ -139,4 +150,10 @@ async function deleteEmbedding(ids) {
   }
 }
 
-export { upsertEmbedding, deleteEmbedding, deleteAllVectors, queryEmbedding, queryEmbeddingById }
+export {
+  upsertEmbedding,
+  deleteEmbedding,
+  deleteAllVectors,
+  queryEmbedding,
+  queryEmbeddingById,
+}

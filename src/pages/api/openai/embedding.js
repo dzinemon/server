@@ -19,7 +19,7 @@ const postUrl = async (req, res) => {
       typeFilters,
       topK
     )
-    
+
     if (!data.matches || data.matches.length === 0) {
       return res.status(200).json({
         prompt: 'No context found.',
@@ -60,7 +60,7 @@ const postUrl = async (req, res) => {
     // Build context efficiently while respecting the limit
     let contextLength = 0
     const contextChunks = []
-    
+
     for (const match of data.matches) {
       const content = match.metadata.content
       if (contextLength + content.length <= CONTEXT_LIMIT) {
@@ -70,7 +70,7 @@ const postUrl = async (req, res) => {
         break
       }
     }
-    
+
     const context = contextChunks.join('')
 
     if (context.length === 0) {

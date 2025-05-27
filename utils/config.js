@@ -9,7 +9,10 @@ const config = {
   staging: {
     baseUrl: 'http://localhost:3000',
   },
-};
+}
 
 // Export the appropriate configuration based on the environment
-module.exports = process.env.NEXT_PUBLIC_VERCEL_ENV === 'production' ? config.production : config.staging;
+module.exports =
+  process.env.NEXT_PUBLIC_VERCEL_ENV === 'production'
+    ? config.production
+    : config.staging

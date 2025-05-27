@@ -1,11 +1,7 @@
 import {
   DocumentArrowUpIcon,
-  ArrowRightIcon,
-  LinkIcon,
   DocumentTextIcon,
-  ChevronDoubleDownIcon,
-  CodeBracketIcon,
-  ArrowDownOnSquareStackIcon,
+  LinkIcon
 } from '@heroicons/react/24/solid'
 
 export default function Assistant({ title, subtitle, isNew }) {

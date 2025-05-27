@@ -1,6 +1,6 @@
-import React, { createContext, useState, useContext, useEffect } from 'react'
-import { baseUrl } from '../../utils/config'
+import { createContext, useContext, useState } from 'react'
 import toast from 'react-hot-toast'
+import { baseUrl } from '../../utils/config'
 
 const MembersContext = createContext()
 
@@ -42,19 +42,16 @@ export const MembersProvider = ({ children }) => {
         duration: 2500,
       })
       return member
-    }
-    catch (error) {
+    } catch (error) {
       console.error('Error fetching member:', error)
       toast.error('Error fetching member', {
         icon: '❌',
         duration: 2500,
       })
-    }
-    finally {
+    } finally {
       setLoading(false)
     }
   }
-
 
   const handleMemberDelete = async (id) => {
     try {
@@ -73,8 +70,10 @@ export const MembersProvider = ({ children }) => {
       }
 
       // remove member from fetchedMembers if it exists there
-      
-      const updatedFetchedMembers = fetchedMembers.filter((member) => member.id !== id)
+
+      const updatedFetchedMembers = fetchedMembers.filter(
+        (member) => member.id !== id
+      )
       setFetchedMembers(updatedFetchedMembers)
 
       toast.success('Member deleted', {
@@ -122,7 +121,6 @@ export const MembersProvider = ({ children }) => {
         setFetchedMembers(updatedFetchedMembers)
       }
 
-
       toast.success('Member updated', {
         icon: '🔄',
         duration: 2500,
@@ -149,7 +147,7 @@ export const MembersProvider = ({ children }) => {
       const newMember = await res.json()
       setMembers([...members, newMember])
       setFetchedMembers((prev) => [...prev, newMember])
-      
+
       toast.success('Member added', {
         icon: '🎉',
         duration: 2500,

@@ -13,7 +13,9 @@ const postUrl = async (req, res) => {
 
     // Validate input parameters
     if (!embedding || !Array.isArray(embedding)) {
-      return res.status(400).json({ error: 'Invalid or missing embedding array' })
+      return res
+        .status(400)
+        .json({ error: 'Invalid or missing embedding array' })
     }
 
     const data = await queryEmbedding(
@@ -28,7 +30,9 @@ const postUrl = async (req, res) => {
     res.status(200).json({ data })
   } catch (error) {
     console.error('Error querying embedding:', error)
-    res.status(500).json({ error: 'Failed to query embedding', message: error.message })
+    res
+      .status(500)
+      .json({ error: 'Failed to query embedding', message: error.message })
   }
 }
 

@@ -165,10 +165,6 @@ function LinksList() {
       })
   }, [])
 
-  if (isLoading) return <Loading />
-
-  if (!data) return <p>No data</p>
-
   return (
     <div className="py-12">
       <div className="bg-slate-200 p-4 rounded-lg mb-6">
@@ -255,6 +251,14 @@ function LinksList() {
         </form>
       </div>
       <div className="mt-6">
+        {
+          isLoading && (
+            <div className="flex justify-center items-center">
+              <Loading />
+            </div>
+          )
+        }
+
         {data && data.length === 0 ? (
           <p className="italic opacity-60 text-center">No uploaded URLs</p>
         ) : (

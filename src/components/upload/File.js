@@ -25,20 +25,6 @@ const Upload = () => {
     redirect: 'follow',
   }
 
-  // remove all items not functional
-  const handleRemoveAll = async () => {
-    // get all ids from each item
-    const res = await fetch(url)
-      .then((res) => res.json())
-      .then((data) => data)
-      .catch((error) => console.log(error))
-
-    // get array of uuids from each item
-
-    const uuids = res.map((item) => item.uuids).flat()
-
-    console.log('items to be deleted', uuids)
-  }
 
   const handleRemove = async (id) => {
     // Find the item to get its uuids
@@ -170,7 +156,7 @@ const Upload = () => {
     }
   }, [])
 
-  if (isLoading) return <Loading />
+
 
   return (
     <div className="space-y-4">
@@ -259,6 +245,8 @@ const Upload = () => {
       ) : null}
 
       {/* <hr /> */}
+
+      {isLoading && <Loading />}
 
       {data && data.length === 0 ? (
         <p className="italic opacity-60 text-center">No Uploaded items</p>

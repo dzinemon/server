@@ -25,9 +25,7 @@ const columnHelper = createColumnHelper()
 
 export default function DataTable({ 
   items, 
-  actions = [], 
-  onDataChange = () => {},
-  confirmationModal = null 
+  actions = []
 }) {
   const [itemToRemove, setItemToRemove] = useState({})
 
@@ -140,7 +138,7 @@ export default function DataTable({
     setFilteredData(filteredData)
   }, [searchTerm, data])
 
-  if (!filteredData && filteredData.length === 0)
+  if (!filteredData || filteredData.length === 0)
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-gray-900 text-lg font-semibold">No data found</div>

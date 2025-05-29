@@ -12,7 +12,6 @@ function PdfFileUploadComponent() {
   const url = '/api/upload-pdf'
   const [data, setData] = useState(null)
   const [isLoading, setLoading] = useState(true)
-  const [isToDelete, setIsToDelete] = useState(false)
 
   const [file, setFile] = useState(null)
 
@@ -132,8 +131,7 @@ function PdfFileUploadComponent() {
     }
   }, [])
 
-  if (isLoading) return <Loading />
-  if (!data) return <p>No data</p>
+  if (isLoading) return <Loading />  
 
   return (
     <div className="py-12">

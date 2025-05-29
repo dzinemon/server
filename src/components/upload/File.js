@@ -171,7 +171,6 @@ const Upload = () => {
   }, [])
 
   if (isLoading) return <Loading />
-  if (!data) return <p>No data</p>
 
   return (
     <div className="space-y-4">

@@ -90,7 +90,7 @@
   }
 
   const ifraneInnerHTMLClose = `<iframe id="chat-frame-widget" 
-    src="http://localhost:3000/widget" 
+    src="https://kruze-ai-agent.vercel.app/widget" 
     data-script-src="/widget" 
     class="shadow-xl ring-1 rounded-lg" 
     style="display: none; 

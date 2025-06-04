@@ -15,7 +15,7 @@ export default function Component() {
     if (session) {
       setCurrentUser(session.user)
     }
-  }, [session])
+  }, [session, setCurrentUser])
 
   if (session) {
     return (

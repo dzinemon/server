@@ -1,4 +1,6 @@
 import '@/styles/globals.css'
+import '@/styles/message-content.css'
+
 
 import { SessionProvider } from 'next-auth/react'
 import { ResourceProvider } from '@/context/resources'

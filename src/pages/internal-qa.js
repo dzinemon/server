@@ -1,22 +1,45 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import Image from 'next/image'
-import { useEffect, useRef, useState } from 'react'
-import toast, { Toaster } from 'react-hot-toast'
+import { useRef, useState } from 'react'
+import { Toaster } from 'react-hot-toast'
 
 import Layout from '@/components/layout'
 
-import { ArrowPathIcon, FunnelIcon } from '@heroicons/react/24/solid'
+import { ArrowPathIcon } from '@heroicons/react/24/solid'
 
 import InlineLoading from '@/components/InlineLoading'
 import QuestionSearchResult from '../components/web-widget/question-search-result'
-
-import { Listbox } from '@headlessui/react'
+import FilterControls from '@/components/common/filter-controls'
 
 import { usedModel } from '../../utils/hardcoded'
-
 import { sourceFilters, typeFilters } from '../../utils/hardcoded'
 
+import { useQuestions } from '@/hooks/useQuestions'
+import { useQAAPI } from '@/hooks/useQAAPI'
+
 export default function ChatWidget() {
+  // Custom hooks
+  const {
+    questions,
+    isSubmitted,
+    addQuestion,
+    updateQuestionSources,
+    updateQuestionAnswer,
+    handleLike,
+    handleDislike,
+    handleReport,
+    clearQuestions,
+  } = useQuestions()
+
+  const {
+    isLoading,
+    setIsLoading,
+    getEmbeddingAndPrompt,
+    getCompletion,
+  } = useQAAPI()
+
+  const [question, setQuestion] = useState('')
+
   const [filterBySourceArray, setFilterBySourceArray] = useState([
     sourceFilters[0],
     sourceFilters[1],
@@ -34,92 +57,6 @@ export default function ChatWidget() {
 
   const scrollTargetRef = useRef(null)
 
-  const [isLoading, setIsLoading] = useState(false)
-  const [isSubmitted, setIsSubmitted] = useState(false)
-  const [question, setQuestion] = useState('')
-  const [questions, setQuestions] = useState([])
-
-  const myHeaders = new Headers()
-  myHeaders.append('Content-Type', 'application/json')
-
-  const handleLike = (question) => {
-    // console.log('like', question)
-    // update questions with like
-
-    const questions = JSON.parse(localStorage.getItem('localQuestions'))
-
-    const updatedQuestions = questions.map((item) => {
-      if (item.question === question.question) {
-        return {
-          ...item,
-          like: true,
-          dislike: false,
-        }
-      }
-      return item
-    })
-
-    setQuestions(updatedQuestions)
-    localStorage.setItem('localQuestions', JSON.stringify(updatedQuestions))
-  }
-
-  const handleDislike = (question) => {
-    const questions = JSON.parse(localStorage.getItem('localQuestions'))
-
-    const updatedQuestions = questions.map((item) => {
-      if (item.question === question.question) {
-        return {
-          ...item,
-          dislike: true,
-          like: false,
-        }
-      }
-      return item
-    })
-
-    setQuestions(updatedQuestions)
-    localStorage.setItem('localQuestions', JSON.stringify(updatedQuestions))
-  }
-
-  const handleReport = (question, report) => {
-    const questions = JSON.parse(localStorage.getItem('localQuestions'))
-
-    const updatedQuestions = questions.map((item) => {
-      if (item.question === question.question) {
-        return {
-          ...item,
-          report: report,
-        }
-      }
-      return item
-    })
-
-    setQuestions(updatedQuestions)
-    localStorage.setItem('localQuestions', JSON.stringify(updatedQuestions))
-  }
-
-  const handleSetQuestionsFromLocalStorage = () => {
-    // read localstorage for questions
-    const questions = JSON.parse(localStorage.getItem('localQuestions'))
-    if (questions && questions.length > 0) {
-      setQuestions(questions)
-      setIsSubmitted(true)
-    }
-  }
-
-  useEffect(() => {
-    // handle localstorage for attempt count and date
-
-    handleSetQuestionsFromLocalStorage()
-  }, [])
-
-  const handleClearLocalStorage = () => {
-    localStorage.removeItem('localQuestions')
-    setIsSubmitted(false)
-
-    setQuestions([])
-  }
-
   const handleScrollIntoView = () => {
     setTimeout(() => {
       scrollTargetRef.current.scrollIntoView({ behavior: 'smooth' })
@@ -131,134 +68,39 @@ export default function ChatWidget() {
     if (question.length === 0) {
       return
     }
-    let currentQuesiton = { question: question, answer: '', sources: [] }
-    setQuestions(questions.concat([currentQuesiton]))
-    // set attempt date to now
-    setQuestion((prev) => {
-      if (window.gtag !== undefined) {
-        console.log('gtag')
-      }
-      return ''
-    })
-    handleScrollIntoView()
 
+    const questionIndex = questions.length
+    addQuestion(question)
+    
+    // Set attempt date and clear input
+    setQuestion('')
+    if (window.gtag !== undefined) {
+      console.log('gtag')
+    }
+    
+    handleScrollIntoView()
     setIsLoading(true)
 
-    setIsSubmitted(true)
-
-    // push current question to array of questions
-
-    const questionRequestOptions = {
-      method: 'POST',
-      headers: myHeaders,
-      body: JSON.stringify({
-        question: question,
-        sourceFilters: filterBySourceArray,
-        typeFilters: filterByTypeArray,
-        topK: 8,
-      }),
-      redirect: 'follow', // manual, *follow, error
-    }
-
-    const { sources, prompt } = await fetch(
-      '/api/openai/embedding',
-      questionRequestOptions
+    // Get embedding and sources
+    const { sources, prompt } = await getEmbeddingAndPrompt(
+      question, 
+      filterBySourceArray, 
+      filterByTypeArray
     )
-      .then((response) => {
-        if (response.status === 200) {
-          console.log('post success')
-          console.log(response)
-        }
-        return response.json()
-      })
-      .then((result) => result)
-      .catch((error) => {
-        console.log('error', error)
-        toast('Error generating completion', {
-          icon: '❌',
-        })
-      })
 
-    // update current question resources
-
-    setQuestions((previous) => {
-      return [
-        ...previous.slice(0, -1),
-        {
-          ...previous[previous.length - 1],
-          sources,
-        },
-      ]
-    })
-
+    // Update question with sources
+    updateQuestionSources(questionIndex, sources)
     handleScrollIntoView()
 
-    const promptRequestOptions = {
-      method: 'POST',
-      headers: myHeaders,
-      body: JSON.stringify({
-        messages: [
-          {
-            role: 'system',
-            content:
-              'You are a helpful startup tax, accounting and bookkeeping assistant.',
-          },
-          { role: 'user', content: prompt },
-        ],
-        model: usedModel,
-        temperature: 0.1,
-      }),
-      redirect: 'follow', // manual, *follow, error
-    }
+    // Get completion
+    const completion = await getCompletion(prompt, usedModel)
 
-    const { completion } = await fetch(
-      '/api/v1/singlecompletion',
-      promptRequestOptions
-    )
-      .then((response) => {
-        if (response.status === 200) {
-          console.log('post success')
-          console.log(response)
-        }
-        return response.json()
-      })
-      .then((result) => result)
-      .catch((error) => {
-        console.log('error', error)
-        toast('Error generating completion', {
-          icon: '❌',
-        })
-      })
-
-    // update current question answer
-
-    setQuestions((previous) => {
-      const currentQuestions = [
-        ...previous.slice(0, -1),
-        {
-          ...previous[previous.length - 1],
-          answer: completion,
-        },
-      ]
-
-      localStorage.setItem('localQuestions', JSON.stringify(currentQuestions))
-      localStorage.setItem('lastAttempt', new Date())
-
-      return currentQuestions
-    })
-
-    // save question answer to db
+    // Update question with answer
+    updateQuestionAnswer(questionIndex, completion)
 
     setIsLoading(false)
-
     handleScrollIntoView()
   }
-
-  useEffect(() => {
-    // handle localstorage for attempt count and date
-
-    handleSetQuestionsFromLocalStorage()
-  }, [])
 
   return (
     <Layout>
@@ -320,95 +162,14 @@ export default function ChatWidget() {
                     onSubmit={askQuestion}
                     className="p-4 flex gap-2 text-base font-semibold leading-7 relative"
                   >
-                    <div className="w-auto relative">
-                      <div className="flex flex-col space-y-2">
-                        <Listbox
-                          value={filterBySourceArray}
-                          onChange={setFilterBySourceArray}
-                          multiple
-                        >
-                          {({ open }) => (
-                            <>
-                              <Listbox.Button
-                                className={`${
-                                  filterBySourceArray.length > 0
-                                    ? 'bg-gray-400 text-white'
-                                    : 'bg-gray-200 text-gray-600'
-                                } w-full px-2 py-1.5 border rounded-md flex-1 font-normal focus:outline-none focus:border-gray-400 relative`}
-                              >
-                                <FunnelIcon className="w-6 h-6 inline" />
-                                {!open && (
-                                  <div className="absolute w-4 h-4 -top-2 -right-2 leading-none flex items-center justify-center rounded-full text-[10px] text-white bg-blue-600">
-                                    {filterBySourceArray.length}
-                                  </div>
-                                )}
-                              </Listbox.Button>
-                              <Listbox.Options
-                                className={
-                                  'absolute w-24 text-xs bottom-0 bg-white border border-gray-200 rounded-md shadow-lg z-20'
-                                }
-                              >
-                                {sourceFilters.map((filter, idx) => (
-                                  <Listbox.Option
-                                    key={`${filter}-${idx}`}
-                                    value={filter}
-                                    className={'px-4 py-2 hover:bg-gray-100'}
-                                  >
-                                    {filter}
-                                    {filterBySourceArray.includes(filter) && (
-                                      <span className="text-gray-600">✓</span>
-                                    )}
-                                  </Listbox.Option>
-                                ))}
-                              </Listbox.Options>
-                            </>
-                          )}
-                        </Listbox>
-
-                        <Listbox
-                          value={filterByTypeArray}
-                          onChange={setFilterByTypeArray}
-                          multiple
-                        >
-                          {({ open }) => (
-                            <>
-                              <Listbox.Button
-                                className={`${
-                                  filterByTypeArray.length > 0
-                                    ? 'bg-gray-400 text-white'
-                                    : 'bg-gray-200 text-gray-600'
-                                } w-full px-2 py-1.5 border rounded-md flex-1 font-normal focus:outline-none focus:border-gray-400 relative`}
-                              >
-                                <FunnelIcon className="w-6 h-6 inline" />
-                                {!open && (
-                                  <div className="absolute w-4 h-4 -top-2 -right-2 leading-none flex items-center justify-center rounded-full text-[10px] text-white bg-blue-600">
-                                    {filterByTypeArray.length}
-                                  </div>
-                                )}
-                              </Listbox.Button>
-                              <Listbox.Options
-                                className={
-                                  'absolute w-32 text-xs bottom-0 bg-white border border-gray-200 rounded-md shadow-lg z-20'
-                                }
-                              >
-                                {typeFilters.map((filter, idx) => (
-                                  <Listbox.Option
-                                    key={`${filter}-${idx}`}
-                                    value={filter}
-                                    className={'px-4 py-2 hover:bg-gray-100'}
-                                  >
-                                    {filter}
-                                    {filterByTypeArray.includes(filter) && (
-                                      <span className="text-gray-600">✓</span>
-                                    )}
-                                  </Listbox.Option>
-                                ))}
-                              </Listbox.Options>
-                            </>
-                          )}
-                        </Listbox>
-                      </div>
-                    </div>
+                    <FilterControls
+                      filterBySourceArray={filterBySourceArray}
+                      setFilterBySourceArray={setFilterBySourceArray}
+                      filterByTypeArray={filterByTypeArray}
+                      setFilterByTypeArray={setFilterByTypeArray}
+                      sourceFilters={sourceFilters}
+                      typeFilters={typeFilters}
+                    />
 
                     <input
                       name="message"
@@ -462,7 +223,7 @@ export default function ChatWidget() {
                         <button
                           type="button"
                           className="border-b text-white border-white hover:border-dashed"
-                          onClick={() => handleClearLocalStorage()}
+                          onClick={() => clearQuestions()}
                         >
                           <ArrowPathIcon className="inline-block mr-2 w-3.5 h-3.5" />
                           Clear results

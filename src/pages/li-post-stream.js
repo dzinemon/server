@@ -408,7 +408,7 @@ export default function LiPost() {
 
       setSelectedReposter(reposter)
     }
-  }, [members])
+  }, [members, selectedPoster, selectedReposter])
 
   // check if selected prompt exists in the list of ai prompts and if not reset it
 
@@ -419,7 +419,7 @@ export default function LiPost() {
         setSelectedPrompt('')
       }
     }
-  }, [aiPrompts])
+  }, [aiPrompts, selectedPrompt])
 
   // check if selected reposter prompt exists in the list of reposter prompts and if not reset it
 
@@ -432,7 +432,7 @@ export default function LiPost() {
         setSelectedReposterPrompt('')
       }
     }
-  }, [reposterPrompts])
+  }, [reposterPrompts, selectedReposterPrompt])
 
   return (
     <Layout>

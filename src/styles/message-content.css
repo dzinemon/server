@@ -1,0 +1,134 @@
+/* Message Bubble Content Styling */
+.m-b-content {
+  line-height: 1.6;
+  font-size: 14px;
+  color: #374151;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.m-b-content h1,
+.m-b-content h2,
+.m-b-content h3,
+.m-b-content h4,
+.m-b-content h5,
+.m-b-content h6 {
+  font-weight: 600;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  color: #111827;
+}
+
+.m-b-content h1 { font-size: 1.25em; }
+.m-b-content h2 { font-size: 1.1em; }
+.m-b-content h3 { font-size: 1em; }
+
+.m-b-content p {
+  margin-bottom: 0.75em;
+}
+
+.m-b-content p:last-child {
+  margin-bottom: 0;
+}
+
+.m-b-content strong,
+.m-b-content b {
+  font-weight: 600;
+  color: #111827;
+}
+
+.m-b-content em,
+.m-b-content i {
+  font-style: italic;
+}
+
+.m-b-content code {
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.85em;
+  color: #dc2626;
+}
+
+.m-b-content pre {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 12px;
+  margin: 8px 0;
+  overflow-x: auto;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.85em;
+  line-height: 1.4;
+}
+
+.m-b-content pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+}
+
+.m-b-content ul,
+.m-b-content ol {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+
+.m-b-content li {
+  margin-bottom: 0.25em;
+}
+
+.m-b-content ul {
+  list-style-type: disc;
+}
+
+.m-b-content ol {
+  list-style-type: decimal;
+}
+
+.m-b-content blockquote {
+  border-left: 4px solid #e5e7eb;
+  padding-left: 1em;
+  margin: 0.75em 0;
+  font-style: italic;
+  color: #6b7280;
+}
+
+.m-b-content a {
+  color: #2563eb;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.m-b-content a:hover {
+  color: #1d4ed8;
+  text-decoration-thickness: 2px;
+}
+
+.m-b-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.75em 0;
+  font-size: 0.9em;
+}
+
+.m-b-content th,
+.m-b-content td {
+  border: 1px solid #e5e7eb;
+  padding: 6px 12px;
+  text-align: left;
+}
+
+.m-b-content th {
+  background-color: #f9fafb;
+  font-weight: 600;
+}
+
+.m-b-content hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 1em 0;
+}

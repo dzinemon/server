@@ -1,33 +1,20 @@
-import { useState, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import Image from 'next/image'
-import InlineLoading from './InlineLoading'
-import { Fragment } from 'react'
-import { Menu } from '@headlessui/react'
+import { useState } from 'react'
 import CopyToClipboard from './copy-to-clipboard'
-
-const links = [
-  { val: 'innacurate', label: 'Inaccurate' },
-  { val: 'not-helpful', label: 'Is not helpful' },
-]
+import InlineLoading from './InlineLoading'
 
 import {
-  DocumentTextIcon,
-  ArrowTopRightOnSquareIcon,
   ChatBubbleBottomCenterTextIcon,
-  ChevronDownIcon,
-  DocumentChartBarIcon,
-  CalendarIcon,
-  TrashIcon,
   CheckIcon,
-  XMarkIcon,
-  ChatBubbleLeftRightIcon,
-  MicrophoneIcon,
+  ChevronDownIcon,
+  DocumentTextIcon,
+  TrashIcon,
+  XMarkIcon
 } from '@heroicons/react/24/solid'
 
 import ReactMarkdown from 'react-markdown'
 
-import { Type } from './common/resourcetype'
+import SourceCard from './common/source-card'
 
 export default function QuestionListItem({ question, onClick, id }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -37,12 +24,6 @@ export default function QuestionListItem({ question, onClick, id }) {
   let strippedString = question.answer.replace(/(<([^>]+)>)/gi, '')
 
   const resources = JSON.parse(question.resources)
-
-  // return (
-  //   <div className='py-40'>
-  //     {JSON.stringify(question)}
-  //   </div>
-  // )
 
   return (
     <div className="w-full bg-white rounded-lg bg-gradient-to-b from-white to-gray-100/50">
@@ -99,65 +80,13 @@ export default function QuestionListItem({ question, onClick, id }) {
               </motion.div>
               <AnimatePresence>
                 <div
-                  className="flex flex-wrap -mx-1 min-h-[100px]"
+                  className="flex flex-wrap -mx-0.5 min-h-[100px]"
                   key={`sources`}
                 >
                   {resources &&
-                    resources.map((item, idx) => {
-                      return (
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{
-                            duration: 0.5,
-                            delay: idx * 0.2,
-                          }}
-                          className="w-1/2 lg:w-1/4 px-1 mb-2 overflow-hidden"
-                          key={`res-${idx}`}
-                        >
-                          <a
-                            href={item.url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="rounded hover:bg-gray-100 bg-gray-100/50 p-2 group block relative"
-                          >
-                            <div className="flex flex-row items-center justify-start ">
-                              <div className="w-auto">
-                                <div className="flex flex-row items-center justify-start px-1.5 py-0.5 leading-none bg-blue-400 font-light lg:text-xs text-[10px] rounded-full text-white w-auto flex-1 capitalize font-bold">
-                                  <Type data={item.type} />
-                                </div>
-                              </div>
-                            </div>
-
-                            <p className="text-xs my-2">{item.title}</p>
-                            {/* <p className="text-xs">{item.url}</p> */}
-
-                            <div className="flex flex-row items-center justify-start ">
-                              <div className="w-auto flex-none">
-                                <Image
-                                  className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-                                  src="/logo-color.png"
-                                  alt="Kruze Logo"
-                                  width={14}
-                                  height={16}
-                                  priority
-                                />
-                              </div>
-                              <div className="text-[10px] md:text-xs w-auto flex-1 capitalize font-medium">
-                                Kruze Consulting
-                              </div>
-                              <div className="text-blue-600 flex-none text-xs text-right">
-                                <span className="group-hover:underline">
-                                  {/* Read more{' '} */}
-                                  <ArrowTopRightOnSquareIcon className="w-3 h-3 inline opacity-50  group-hover:opacity-100 group-hover:translate-x-1 group-hover:-translate-y-1 duration-200" />
-                                </span>
-                              </div>
-                            </div>
-                          </a>
-                        </motion.div>
-                      )
-                    })}
+                    resources.map((item, idx) => (
+                      <SourceCard key={`source-${idx}`} item={item} index={idx} />
+                    ))}
                 </div>
 
                 {question.answer && (

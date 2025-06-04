@@ -1,12 +1,8 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 
-// connect to database in db file get id from request params and output the result here as json
-
 import db from '../../../db'
 
 import { deleteEmbedding, upsertEmbedding } from '../../../../utils/pinecone'
-
-// http://localhost:3000/api/urls/:id
 
 export default async function urlById(req, res) {
   const {

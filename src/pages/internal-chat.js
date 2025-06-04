@@ -1,36 +1,29 @@
-import React, { Fragment, useRef, useState, useEffect } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import Image from 'next/image'
-import toast, { Toaster } from 'react-hot-toast'
-import { v4 as uuidv4 } from 'uuid'
+import { useRef, useState } from 'react'
+import { Toaster } from 'react-hot-toast'
 
 import Layout from '@/components/layout'
 import { useResources } from '@/context/resources'
 import { useUser } from '@/context/user'
 
 import ModelPicker from '@/components/common/modelpicker'
+import ThreadCombobox from '@/components/common/thread-combobox'
+import FilterControls from '@/components/common/filter-controls'
 
 import {
   ArrowPathIcon,
-  FunnelIcon,
-  ArrowRightIcon,
-  CheckIcon,
-  ChevronUpDownIcon,
-  ChevronDoubleRightIcon,
   ChevronDoubleLeftIcon,
-  ArrowTopRightOnSquareIcon,
-  SquaresPlusIcon,
+  ChevronDoubleRightIcon,
+  SquaresPlusIcon
 } from '@heroicons/react/24/solid'
-
-import { Type } from '../components/common/resourcetype'
 
 import LoadingIndicator, {
   LoadingCircles,
 } from '@/components/common/chatloadingstate'
 
 import InlineLoading from '@/components/InlineLoading'
-
-import { Listbox } from '@headlessui/react'
+import SourceCard from '@/components/common/source-card'
 
 import { promptTemplate } from '../../utils/handleprompts/internal'
 
@@ -38,71 +31,40 @@ import MessageBubble from '@/components/common/message-bubble'
 
 import { sourceFilters, typeFilters } from '../../utils/hardcoded'
 
-function ThreadCombobox({ threads, currentThreadId, setCurrentThreadId }) {
-  const [query, setQuery] = useState('')
-
-  const filteredThreads =
-    query === ''
-      ? threads
-      : threads.filter((thread) => {
-          return thread.name.toLowerCase().includes(query.toLowerCase())
-        })
-
-  return (
-    <div className="space-y-3 w-full">
-      <div>
-        <div className="flex flex-row items-stretch gap-2 justify-between">
-          {threads.length > 0 && (
-            <div className="grow">
-              <p className="font-bold">Threads</p>
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="🔎 Search threads by name"
-                className="px-2 w-full py-1.5 border rounded-md flex-1 font-normal focus:outline-none focus:border-gray-400"
-              />
-            </div>
-          )}
-        </div>
-      </div>
-      <div className="flex flex-col divide-y border border rounded-lg">
-        {filteredThreads.map((thread, idx, arr) => (
-          <button
-            key={thread.id}
-            onClick={() => setCurrentThreadId(thread.id)}
-            className={`${
-              thread.id === currentThreadId
-                ? 'bg-kruze-blue/20 text-kruze-blue'
-                : 'bg-white text-kruze-secondary'
-            }
-            ${
-              idx === 0
-                ? 'rounded-t-md'
-                : idx === arr.length - 1
-                ? 'rounded-b-md'
-                : ''
-            }
-            ${arr.length === 1 ? 'rounded-b-md' : ''}
-            ${idx !== 0 && idx !== arr.length - 1 ? 'rounded-none' : ''}
-            
-        
-            p-2 hover:bg-kruze-blue hover:text-white hover:opacity-80 text-left leading-none`}
-          >
-            {thread.name}
-          </button>
-        ))}
-      </div>
-    </div>
-  )
-}
+import { useThreads } from '@/hooks/useThreads'
+import { useInternalChatAPI } from '@/hooks/useInternalChatAPI'
 
 export default function InternalChatPage() {
   const { currentModel } = useResources()
-
   const { currentUser } = useUser()
 
+  // Custom hooks
+  const {
+    threads,
+    currentThreadId,
+    currentThread,
+    setCurrentThreadId,
+    addNewThread,
+    removeThread,
+    addMessageToThread,
+    removeMessageFromThread,
+    updateThreadName,
+    clearAllThreads,
+  } = useThreads()
+
+  const {
+    isLoading,
+    setIsLoading,
+    currentSources,
+    setCurrentSources,
+    getEmbedding,
+    getData,
+    getCompletion,
+  } = useInternalChatAPI()
+
   const [sideBarIsOpen, setSideBarOpen] = useState(true)
+  const [isSubmitted, setIsSubmitted] = useState(false)
+  const [userMessage, setUserMessage] = useState('')
 
   const [filterBySourceArray, setFilterBySourceArray] = useState([
     sourceFilters[0],
@@ -126,117 +88,21 @@ export default function InternalChatPage() {
     }, 100)
   }
 
-  const [isLoading, setIsLoading] = useState(false)
-  const [isSubmitted, setIsSubmitted] = useState(false)
-  const [userMessage, setUserMessage] = useState('')
-  const [threads, setThreads] = useState([])
-  const [currentThreadId, setCurrentThreadId] = useState(null)
-
-  const [currentThread, setCurrentThread] = useState(null)
-
-  const [currentSources, setCurrentSources] = useState([])
-
-  const myHeaders = new Headers()
-  myHeaders.append('Content-Type', 'application/json')
-
   const handleAddNewThread = () => {
-    const newThread = {
-      id: uuidv4(),
-      date: new Date().toLocaleString(),
-      name: 'New Thread',
-      messages: [],
+    // prevent from creating multiple empty threads
+    if (
+      threads.length === 0 ||
+      currentThread?.name !== 'New Thread'
+    ) {
+      const newThread = addNewThread()
+      handleScrollIntoView()
+      setSideBarOpen(false)
     }
-
-    setThreads((previous) => [...previous, newThread])
-    setCurrentThreadId(newThread.id)
-    handleScrollIntoView()
-    setSideBarOpen(false)
   }
 
   const handleThreadRemove = (id) => {
-    const updatedThreads = threads.filter((thread) => thread.id !== id)
-    setThreads(updatedThreads)
-    // update local storage
-    localStorage.setItem('localThreads', JSON.stringify(updatedThreads))
-    setCurrentThreadId(null)
+    removeThread(id)
     setSideBarOpen(true)
-  }
-
-  const getEmbedding = async (question) => {
-    const questionRequestOptions = {
-      method: 'POST',
-      headers: myHeaders,
-      body: JSON.stringify({
-        question: question,
-      }),
-      redirect: 'follow', // manual, *follow, error
-    }
-
-    const { embedding } = await fetch(
-      '/api/v1/generateembedding',
-      questionRequestOptions
-    )
-      .then((response) => {
-        if (response.status === 200) {
-          console.log('post success')
-          console.log(response)
-          toast('Embedding generated', {
-            icon: '🚀',
-            duration: 2000,
-          })
-        }
-        return response.json()
-      })
-      .then((result) => result)
-      .catch((error) => {
-        console.log('error', error)
-        toast('Error generating embedding', {
-          icon: '❌',
-        })
-        return { embedding: '' }
-      })
-
-    return embedding
-  }
-
-  const getData = async (embedding) => {
-    const questionRequestOptions = {
-      method: 'POST',
-      headers: myHeaders,
-      body: JSON.stringify({
-        embedding: embedding,
-        sourceFilters: filterBySourceArray,
-        typeFilters: filterByTypeArray,
-        topK: 8,
-      }),
-      redirect: 'follow', // manual, *follow, error
-    }
-
-    const { data } = await fetch(
-      '/api/v1/queryembedding',
-      questionRequestOptions
-    )
-      .then((response) => {
-        if (response.status === 200) {
-          console.log('post success')
-          console.log(response)
-          toast('Data fetched', {
-            icon: '🚀',
-            duration: 2000,
-          })
-        }
-        return response.json()
-      })
-      .then((result) => result)
-      .catch((error) => {
-        console.log('error', error)
-        toast('Error generating completion', {
-          icon: '❌',
-        })
-        return { data: [] }
-      })
-
-    return data
   }
 
   const handleSubmit = async (e) => {
@@ -246,65 +112,32 @@ export default function InternalChatPage() {
       return
     }
 
-    // get current thread and update the name to the user message
-
-    const newThread = threads.find((thread) => thread.id === currentThreadId)
-
     const threadName =
       userMessage.length > 250 ? userMessage.slice(0, 250) : userMessage
 
-    setThreads((previous) => {
-      const currentThread = previous.find(
-        (thread) => thread.id === currentThreadId
-      )
+    // Update thread name if it's a new thread and add user message
+    if (currentThread?.name === 'New Thread') {
+      updateThreadName(currentThreadId, threadName)
+    }
 
-      if (!currentThread) {
-        return previous
-      }
-
-      const updatedThreads = [
-        ...previous.filter((thread) => thread.id !== currentThreadId),
-        {
-          ...currentThread,
-          name:
-            currentThread.name === 'New Thread'
-              ? threadName
-              : currentThread.name,
-          messages: [
-            ...currentThread.messages,
-            { role: 'user', content: userMessage },
-          ],
-        },
-      ]
-
-      // Save to localStorage
-      localStorage.setItem('localThreads', JSON.stringify(updatedThreads))
-
-      return updatedThreads
-    })
+    addMessageToThread(currentThreadId, { role: 'user', content: userMessage })
 
     setIsLoading(true)
     handleScrollIntoView()
 
-    // create user messages array with the only previous user messages if they exist
-
-    const userMessages = threads
-      .filter((thread) => thread.id === currentThreadId)
-      .map((thread) => {
-        return thread.messages
-          .filter((message) => message.role === 'user')
-          .map((message) => message.content)
-      })
+    // Create user messages array with previous user messages
+    const userMessages = currentThread?.messages
+      ?.filter((message) => message.role === 'user')
+      ?.map((message) => message.content) || []
 
     const embedding = await getEmbedding(userMessage)
-
     console.log('embedding-------start')
     console.log(embedding)
     console.log('embedding-------end')
 
-    const data = await getData(embedding)
+    const data = await getData(embedding, filterBySourceArray, filterByTypeArray)
 
-    const sources = await data.matches.map((match) => {
+    const sources = data.matches?.map((match) => {
       return {
         id: match.metadata.id,
         title: match.metadata.title,
@@ -314,97 +147,30 @@ export default function InternalChatPage() {
         url: match.metadata.url,
         score: match.score,
       }
-    })
-    // .filter(
-    //   (item, idx, arr) => arr.findIndex((t) => t.url === item.url) === idx
-    // )
+    }) || []
 
     setCurrentSources(sources)
-
     handleScrollIntoView()
 
     const prompt = promptTemplate(userMessage, userMessages, data.matches)
+    const completion = await getCompletion(
+      [...(currentThread?.messages || []), { role: 'user', content: prompt }],
+      currentModel
+    )
 
-    const completionResponse = await fetch('/api/openai/messages', {
-      method: 'POST',
-      headers: myHeaders,
-      body: JSON.stringify({
-        messages: [...newThread.messages, { role: 'user', content: prompt }],
-        model: currentModel,
-        temperature: 0.1,
-      }),
-      redirect: 'follow', // manual, *follow, error
-    })
-      .then((response) => {
-        if (response.status === 200) {
-          console.log('post success')
-          console.log(response)
-        }
-        return response.json()
-      })
-      .then((result) => result)
-      .catch((error) => {
-        console.log('error', error)
-        toast('Error generating completion', {
-          icon: '❌',
-        })
-        return { completion: '' }
-      })
-
-    const { completion } = completionResponse
-
-    // update the current thread with the sources and completion as the assistant message
-
-    setThreads((previous) => {
-      const currentThread = previous.find(
-        (thread) => thread.id === currentThreadId
-      )
-
-      if (!currentThread) {
-        return previous
-      }
-
-      const updatedThreads = [
-        ...previous.filter((thread) => thread.id !== currentThreadId),
-        {
-          ...currentThread,
-          messages: [
-            ...currentThread.messages,
-            { role: 'assistant', content: completion, sources: sources },
-          ],
-        },
-      ]
-
-      // Save to localStorage
-      localStorage.setItem('localThreads', JSON.stringify(updatedThreads))
-
-      return updatedThreads
+    // Add assistant message with sources
+    addMessageToThread(currentThreadId, {
+      role: 'assistant',
+      content: completion,
+      sources: sources,
     })
 
     setIsLoading(false)
     setIsSubmitted(true)
     setCurrentSources([])
-
     setUserMessage('')
-
     handleScrollIntoView()
   }
-
-  useEffect(() => {
-    const localThreads = JSON.parse(localStorage.getItem('localThreads'))
-
-    if (localThreads) {
-      setThreads(localThreads)
-    }
-  }, [])
-
-  useEffect(() => {
-    // set current thread
-    const currentThread = threads.find(
-      (thread) => thread.id === currentThreadId
-    )
-    setCurrentThread(currentThread)
-  }, [currentThreadId])
 
   return (
     <Layout>
@@ -455,16 +221,7 @@ export default function InternalChatPage() {
             )}
             <div className=" my-3">
               <button
-                onClick={() => {
-                  // prevent from creating multiple empty threads and if current thread name is not new thread
-                  if (
-                    threads.length === 0 ||
-                    threads.find((thread) => thread.id === currentThreadId)
-                      ?.name !== 'New Thread'
-                  ) {
-                    handleAddNewThread()
-                  }
-                }}
+                onClick={handleAddNewThread}
                 className="bg-kruze-blue flex items-center justify-between w-full text-white p-2 rounded-md hover:bg-kruze-secondary"
               >
                 <span className="font-bold">Add new thread</span>
@@ -597,32 +354,7 @@ export default function InternalChatPage() {
                             role={message.role}
                             message={message.content}
                             onRemove={() => {
-                              // remove message from thread messages array
-                              setThreads((previous) => {
-                                const currentThread = previous.find(
-                                  (thread) => thread.id === currentThreadId
-                                )
-                                if (!currentThread) {
-                                  return previous
-                                }
-                                const updatedThreads = [
-                                  ...previous.filter(
-                                    (thread) => thread.id !== currentThreadId
-                                  ),
-                                  {
-                                    ...currentThread,
-                                    messages: currentThread.messages.filter(
-                                      (msg) => msg.content !== message.content
-                                    ),
-                                  },
-                                ]
-                                // Save to localStorage
-                                localStorage.setItem(
-                                  'localThreads',
-                                  JSON.stringify(updatedThreads)
-                                )
-                                return updatedThreads
-                              })
+                              removeMessageFromThread(currentThreadId, message.content)
                             }}
                           />
                           {message.sources && (
@@ -639,83 +371,9 @@ export default function InternalChatPage() {
                                     arr.findIndex((t) => t.url === item.url) ===
                                     idx
                                 )
-                                .map((item, idx) => {
-                                  return (
-                                    <motion.div
-                                      initial={{ opacity: 0 }}
-                                      animate={{ opacity: 1 }}
-                                      exit={{ opacity: 0 }}
-                                      transition={{
-                                        duration: 0.5,
-                                        delay: idx * 0.2,
-                                      }}
-                                      className="w-1/2 lg:w-1/4 px-0.5 mb-2 overflow-hidden"
-                                      key={`res-${idx}`}
-                                    >
-                                      <a
-                                        href={item.url}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="rounded hover:bg-gray-100 bg-white group flex flex-col relative h-full"
-                                      >
-                                        <div className="aspect-video overflow-hidden">
-                                          {item.image ? (
-                                            <Image
-                                              src={item.image}
-                                              width={120}
-                                              height={80}
-                                              className="w-full rounded-t"
-                                              alt={item.title}
-                                            />
-                                          ) : (
-                                            <Image
-                                              src="https://kruzeconsulting.com/img/hero_vanessa_2020.jpg"
-                                              width={120}
-                                              height={80}
-                                              className="w-full rounded-t"
-                                              alt={item.title}
-                                            />
-                                          )}
-                                        </div>
-                                        <div className="p-2 grow flex flex-col justify-between">
-                                          <div>
-                                            <div className="flex flex-row items-center justify-start -mt-4">
-                                              <div className="w-auto">
-                                                <div className="flex flex-row items-center justify-start px-1 py-px leading-none border-white border bg-blue-400 font-light lg:text-xs text-[10px] rounded-full text-white w-auto flex-1 capitalize font-bold">
-                                                  <Type data={item.type} />
-                                                </div>
-                                              </div>
-                                            </div>
-                                            <p className="text-xs my-2">
-                                              {item.title}
-                                            </p>
-                                          </div>
-                                          <div className="flex flex-row items-center justify-start ">
-                                            <div className="w-auto flex-none">
-                                              <Image
-                                                className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-                                                src="/logo-color.png"
-                                                alt="Kruze Logo"
-                                                width={14}
-                                                height={16}
-                                                priority
-                                              />
-                                            </div>
-                                            <div className="text-[10px] md:text-xs w-auto flex-1 capitalize font-medium">
-                                              Kruze Consulting
-                                            </div>
-                                            <div className="text-blue-600 flex-none text-xs text-right">
-                                              <span className="group-hover:underline">
-                                                {/* Read more{' '} */}
-                                                <ArrowTopRightOnSquareIcon className="w-3 h-3 inline opacity-50  group-hover:opacity-100 group-hover:translate-x-1 group-hover:-translate-y-1 duration-200" />
-                                              </span>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </a>
-                                    </motion.div>
-                                  )
-                                })}
+                                .map((item, idx) => (
+                                  <SourceCard key={`source-${idx}`} item={item} index={idx} />
+                                ))}
                             </div>
                           )}
                         </div>
@@ -768,98 +426,15 @@ export default function InternalChatPage() {
                   onSubmit={handleSubmit}
                   className="p-1 flex gap-1 text-base font-semibold leading-7 relative"
                 >
-                  <div
-                    className={`w-auto relative ${
-                      currentUser?.role === 'admin' ? '' : 'hidden'
-                    }`}
-                  >
-                    <div className="flex flex-col space-y-1 h-full items-between">
-                      <Listbox
-                        value={filterBySourceArray}
-                        onChange={setFilterBySourceArray}
-                        multiple
-                      >
-                        {({ open }) => (
-                          <>
-                            <Listbox.Button
-                              className={`${
-                                filterBySourceArray.length > 0
-                                  ? 'bg-gray-400 text-white'
-                                  : 'bg-gray-200 text-gray-600'
-                              } w-full px-2 py-1.5 border rounded-md flex-1 font-normal focus:outline-none focus:border-gray-400 relative`}
-                            >
-                              <FunnelIcon className="w-6 h-6 inline" />
-                              {!open && (
-                                <div className="absolute w-4 h-4 -top-2 -right-2 leading-none flex items-center justify-center rounded-full text-[10px] text-white bg-blue-600">
-                                  {filterBySourceArray.length}
-                                </div>
-                              )}
-                            </Listbox.Button>
-                            <Listbox.Options
-                              className={
-                                'absolute w-24 text-xs bottom-0 bg-white border border-gray-200 rounded-md shadow-lg z-20'
-                              }
-                            >
-                              {sourceFilters.map((filter, idx) => (
-                                <Listbox.Option
-                                  key={`${filter}-${idx}`}
-                                  value={filter}
-                                  className={'px-4 py-2 hover:bg-gray-100'}
-                                >
-                                  {filter}
-                                  {filterBySourceArray.includes(filter) && (
-                                    <span className="text-gray-600">✓</span>
-                                  )}
-                                </Listbox.Option>
-                              ))}
-                            </Listbox.Options>
-                          </>
-                        )}
-                      </Listbox>
-                      <Listbox
-                        value={filterByTypeArray}
-                        onChange={setFilterByTypeArray}
-                        multiple
-                      >
-                        {({ open }) => (
-                          <>
-                            <Listbox.Button
-                              className={`${
-                                filterByTypeArray.length > 0
-                                  ? 'bg-gray-400 text-white'
-                                  : 'bg-gray-200 text-gray-600'
-                              } w-full px-2 py-1.5 border rounded-md flex-1 font-normal focus:outline-none focus:border-gray-400 relative`}
-                            >
-                              <FunnelIcon className="w-6 h-6 inline" />
-                              {!open && (
-                                <div className="absolute w-4 h-4 -top-2 -right-2 leading-none flex items-center justify-center rounded-full text-[10px] text-white bg-blue-600">
-                                  {filterByTypeArray.length}
-                                </div>
-                              )}
-                            </Listbox.Button>
-                            <Listbox.Options
-                              className={
-                                'absolute w-24 text-xs bottom-0 bg-white border border-gray-200 rounded-md shadow-lg z-20'
-                              }
-                            >
-                              {typeFilters.map((filter, idx) => (
-                                <Listbox.Option
-                                  key={`${filter}-${idx}`}
-                                  value={filter}
-                                  className={'px-4 py-2 hover:bg-gray-100'}
-                                >
-                                  {filter}
-                                  {filterByTypeArray.includes(filter) && (
-                                    <span className="text-gray-600">✓</span>
-                                  )}
-                                </Listbox.Option>
-                              ))}
-                            </Listbox.Options>
-                          </>
-                        )}
-                      </Listbox>
-                    </div>
-                  </div>
+                  <FilterControls
+                    filterBySourceArray={filterBySourceArray}
+                    setFilterBySourceArray={setFilterBySourceArray}
+                    filterByTypeArray={filterByTypeArray}
+                    setFilterByTypeArray={setFilterByTypeArray}
+                    sourceFilters={sourceFilters}
+                    typeFilters={typeFilters}
+                    userRole={currentUser?.role}
+                  />
                   <textarea
                     name="message"
                     onChange={(e) => {
@@ -912,10 +487,8 @@ export default function InternalChatPage() {
                         type="button"
                         className="border-b text-white border-white hover:border-dashed"
                         onClick={() => {
-                          setThreads([])
-                          setCurrentThreadId(null)
+                          clearAllThreads()
                           setSideBarOpen(true)
-                          localStorage.removeItem('localThreads')
                         }}
                       >
                         <ArrowPathIcon className="inline-block mr-2 w-3.5 h-3.5" />

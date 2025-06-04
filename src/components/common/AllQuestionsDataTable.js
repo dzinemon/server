@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { useResources } from '@/context/resources'
 
@@ -50,7 +50,7 @@ export default function AllQuestionsDataTable() {
     pageIndex: 0, //initial page index
     pageSize: 20, //default page size
   })
-  const handleSetCurrentQuestion = async (id) => {
+  const handleSetCurrentQuestion = useCallback(async (id) => {
     const existingItem = fetchedItems.find((item) => item.id === id)
     if (existingItem) {
       setItemToRemove(existingItem)
@@ -61,7 +61,7 @@ export default function AllQuestionsDataTable() {
       setFetchedItems((prev) => [...prev, res])
     }
     setIsDialogOpen(true)
-  }
+  }, [fetchedItems, fetchQuestionById])
 
   const handleRemove = async (id) => {
     try {
@@ -115,7 +115,7 @@ export default function AllQuestionsDataTable() {
       //   header: 'Resources',
       // }),
     ],
-    [allQuestions]
+    [handleSetCurrentQuestion]
   )
 
   const table = useReactTable({
@@ -138,7 +138,7 @@ export default function AllQuestionsDataTable() {
     })
 
     setFilteredData(filteredData)
-  }, [searchTerm])
+  }, [searchTerm, allQuestions])
 
   useEffect(() => {
     setFilteredData(allQuestions)

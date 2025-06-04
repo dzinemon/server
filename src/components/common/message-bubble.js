@@ -103,7 +103,7 @@ export const AssistantMessageWrapper = ({ children, role, onRemove }) => {
   }, [children])
 
   return (
-    <div className={``}>
+    <>
       <div ref={contentRef}>
         {isExpanded ? (
           <div>{children}</div>
@@ -156,7 +156,7 @@ export const AssistantMessageWrapper = ({ children, role, onRemove }) => {
           </button>
         )}
       </div>
-    </div>
+    </>
   )
 }
 
@@ -166,10 +166,10 @@ export default function MessageBubble({ message, role, onRemove }) {
   return (
     <div
       className={`p-3 ${
-        role === 'user' ? 'bg-slate-50' : 'bg-white border border-slate-200'
+        role === 'user' ? 'bg-white text-right' : 'bg-white border border-slate-200'
       } ${
-        role === 'assistant' ? 'prose prose-hr:my-3 prose-a:text-blue-600' : ''
-      } rounded-md w-full`}
+        role === 'assistant' ? '' : ''
+      } rounded-md w-full m-b-content`}
     >
       {role === 'user' ? (
         <UserMessageWrapper onRemove={onRemove}>

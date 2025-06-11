@@ -10,20 +10,26 @@ import { usedModel } from '../../utils/hardcoded'
 import QuestionSearchResult from '../components/web-widget/question-search-result'
 
 const questionExamples = [
+  'Are VC Investments Taxed?',
+  'How do you raise VC funding?',
+  'Best banks for startups',
+  'What is a chart of accounts?',
+  'State tax filing requirements',
+  'What does a startup CFO do?',
+  '409A Valuation for Startups',
+  'VC diligence process',
+  'What is a SAFE note?',
   'Is QuickBooks good for SaaS Startups?',
   'What is the best accounting software for SaaS startups?',
   'What taxes should I pay as a Delaware C-corp startup?',
   'How much time do you spend monthly doing bookkeeping?',
   'Who are good bookkeepers in Mountain View CA?',
   'Which tools should every startup CFO know/use?',
+  
 ]
 
 const searchExamples = [
-  'Kruze Pricing',
-  'Startup Taxes',
-  'Startup Bookkeeping',
   'C-Corp Tax Deadlines 2025',
-  '409A Valuation',
   'Top pre-seed funds',
 ]
 

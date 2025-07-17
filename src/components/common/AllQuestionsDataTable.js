@@ -1,16 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 
 import { useResources } from '@/context/resources'
 
 import toast, { Toaster } from 'react-hot-toast'
-
-import {
-  createColumnHelper,
-  flexRender,
-  getCoreRowModel,
-  getPaginationRowModel,
-  useReactTable,
-} from '@tanstack/react-table'
 
 import {
   ChevronDoubleLeftIcon,
@@ -20,9 +12,18 @@ import {
   DocumentMagnifyingGlassIcon,
 } from '@heroicons/react/24/solid'
 
-import QuestionDialogModal from './QuestionDialogModal'
 
-const columnHelper = createColumnHelper()
+const Loading = () => (
+  <div className="flex items-center justify-center h-32">
+    <svg className="animate-spin h-6 w-6 text-blue-500 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+    </svg>
+    <span className="text-slate-600 text-sm">Loading...</span>
+  </div>
+)
+
+const QuestionDialogModal = lazy(() => import('./QuestionDialogModal'))
 
 export default function AllQuestionsDataTable() {
   const {
@@ -32,24 +33,46 @@ export default function AllQuestionsDataTable() {
     fetchQuestionById,
     handleQuestionDelete,
     removeMultipleQuestionsById,
+    pagination,
+    searchTerm,
+    setSearchTerm,
+    isInitialized,
   } = useResources()
 
   const [selectedItems, setSelectedItems] = useState([])
-
   const [itemToRemove, setItemToRemove] = useState({})
-
   const [fetchedItems, setFetchedItems] = useState([])
-
-  const [filteredData, setFilteredData] = useState([])
-
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
-  const [searchTerm, setSearchTerm] = useState('')
+  // Handle page changes
+  const handlePageChange = useCallback((newPage) => {
+    fetchAllQuestions(newPage, pagination.pageSize, searchTerm)
+    setSelectedItems([]) // Clear selections when changing pages
+  }, [fetchAllQuestions, pagination.pageSize, searchTerm])
 
-  const [pagination, setPagination] = useState({
-    pageIndex: 0, //initial page index
-    pageSize: 20, //default page size
-  })
+  // Handle page size changes
+  const handlePageSizeChange = useCallback((newPageSize) => {
+    fetchAllQuestions(1, newPageSize, searchTerm) // Reset to page 1 when changing page size
+    setSelectedItems([]) // Clear selections when changing page size
+  }, [fetchAllQuestions, searchTerm])
+
+  // Debounced search effect - trigger for any search term change
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchAllQuestions(1, pagination.pageSize, searchTerm)
+      setSelectedItems([])
+    }, 1000)
+
+    return () => clearTimeout(timeoutId)
+  }, [searchTerm, fetchAllQuestions, pagination.pageSize])
+
+  // Initial data load - separate from search
+  useEffect(() => {
+    if (!isInitialized) {
+      fetchAllQuestions(1, pagination.pageSize, '', true) // Show toast on initial load
+    }
+  }, [fetchAllQuestions, pagination.pageSize, isInitialized])
+
   const handleSetCurrentQuestion = useCallback(async (id) => {
     const existingItem = fetchedItems.find((item) => item.id === id)
     if (existingItem) {
@@ -67,9 +90,7 @@ export default function AllQuestionsDataTable() {
     try {
       await handleQuestionDelete(id)
       setIsDialogOpen(false)
-      // update fetched Items
       setFetchedItems((prev) => prev.filter((item) => item.id !== id))
-      // update item to remove
       setItemToRemove({})
     } catch (error) {
       console.error('Error deleting question:', error)
@@ -80,76 +101,26 @@ export default function AllQuestionsDataTable() {
     }
   }
 
-  const columns = useMemo(
-    () => [
-      columnHelper.accessor('id', {
-        cell: ({ row }) => <div>{row.original.id}</div>,
-        header: 'Id',
-      }),
-      columnHelper.accessor('question', {
-        cell: ({ row }) => (
-          <div className="text-clip">
-            <button
-              className="hover:text-blue-600 cursor-pointer text-sm text-gray-900"
-              onClick={() => {
-                handleSetCurrentQuestion(row.original.id)
-              }}
-            >
-              {row.original.question}
-            </button>
-          </div>
-        ),
-        header: 'Question',
-      }),
-      // columnHelper.accessor('resources', {
-      //   cell: ({ row }) => {
-      //     const resources = JSON.parse(row.original.resources)
-      //     return (
-      //       <div>
-      //         <p className="text-sm font-semibold text-gray-900">
-      //           {resources.length}
-      //         </p>
-      //       </div>
-      //     )
-      //   },
-      //   header: 'Resources',
-      // }),
-    ],
-    [handleSetCurrentQuestion]
-  )
-
-  const table = useReactTable({
-    columns,
-    data: filteredData, //also good to use a fallback array that is defined outside of the component (stable reference)
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onPaginationChange: setPagination, //update the pagination state when internal APIs mutate the pagination state
-    state: {
-      //...
-      pagination,
-    },
-  })
-
-  useEffect(() => {
-    if (searchTerm === '') return setFilteredData(allQuestions)
-
-    const filteredData = allQuestions.filter((link) => {
-      return link.question.toLowerCase().includes(searchTerm.toLowerCase())
-    })
-
-    setFilteredData(filteredData)
-  }, [searchTerm, allQuestions])
-
-  useEffect(() => {
-    setFilteredData(allQuestions)
-  }, [allQuestions])
-
-  if (!filteredData && filteredData.length === 0)
+  if (!allQuestions || allQuestions.length === 0) {
+    if (loading) {
+      return <Loading />
+    }
+    
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-900 text-lg font-semibold">No data found</div>
+        <div className="text-center">
+          <div className="text-gray-900 text-lg font-semibold mb-2">
+            {searchTerm ? 'No questions found' : 'No questions available'}
+          </div>
+          {searchTerm && (
+            <div className="text-gray-500 text-sm">
+              Try adjusting your search term
+            </div>
+          )}
+        </div>
       </div>
     )
+  }
 
   return (
     <>
@@ -159,24 +130,16 @@ export default function AllQuestionsDataTable() {
             <div className="flex items-center justify-between w-full">
               <h2 className="text-2xl font-semibold text-gray-900 grow">
                 <strong className="text-slate-400">
-                  {JSON.stringify(allQuestions.length)}
+                  {pagination.totalItems}
                 </strong>{' '}
                 Questions{' '}
               </h2>
-              <div className="px-2  w-auto">
+              <div className="px-2 w-auto">
                 {loading ? (
                   <div className="text-xs text-slate-500">Loading...</div>
                 ) : (
-                  <div className="text-xs flex flex-col items-start text-slate-500">
-                    <button
-                      onClick={() => fetchAllQuestions()}
-                      className="border border-slate-200 rounded px-1 py-0.5 bg-slate-50 hover:bg-slate-200 text-slate-800"
-                    >
-                      Pull Latest Questions
-                    </button>
-                    <div className="text-xs">
-                      Last updated: {new Date().toLocaleString()}
-                    </div>
+                  <div className="text-xs text-slate-500">
+                    Page {pagination.currentPage} of {pagination.totalPages}
                   </div>
                 )}
               </div>
@@ -188,7 +151,7 @@ export default function AllQuestionsDataTable() {
               <input
                 type="text"
                 name="search"
-                placeholder="search by name"
+                placeholder="search by question text"
                 value={searchTerm}
                 className="border p-1 rounded w-64"
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -216,71 +179,55 @@ export default function AllQuestionsDataTable() {
 
           <table className="table-auto bg-white w-full">
             <thead className="bg-slate-100">
-              {table.getHeaderGroups().map((headerGroup, idx) => (
-                <tr key={headerGroup.id}>
-                  <th className="px-2 py-1 border w-20">
-                    <input
-                      className=""
-                      id={`select-header-${idx}`}
-                      type="checkbox"
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedItems(filteredData.map((item) => item.id))
-                        } else {
-                          setSelectedItems([])
-                        }
-                      }}
-                      checked={selectedItems.length === filteredData.length}
-                    />
-                  </th>
-                  {headerGroup.headers.map((header) => (
-                    <th
-                      key={header.id}
-                      colSpan={header.colSpan}
-                      className="px-2 py-1 border"
-                    >
-                      {/* Handles all possible header column def scenarios for `header` */}
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                    </th>
-                  ))}
-                  <th className="px-2 py-1 border">Actions</th>
-                </tr>
-              ))}
+              <tr>
+                <th className="px-2 py-1 border w-20">
+                  <input
+                    type="checkbox"
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedItems(allQuestions.map((item) => item.id))
+                      } else {
+                        setSelectedItems([])
+                      }
+                    }}
+                    checked={selectedItems.length === allQuestions.length && allQuestions.length > 0}
+                  />
+                </th>
+                <th className="px-2 py-1 border">Id</th>
+                <th className="px-2 py-1 border">Question</th>
+                <th className="px-2 py-1 border">Actions</th>
+              </tr>
             </thead>
             <tbody>
-              {table.getRowModel().rows.map((row, idx) => (
-                <tr key={row.id}>
+              {allQuestions.map((question, idx) => (
+                <tr key={question.id}>
                   <td className="px-2 py-1 border text-center">
                     <input
                       type="checkbox"
-                      id={`select-body-${idx}`}
-                      checked={selectedItems.includes(row.original.id)}
+                      checked={selectedItems.includes(question.id)}
                       className="cursor-pointer"
                       onChange={(e) => {
                         if (e.target.checked) {
-                          setSelectedItems((prev) => [...prev, row.original.id])
+                          setSelectedItems((prev) => [...prev, question.id])
                         } else {
                           setSelectedItems((prev) =>
-                            prev.filter((item) => item !== row.original.id)
+                            prev.filter((item) => item !== question.id)
                           )
                         }
                       }}
                     />
                   </td>
-
-                  {row.getVisibleCells().map((cell) => {
-                    return (
-                      <td className="px-2 py-1 border" key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </td>
-                    )
-                  })}
+                  <td className="px-2 py-1 border">{question.id}</td>
+                  <td className="px-2 py-1 border">
+                    <button
+                      className="hover:text-blue-600 cursor-pointer text-sm text-gray-900 text-left"
+                      onClick={() => {
+                        handleSetCurrentQuestion(question.id)
+                      }}
+                    >
+                      {question.question}
+                    </button>
+                  </td>
                   <td className="px-2 py-1 border">
                     <div className="flex items-center justify-center gap-2">
                       <button
@@ -288,7 +235,7 @@ export default function AllQuestionsDataTable() {
                         aria-label="View Question Details"
                         className="text-slate-600 hover:text-blue-600 cursor-pointer"
                         onClick={() => {
-                          handleSetCurrentQuestion(row.original.id)
+                          handleSetCurrentQuestion(question.id)
                         }}
                       >
                         <DocumentMagnifyingGlassIcon className="w-4 h-4" />
@@ -302,58 +249,67 @@ export default function AllQuestionsDataTable() {
           <div className="h-2" />
           <div className="flex items-center gap-2">
             <button
-              className="border rounded p-1"
-              onClick={() => table.firstPage()}
-              disabled={!table.getCanPreviousPage()}
+              className="border rounded p-1 disabled:opacity-50"
+              onClick={() => handlePageChange(1)}
+              disabled={!pagination.hasPreviousPage || loading}
             >
               <ChevronDoubleLeftIcon className="w-4 h-4" />
             </button>
             <button
-              className="border rounded p-1"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
+              className="border rounded p-1 disabled:opacity-50"
+              onClick={() => handlePageChange(pagination.currentPage - 1)}
+              disabled={!pagination.hasPreviousPage || loading}
             >
               <ChevronLeftIcon className="w-4 h-4" />
             </button>
             <button
-              className="border rounded p-1"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
+              className="border rounded p-1 disabled:opacity-50"
+              onClick={() => handlePageChange(pagination.currentPage + 1)}
+              disabled={!pagination.hasNextPage || loading}
             >
               <ChevronRightIcon className="w-4 h-4" />
             </button>
             <button
-              className="border rounded p-1"
-              onClick={() => table.lastPage()}
-              disabled={!table.getCanNextPage()}
+              className="border rounded p-1 disabled:opacity-50"
+              onClick={() => handlePageChange(pagination.totalPages)}
+              disabled={!pagination.hasNextPage || loading}
             >
               <ChevronDoubleRightIcon className="w-4 h-4" />
             </button>
             <span className="flex items-center gap-1">
               <div>Page</div>
               <strong>
-                {table.getState().pagination.pageIndex + 1} of{' '}
-                {table.getPageCount().toLocaleString()}
+                {pagination.currentPage} of {pagination.totalPages}
               </strong>
             </span>
             <span className="flex items-center gap-1">
               | Go to page:
               <input
                 type="number"
-                id={`page-${table.getState().pagination.pageIndex}`}
-                defaultValue={table.getState().pagination.pageIndex + 1}
+                min="1"
+                max={pagination.totalPages}
+                value={pagination.currentPage}
                 onChange={(e) => {
-                  const page = e.target.value ? Number(e.target.value) - 1 : 0
-                  table.setPageIndex(page)
+                  const page = parseInt(e.target.value)
+                  if (page >= 1 && page <= pagination.totalPages) {
+                    handlePageChange(page)
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    const page = parseInt(e.target.value)
+                    if (page >= 1 && page <= pagination.totalPages) {
+                      handlePageChange(page)
+                    }
+                  }
                 }}
                 className="border p-1 rounded w-16"
               />
             </span>
             <select
-              value={table.getState().pagination.pageSize}
-              onChange={(e) => {
-                table.setPageSize(Number(e.target.value))
-              }}
+              value={pagination.pageSize}
+              onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+              disabled={loading}
             >
               {[10, 20, 30, 40, 50].map((pageSize) => (
                 <option key={pageSize} value={pageSize}>
@@ -363,18 +319,20 @@ export default function AllQuestionsDataTable() {
             </select>
           </div>
           <div>
-            Showing {table.getRowModel().rows.length.toLocaleString()} of{' '}
-            {table.getRowCount().toLocaleString()} Rows
+            Showing {allQuestions.length} of {pagination.totalItems} Questions
           </div>
         </div>
       </div>
       <Toaster />
-      <QuestionDialogModal
-        data={itemToRemove}
-        handleRemove={handleRemove}
-        open={isDialogOpen}
-        setOpen={setIsDialogOpen}
-      />
+      <Suspense fallback={Loading}>
+        <QuestionDialogModal
+          data={itemToRemove}
+          handleRemove={handleRemove}
+          open={isDialogOpen}
+          setOpen={setIsDialogOpen}
+        />
+      </Suspense>
+      
     </>
   )
 }

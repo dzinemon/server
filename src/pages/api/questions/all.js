@@ -1,15 +1,56 @@
 // import db
 import db from '../../../db'
+import { pagination as paginationConfig } from '../../../../utils/config'
 
 // http://localhost:3000/api/questions
 
 const getAllQa = async (req, res) => {
   try {
-    // each qna has id, question, answer, resources; for now, we will only return the last 40 items with id and qestion
-    const result = await db.query(
-      'SELECT id, question FROM qas ORDER BY id DESC'
-    )
-    return res.status(200).json(result.rows)
+    const { page = 1, pageSize = paginationConfig.defaultPageSize, search = '' } = req.query
+    
+    // Validate pagination parameters
+    const currentPage = Math.max(1, parseInt(page))
+    const limit = Math.min(parseInt(pageSize), paginationConfig.maxPageSize)
+    const offset = (currentPage - 1) * limit
+    
+    // Build the query with optional search
+    let countQuery = 'SELECT COUNT(*) FROM qas'
+    let dataQuery = 'SELECT id, question FROM qas'
+    let queryParams = []
+    let countParams = []
+    
+    if (search) {
+      const searchCondition = ' WHERE question ILIKE $1'
+      countQuery += searchCondition
+      dataQuery += searchCondition
+      const searchParam = `%${search}%`
+      queryParams.push(searchParam)
+      countParams.push(searchParam)
+    }
+    
+    // Add ordering and pagination to data query
+    dataQuery += ' ORDER BY id DESC LIMIT $' + (queryParams.length + 1) + ' OFFSET $' + (queryParams.length + 2)
+    queryParams.push(limit, offset)
+    
+    // Get total count
+    const countResult = await db.query(countQuery, countParams)
+    const totalItems = parseInt(countResult.rows[0].count)
+    const totalPages = Math.ceil(totalItems / limit)
+    
+    // Get paginated data
+    const dataResult = await db.query(dataQuery, queryParams)
+    
+    return res.status(200).json({
+      data: dataResult.rows,
+      pagination: {
+        currentPage,
+        pageSize: limit,
+        totalItems,
+        totalPages,
+        hasNextPage: currentPage < totalPages,
+        hasPreviousPage: currentPage > 1,
+      }
+    })
   } catch (error) {
     console.error('Error fetching questions:', error)
     return res.status(500).json({ error: 'Failed to fetch questions' })

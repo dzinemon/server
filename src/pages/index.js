@@ -60,13 +60,7 @@ export default function Home() {
                 name: 'All Questions',
                 url: 'all-questions',
                 description: 'View the questions users have asked on AI Widget',
-              },
-              {
-                name: 'Quotes Generator',
-                url: 'podcast-quotes-topic',
-                description:
-                  'Generate quotes from podcast page to specific topic',
-              },
+              },  
             ].map(({ name, url, description }, id) => (
               <a
                 key={`link-${id}-${name}`}

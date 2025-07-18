@@ -42,24 +42,25 @@ export default function Navbar() {
     },
   ]
 
-  const quotesItems = [
-    {
-      name: 'Quotes by Topic',
-      slug: 'podcast-quotes-topic',
-    },
-    {
-      name: 'Podcast Quotes',
-      slug: 'podcast-quotes',
-    },
-    {
-      name: 'Podcast Quotes v2',
-      slug: 'podcast-quotes-v2',
-    },
-    {
-      name: 'Categories Quotes',
-      slug: 'categories-quotes',
-    },
-  ]
+  // deprecated items
+  // const quotesItems = [
+  //   {
+  //     name: 'Quotes by Topic',
+  //     slug: 'podcast-quotes-topic',
+  //   },
+  //   {
+  //     name: 'Podcast Quotes',
+  //     slug: 'podcast-quotes',
+  //   },
+  //   {
+  //     name: 'Podcast Quotes v2',
+  //     slug: 'podcast-quotes-v2',
+  //   },
+  //   {
+  //     name: 'Categories Quotes',
+  //     slug: 'categories-quotes',
+  //   },
+  // ]
 
   const adminNavItems = [
     // {

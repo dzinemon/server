@@ -58,8 +58,8 @@ export default function AllQuestionsDataTable() {
   const [itemToRemove, setItemToRemove] = useState({})
   const [fetchedItems, setFetchedItems] = useState([])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  
-    // Refs to track search state and prevent unnecessary selection clearing
+
+  // Refs to track search state and prevent unnecessary selection clearing
   const isSearchingRef = useRef(false)
   const lastSearchTermRef = useRef(null) // Start with null to detect initial load
 
@@ -87,11 +87,11 @@ export default function AllQuestionsDataTable() {
     if (lastSearchTermRef.current === searchTerm) {
       return
     }
-    
+
     const previousSearchTerm = lastSearchTermRef.current
     lastSearchTermRef.current = searchTerm
     isSearchingRef.current = true
-    
+
     const timeoutId = setTimeout(() => {
       fetchAllQuestions(1, pagination.pageSize, searchTerm)
       // Only clear selections if this is a user-initiated search change

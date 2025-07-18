@@ -190,7 +190,9 @@ export default function MessageBubble({ message, role, onRemove }) {
                   <thead className="bg-gray-50">{children}</thead>
                 ),
                 tbody: ({ children }) => (
-                  <tbody className="bg-white divide-y divide-gray-200">{children}</tbody>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {children}
+                  </tbody>
                 ),
                 tr: ({ children }) => (
                   <tr className="hover:bg-gray-50">{children}</tr>
@@ -207,22 +209,34 @@ export default function MessageBubble({ message, role, onRemove }) {
                 ),
                 // Style other markdown elements
                 h1: ({ children }) => (
-                  <h1 className="text-2xl font-bold mt-6 mb-4 text-gray-900">{children}</h1>
+                  <h1 className="text-2xl font-bold mt-6 mb-4 text-gray-900">
+                    {children}
+                  </h1>
                 ),
                 h2: ({ children }) => (
-                  <h2 className="text-xl font-bold mt-5 mb-3 text-gray-900">{children}</h2>
+                  <h2 className="text-xl font-bold mt-5 mb-3 text-gray-900">
+                    {children}
+                  </h2>
                 ),
                 h3: ({ children }) => (
-                  <h3 className="text-lg font-semibold mt-4 mb-2 text-gray-900">{children}</h3>
+                  <h3 className="text-lg font-semibold mt-4 mb-2 text-gray-900">
+                    {children}
+                  </h3>
                 ),
                 p: ({ children }) => (
-                  <p className="mb-3 leading-relaxed text-gray-700">{children}</p>
+                  <p className="mb-3 leading-relaxed text-gray-700">
+                    {children}
+                  </p>
                 ),
                 ul: ({ children }) => (
-                  <ul className="list-disc list-inside mb-3 space-y-1">{children}</ul>
+                  <ul className="list-disc list-inside mb-3 space-y-1">
+                    {children}
+                  </ul>
                 ),
                 ol: ({ children }) => (
-                  <ol className="list-decimal list-inside mb-3 space-y-1">{children}</ol>
+                  <ol className="list-decimal list-inside mb-3 space-y-1">
+                    {children}
+                  </ol>
                 ),
                 li: ({ children }) => (
                   <li className="text-gray-700">{children}</li>
@@ -234,7 +248,9 @@ export default function MessageBubble({ message, role, onRemove }) {
                     </code>
                   ) : (
                     <pre className="bg-gray-100 p-3 rounded-lg overflow-x-auto mb-3">
-                      <code className="text-sm font-mono text-gray-800">{children}</code>
+                      <code className="text-sm font-mono text-gray-800">
+                        {children}
+                      </code>
                     </pre>
                   ),
                 blockquote: ({ children }) => (
@@ -276,7 +292,9 @@ export default function MessageBubble({ message, role, onRemove }) {
                   <thead className="bg-gray-50">{children}</thead>
                 ),
                 tbody: ({ children }) => (
-                  <tbody className="bg-white divide-y divide-gray-200">{children}</tbody>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {children}
+                  </tbody>
                 ),
                 tr: ({ children }) => (
                   <tr className="hover:bg-gray-50">{children}</tr>
@@ -293,22 +311,34 @@ export default function MessageBubble({ message, role, onRemove }) {
                 ),
                 // Style other markdown elements
                 h1: ({ children }) => (
-                  <h1 className="text-2xl font-bold mt-6 mb-4 text-gray-900">{children}</h1>
+                  <h1 className="text-2xl font-bold mt-6 mb-4 text-gray-900">
+                    {children}
+                  </h1>
                 ),
                 h2: ({ children }) => (
-                  <h2 className="text-xl font-bold mt-5 mb-3 text-gray-900">{children}</h2>
+                  <h2 className="text-xl font-bold mt-5 mb-3 text-gray-900">
+                    {children}
+                  </h2>
                 ),
                 h3: ({ children }) => (
-                  <h3 className="text-lg font-semibold mt-4 mb-2 text-gray-900">{children}</h3>
+                  <h3 className="text-lg font-semibold mt-4 mb-2 text-gray-900">
+                    {children}
+                  </h3>
                 ),
                 p: ({ children }) => (
-                  <p className="mb-3 leading-relaxed text-gray-700">{children}</p>
+                  <p className="mb-3 leading-relaxed text-gray-700">
+                    {children}
+                  </p>
                 ),
                 ul: ({ children }) => (
-                  <ul className="list-disc list-inside mb-3 space-y-1">{children}</ul>
+                  <ul className="list-disc list-inside mb-3 space-y-1">
+                    {children}
+                  </ul>
                 ),
                 ol: ({ children }) => (
-                  <ol className="list-decimal list-inside mb-3 space-y-1">{children}</ol>
+                  <ol className="list-decimal list-inside mb-3 space-y-1">
+                    {children}
+                  </ol>
                 ),
                 li: ({ children }) => (
                   <li className="text-gray-700">{children}</li>
@@ -320,7 +350,9 @@ export default function MessageBubble({ message, role, onRemove }) {
                     </code>
                   ) : (
                     <pre className="bg-gray-100 p-3 rounded-lg overflow-x-auto mb-3">
-                      <code className="text-sm font-mono text-gray-800">{children}</code>
+                      <code className="text-sm font-mono text-gray-800">
+                        {children}
+                      </code>
                     </pre>
                   ),
                 blockquote: ({ children }) => (

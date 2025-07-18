@@ -18,7 +18,10 @@ import {
   PaperAirplaneIcon,
   SquaresPlusIcon,
   TrashIcon,
+  ArrowUpIcon,
 } from '@heroicons/react/24/solid'
+
+import ModelPicker from '@/components/common/modelpicker'
 
 import LoadingIndicator from '@/components/common/chatloadingstate'
 
@@ -26,85 +29,93 @@ import LoadingIndicator from '@/components/common/chatloadingstate'
 const MessageBubble = lazy(() => import('@/components/common/message-bubble'))
 
 // Lazy load components that are conditionally rendered
-const SourceCardCompact = lazy(() => import('@/components/common/source-card-compact'))
+const SourceCardCompact = lazy(() =>
+  import('@/components/common/source-card-compact')
+)
 
 import { promptTemplate } from '../../utils/handleprompts/internal'
 import { sourceFilters, typeFilters } from '../../utils/hardcoded'
 import { useInternalChatAPI } from '../hooks/useAPI'
 
 // Lazy load the welcome screen component
-const WelcomeScreen = lazy(() => Promise.resolve({
-  default: memo(function WelcomeScreen({ questionExamples, onQuestionClick }) {
-    return (
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="text-center w-full max-w-6xl">
-          <div className="mb-6">
-            <Image
-              src="/logo-color.png"
-              alt="Logo"
-              width={64}
-              height={76}
-              className="mx-auto object-contain opacity-50"
-            />
-          </div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Welcome to AI Chat
-          </h2>
-          <p className="text-gray-600 mb-6">
-            Start a conversation by creating a new thread or selecting
-            from example questions below.
-          </p>
-
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-gray-700 mb-3">
-              Try asking:
+const WelcomeScreen = lazy(() =>
+  Promise.resolve({
+    default: memo(function WelcomeScreen({
+      questionExamples,
+      onQuestionClick,
+    }) {
+      return (
+        <div className="flex-1 flex items-center justify-center p-8">
+          <div className="text-center w-full max-w-6xl">
+            <div className="mb-6">
+              <Image
+                src="/logo-color.png"
+                alt="Logo"
+                width={64}
+                height={76}
+                className="mx-auto object-contain opacity-50"
+              />
+            </div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Welcome to AI Chat
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Start a conversation by creating a new thread or selecting from
+              example questions below.
             </p>
-            <div className='flex flex-wrap gap-2 justify-center'>
-              {questionExamples.map((question, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => onQuestionClick(question)}
-                  className="text-left px-1.5 py-1 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 text-sm text-gray-700"
-                >
-                  {question}
-                </button>
-              ))}
+
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-gray-700 mb-3">
+                Try asking:
+              </p>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {questionExamples.map((question, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => onQuestionClick(question)}
+                    className="text-left px-1.5 py-1 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 text-sm text-gray-700"
+                  >
+                    {question}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    )
+      )
+    }),
   })
-}))
+)
 
 // Lazy load sources section
-const MessageSources = lazy(() => Promise.resolve({
-  default: memo(function MessageSources({ sources }) {
-    return (
-      <div className="flex flex-wrap ml-0 gap-2">
-        <div className="leading-none font-semibold w-full mb-3 text-sm text-gray-700">
-          Resources used:
+const MessageSources = lazy(() =>
+  Promise.resolve({
+    default: memo(function MessageSources({ sources }) {
+      return (
+        <div className="flex flex-wrap ml-0 gap-2">
+          <div className="leading-none font-semibold w-full mb-3 text-sm text-gray-700">
+            Resources used:
+          </div>
+          {sources
+            .filter(
+              (item, idx, arr) =>
+                arr.findIndex((t) => t.url === item.url) === idx
+            )
+            .map((item, idx) => (
+              <Suspense
+                key={`source-${idx}`}
+                fallback={
+                  <div className="w-16 h-8 bg-gray-100 rounded animate-pulse" />
+                }
+              >
+                <SourceCardCompact item={item} index={idx} />
+              </Suspense>
+            ))}
         </div>
-        {sources
-          .filter(
-            (item, idx, arr) =>
-              arr.findIndex((t) => t.url === item.url) === idx
-          )
-          .map((item, idx) => (
-            <Suspense 
-              key={`source-${idx}`}
-              fallback={<div className="w-16 h-8 bg-gray-100 rounded animate-pulse" />}
-            >
-              <SourceCardCompact
-                item={item}
-                index={idx}
-              />
-            </Suspense>
-          ))}
-      </div>
-    )
+      )
+    }),
   })
-}))
+)
 
 const questionExamples = [
   'Are VC Investments Taxed?',
@@ -116,12 +127,12 @@ const questionExamples = [
   '409A Valuation for Startups',
   'VC diligence process',
   'What is a SAFE note?',
-  'Is QuickBooks good for SaaS Startups?',
-  'What is the best accounting software for SaaS startups?',
-  'What taxes should I pay as a Delaware C-corp startup?',
-  'How much time do you spend monthly doing bookkeeping?',
-  'Who are good bookkeepers in Mountain View CA?',
-  'Which tools should every startup CFO know/use?',
+  // 'Is QuickBooks good for SaaS Startups?',
+  // 'What is the best accounting software for SaaS startups?',
+  // 'What taxes should I pay as a Delaware C-corp startup?',
+  // 'How much time do you spend monthly doing bookkeeping?',
+  // 'Who are good bookkeepers in Mountain View CA?',
+  // 'Which tools should every startup CFO know/use?',
 ]
 // Memoized ThreadCombobox component
 const ThreadCombobox = memo(function ThreadCombobox({
@@ -651,7 +662,7 @@ export default function ThreadedChatWidget() {
                       </div>
                     )}
                     <div className="flex-1">
-                      <Suspense 
+                      <Suspense
                         fallback={
                           <div className="bg-white border border-gray-200 rounded-lg p-4">
                             <div className="animate-pulse">
@@ -672,10 +683,12 @@ export default function ThreadedChatWidget() {
                         />
                       </Suspense>
                       {message.sources && message.sources.length > 0 && (
-                        <Suspense 
+                        <Suspense
                           fallback={
                             <div className="flex gap-2 mt-2">
-                              <div className="text-sm text-gray-700">Loading sources...</div>
+                              <div className="text-sm text-gray-700">
+                                Loading sources...
+                              </div>
                             </div>
                           }
                         >
@@ -711,14 +724,14 @@ export default function ThreadedChatWidget() {
             </>
           ) : (
             // Welcome Screen with Suspense
-            <Suspense 
+            <Suspense
               fallback={
                 <div className="flex-1 flex items-center justify-center">
                   <div className="text-gray-500">Loading...</div>
                 </div>
               }
             >
-              <WelcomeScreen 
+              <WelcomeScreen
                 questionExamples={questionExamples}
                 onQuestionClick={handleQuestionClick}
               />
@@ -726,7 +739,7 @@ export default function ThreadedChatWidget() {
           )}
 
           {/* Input Area - remains the same */}
-          <div className="bg-white border-t border-gray-200 p-4">
+          <div className="bg-white shadow-lg rounded-t-2xl border-gray-200 px-2 pt-2 max-w-3xl mx-auto w-full relative">
             <form onSubmit={handleSubmit} className="flex space-x-3">
               <input
                 ref={messageInputRef}
@@ -734,17 +747,22 @@ export default function ThreadedChatWidget() {
                 value={userMessage}
                 onChange={(e) => setUserMessage(e.target.value)}
                 placeholder="Type your message..."
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="flex-1 px-2 pt-2 pb-16 rounded-t-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent"
                 disabled={isLoading}
               />
+            </form>
+            <div className="absolute bottom-2 left-4 w-40">
+              <ModelPicker />
+            </div>
+            <div className="absolute bottom-2 right-4">
               <button
                 type="submit"
                 disabled={isLoading || !userMessage.trim()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                className="px-2 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
               >
-                <PaperAirplaneIcon className="w-5 h-5" />
+                <ArrowUpIcon className="w-5 h-5" />
               </button>
-            </form>
+            </div>
           </div>
         </div>
       </div>

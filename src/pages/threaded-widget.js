@@ -37,7 +37,7 @@ const WelcomeScreen = lazy(() => Promise.resolve({
   default: memo(function WelcomeScreen({ questionExamples, onQuestionClick }) {
     return (
       <div className="flex-1 flex items-center justify-center p-8">
-        <div className="text-center max-w-md">
+        <div className="text-center w-full max-w-6xl">
           <div className="mb-6">
             <Image
               src="/logo-color.png"
@@ -59,15 +59,17 @@ const WelcomeScreen = lazy(() => Promise.resolve({
             <p className="text-sm font-medium text-gray-700 mb-3">
               Try asking:
             </p>
-            {questionExamples.slice(0, 3).map((question, idx) => (
-              <button
-                key={idx}
-                onClick={() => onQuestionClick(question)}
-                className="block w-full text-left p-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 text-sm text-gray-700"
-              >
-                {question}
-              </button>
-            ))}
+            <div className='flex flex-wrap gap-2 justify-center'>
+              {questionExamples.map((question, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => onQuestionClick(question)}
+                  className="text-left px-1.5 py-1 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 text-sm text-gray-700"
+                >
+                  {question}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -105,6 +107,15 @@ const MessageSources = lazy(() => Promise.resolve({
 }))
 
 const questionExamples = [
+  'Are VC Investments Taxed?',
+  'How do you raise VC funding?',
+  'Best banks for startups',
+  'What is a chart of accounts?',
+  'State tax filing requirements',
+  'What does a startup CFO do?',
+  '409A Valuation for Startups',
+  'VC diligence process',
+  'What is a SAFE note?',
   'Is QuickBooks good for SaaS Startups?',
   'What is the best accounting software for SaaS startups?',
   'What taxes should I pay as a Delaware C-corp startup?',
@@ -112,7 +123,6 @@ const questionExamples = [
   'Who are good bookkeepers in Mountain View CA?',
   'Which tools should every startup CFO know/use?',
 ]
-
 // Memoized ThreadCombobox component
 const ThreadCombobox = memo(function ThreadCombobox({
   threads,
@@ -160,7 +170,7 @@ const ThreadCombobox = memo(function ThreadCombobox({
           )}
         </div>
       </div>
-      <div className="flex flex-col divide-y border rounded-lg max-h-48 overflow-y-auto">
+      <div className="flex flex-col divide-y border rounded-lg max-h-70vh overflow-y-auto">
         {filteredThreads.map((thread, idx, arr) => (
           <button
             key={thread.id}

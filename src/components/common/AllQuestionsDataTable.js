@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useState, useRef } from 'react'
 
 import { useResources } from '@/context/resources'
 
@@ -58,6 +58,10 @@ export default function AllQuestionsDataTable() {
   const [itemToRemove, setItemToRemove] = useState({})
   const [fetchedItems, setFetchedItems] = useState([])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  
+    // Refs to track search state and prevent unnecessary selection clearing
+  const isSearchingRef = useRef(false)
+  const lastSearchTermRef = useRef(null) // Start with null to detect initial load
 
   // Handle page changes
   const handlePageChange = useCallback(
@@ -79,12 +83,29 @@ export default function AllQuestionsDataTable() {
 
   // Debounced search effect - trigger for any search term change
   useEffect(() => {
+    // Only proceed if search term actually changed
+    if (lastSearchTermRef.current === searchTerm) {
+      return
+    }
+    
+    const previousSearchTerm = lastSearchTermRef.current
+    lastSearchTermRef.current = searchTerm
+    isSearchingRef.current = true
+    
     const timeoutId = setTimeout(() => {
       fetchAllQuestions(1, pagination.pageSize, searchTerm)
-      setSelectedItems([])
+      // Only clear selections if this is a user-initiated search change
+      // (not initial load or programmatic reset)
+      if (previousSearchTerm !== null && previousSearchTerm !== searchTerm) {
+        setSelectedItems([])
+      }
+      isSearchingRef.current = false
     }, 1000)
 
-    return () => clearTimeout(timeoutId)
+    return () => {
+      clearTimeout(timeoutId)
+      isSearchingRef.current = false
+    }
   }, [searchTerm, fetchAllQuestions, pagination.pageSize])
 
   // Initial data load - separate from search

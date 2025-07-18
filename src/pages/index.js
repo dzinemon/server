@@ -126,7 +126,7 @@ export default function Home() {
                 <p
                   className={`m-0 max-w-[30ch] text-sm opacity-50 pointer-events-none`}
                 >
-                  Use the threaded chat widget with conversations 
+                  Use the threaded chat widget with conversations
                 </p>
               </button>
             </div>
@@ -159,21 +159,21 @@ export default function Home() {
               </a>
             </div>
           </div>
-          <Script 
-            id="chat-widget-script" 
+          <Script
+            id="chat-widget-script"
             src="/chat-widget.js"
             onLoad={() => {
               if (typeof window !== 'undefined' && window.ChatWidget) {
-                window.ChatWidget.init();
+                window.ChatWidget.init()
               }
             }}
           />
-          <Script 
-            id="threaded-chat-widget-script" 
+          <Script
+            id="threaded-chat-widget-script"
             src="/threaded-chat-widget.js"
             onLoad={() => {
               if (typeof window !== 'undefined' && window.ThreadedChatWidget) {
-                window.ThreadedChatWidget.init();
+                window.ThreadedChatWidget.init()
               }
             }}
           />
@@ -187,7 +187,7 @@ export default function Home() {
       Not signed in <br />
       <button
         className="hover:bg-sky-700 text-sm font-semibold leading-6  text-gray-100 px-6 bg-sky-600 rounded-lg py-2 mx-5"
-        onClick={() => import('next-auth/react').then(mod => mod.signIn())}
+        onClick={() => import('next-auth/react').then((mod) => mod.signIn())}
       >
         Sign in
       </button>

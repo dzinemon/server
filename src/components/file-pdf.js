@@ -5,7 +5,7 @@ import Loading from './Loading'
 
 import {
   DocumentTextIcon,
-  FolderArrowDownIcon
+  FolderArrowDownIcon,
 } from '@heroicons/react/24/solid'
 
 function PdfFileUploadComponent() {
@@ -131,7 +131,7 @@ function PdfFileUploadComponent() {
     }
   }, [])
 
-  if (isLoading) return <Loading />  
+  if (isLoading) return <Loading />
 
   return (
     <div className="py-12">

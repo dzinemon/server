@@ -166,10 +166,10 @@ export default function MessageBubble({ message, role, onRemove }) {
   return (
     <div
       className={`p-3 ${
-        role === 'user' ? 'bg-white text-right' : 'bg-white border border-slate-200'
-      } ${
-        role === 'assistant' ? '' : ''
-      } rounded-md w-full m-b-content`}
+        role === 'user'
+          ? 'bg-white text-right'
+          : 'bg-white border border-slate-200'
+      } ${role === 'assistant' ? '' : ''} rounded-md w-full m-b-content`}
     >
       {role === 'user' ? (
         <UserMessageWrapper onRemove={onRemove}>

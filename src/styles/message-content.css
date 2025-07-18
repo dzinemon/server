@@ -19,9 +19,15 @@
   color: #111827;
 }
 
-.m-b-content h1 { font-size: 1.25em; }
-.m-b-content h2 { font-size: 1.1em; }
-.m-b-content h3 { font-size: 1em; }
+.m-b-content h1 {
+  font-size: 1.25em;
+}
+.m-b-content h2 {
+  font-size: 1.1em;
+}
+.m-b-content h3 {
+  font-size: 1em;
+}
 
 .m-b-content p {
   margin-bottom: 0.75em;

@@ -16,13 +16,10 @@ import {
   EnvelopeIcon,
   FlagIcon,
   HandThumbDownIcon,
-  HandThumbUpIcon
+  HandThumbUpIcon,
 } from '@heroicons/react/24/solid'
 
-import {
-  faLinkedinIn,
-  faTwitter
-} from '@fortawesome/free-brands-svg-icons'
+import { faLinkedinIn, faTwitter } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import SourceCard from '../common/source-card'
@@ -143,7 +140,11 @@ export default function QuestionSearchResult({
                 >
                   {question.sources &&
                     question.sources.map((item, idx) => (
-                      <SourceCard key={`source-${idx}`} item={item} index={idx} />
+                      <SourceCard
+                        key={`source-${idx}`}
+                        item={item}
+                        index={idx}
+                      />
                     ))}
                 </div>
 

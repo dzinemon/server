@@ -4,14 +4,22 @@ import Image from 'next/image'
 import LoginComponent from './login-btn'
 import { useRouter } from 'next/router'
 import { useUser } from '@/context/user'
-import { NavDropdown, MobileNavSection, useNavDropdowns } from './navigation/nav-components'
+import {
+  NavDropdown,
+  MobileNavSection,
+  useNavDropdowns,
+} from './navigation/nav-components'
 
 export default function Navbar() {
   // Main mobile menu state
   const [isOpen, setIsOpen] = useState(false)
-  
+
   // Use our custom hook to manage dropdown states - ensures only one dropdown is open at a time
-  const { isOpen: isDropdownOpen, toggleDropdown, closeDropdown } = useNavDropdowns(['upload', 'quotes'])
+  const {
+    isOpen: isDropdownOpen,
+    toggleDropdown,
+    closeDropdown,
+  } = useNavDropdowns(['upload', 'quotes'])
 
   const { pathname } = useRouter()
 
@@ -33,7 +41,7 @@ export default function Navbar() {
       slug: 'texts',
     },
   ]
-  
+
   const quotesItems = [
     {
       name: 'Quotes by Topic',
@@ -129,7 +137,7 @@ export default function Navbar() {
 
         <div className="hidden lg:flex lg:gap-x-12">
           {/* Quotes Dropdown - Available for all users */}
-          <NavDropdown 
+          <NavDropdown
             label="Quotes"
             items={quotesItems}
             isOpen={isDropdownOpen('quotes')}
@@ -138,7 +146,7 @@ export default function Navbar() {
             closeDropdown={() => closeDropdown('quotes')}
             id="quotes"
           />
-          
+
           {navItems.map((item, idx) => {
             return (
               <Link
@@ -154,7 +162,7 @@ export default function Navbar() {
               </Link>
             )
           })}
-          
+
           {/* Upload Dropdown - Only visible for admin users */}
           {currentUser?.role === 'admin' && (
             <NavDropdown
@@ -249,7 +257,7 @@ export default function Navbar() {
                   pathname={pathname}
                   onItemClick={() => setIsOpen(false)}
                 />
-                
+
                 {navItems.map((item, idx) => {
                   return (
                     <Link
@@ -265,7 +273,7 @@ export default function Navbar() {
                     </Link>
                   )
                 })}
-                
+
                 {/* Upload Section in Mobile Menu - Only visible for admin users */}
                 {currentUser?.role === 'admin' && (
                   <MobileNavSection

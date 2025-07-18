@@ -1,6 +1,6 @@
-import SidebarLayout from '@/components/layout/SidebarLayout';
-import { getContentSidebarConfig } from '@/components/layout/sidebarConfig';
-import { useRouter } from 'next/router';
+import SidebarLayout from '@/components/layout/SidebarLayout'
+import { getContentSidebarConfig } from '@/components/layout/sidebarConfig'
+import { useRouter } from 'next/router'
 
 /**
  * Application layout that provides sidebar navigation
@@ -8,16 +8,13 @@ import { useRouter } from 'next/router';
  * determines which sidebar configuration to use based on the current route
  */
 export default function AppLayout({ children }) {
-  const router = useRouter();
-  let pageType = '';
+  const router = useRouter()
+  let pageType = ''
 
-  
   // Get the appropriate sidebar configuration
-  const sidebarSections = getContentSidebarConfig(pageType);
-  
+  const sidebarSections = getContentSidebarConfig(pageType)
+
   return (
-    <SidebarLayout sidebarSections={sidebarSections}>
-      {children}
-    </SidebarLayout>
-  );
+    <SidebarLayout sidebarSections={sidebarSections}>{children}</SidebarLayout>
+  )
 }

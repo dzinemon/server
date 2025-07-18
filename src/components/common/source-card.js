@@ -51,9 +51,7 @@ const SourceCard = ({ item, index }) => {
                 </div>
               </div>
             </div>
-            <p className="text-xs my-2 line-clamp-4">
-              {item.title}
-            </p>
+            <p className="text-xs my-2 line-clamp-4">{item.title}</p>
           </div>
           <div className="flex flex-row items-center justify-start">
             <div className="w-auto flex-none">

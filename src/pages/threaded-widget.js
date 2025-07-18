@@ -1,6 +1,13 @@
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import React, { useEffect, useRef, useState, useCallback, useMemo, memo } from 'react'
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  useMemo,
+  memo,
+} from 'react'
 import toast, { Toaster } from 'react-hot-toast'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -9,7 +16,7 @@ import {
   ChevronDoubleRightIcon,
   PaperAirplaneIcon,
   SquaresPlusIcon,
-  TrashIcon
+  TrashIcon,
 } from '@heroicons/react/24/solid'
 
 import LoadingIndicator from '@/components/common/chatloadingstate'
@@ -29,7 +36,11 @@ const questionExamples = [
 ]
 
 // Memoized ThreadCombobox component
-const ThreadCombobox = memo(function ThreadCombobox({ threads, currentThreadId, setCurrentThreadId }) {
+const ThreadCombobox = memo(function ThreadCombobox({
+  threads,
+  currentThreadId,
+  setCurrentThreadId,
+}) {
   const [query, setQuery] = useState('')
 
   // Memoize filtered threads to prevent recalculation on every render
@@ -46,9 +57,12 @@ const ThreadCombobox = memo(function ThreadCombobox({ threads, currentThreadId, 
   }, [])
 
   // Memoize thread selection handler
-  const handleThreadSelect = useCallback((threadId) => {
-    setCurrentThreadId(threadId)
-  }, [setCurrentThreadId])
+  const handleThreadSelect = useCallback(
+    (threadId) => {
+      setCurrentThreadId(threadId)
+    },
+    [setCurrentThreadId]
+  )
 
   return (
     <div className="space-y-3 w-full">
@@ -108,14 +122,14 @@ export default function ThreadedChatWidget() {
   const [currentThreadId, setCurrentThreadId] = useState(null)
 
   // Use the hook
-  const { 
-    isLoading, 
-    setIsLoading, 
-    currentSources, 
-    setCurrentSources, 
-    getEmbedding, 
-    getData, 
-    getCompletion 
+  const {
+    isLoading,
+    setIsLoading,
+    currentSources,
+    setCurrentSources,
+    getEmbedding,
+    getData,
+    getCompletion,
   } = useInternalChatAPI()
 
   // Add filter states for RAG
@@ -154,10 +168,13 @@ export default function ThreadedChatWidget() {
   // Memoize parent notification function
   const notifyParentOfThreadCount = useCallback((count) => {
     if (window.parent && window.parent !== window) {
-      window.parent.postMessage({
-        type: 'THREAD_COUNT_UPDATE',
-        count: count
-      }, '*')
+      window.parent.postMessage(
+        {
+          type: 'THREAD_COUNT_UPDATE',
+          count: count,
+        },
+        '*'
+      )
     }
   }, [])
 
@@ -177,7 +194,7 @@ export default function ThreadedChatWidget() {
     notifyParentOfThreadCount(updatedThreads.length)
     handleScrollIntoView()
     setSideBarOpen(false)
-    
+
     // Focus on input
     setTimeout(() => {
       if (messageInputRef.current) {
@@ -187,131 +204,128 @@ export default function ThreadedChatWidget() {
   }, [threads, notifyParentOfThreadCount, handleScrollIntoView])
 
   // Memoize thread removal handler
-  const handleThreadRemove = useCallback((id) => {
-    const updatedThreads = threads.filter((thread) => thread.id !== id)
-    setThreads(updatedThreads)
-    localStorage.setItem('threadedChatThreads', JSON.stringify(updatedThreads))
-    notifyParentOfThreadCount(updatedThreads.length)
-    setCurrentThreadId(null)
-    setSideBarOpen(true)
-  }, [threads, notifyParentOfThreadCount])
-
-  const askQuestion = useCallback(async (question, userMessages, currentThreadMessages) => {
-    try {
-      // Get embedding for the question
-      const embedding = await getEmbedding(question)
-      console.log('embedding generated')
-
-      // Get relevant data from vector database
-      const data = await getData(embedding, filterBySourceArray, filterByTypeArray)
-      console.log('data retrieved')
-
-      // Extract sources for display
-      const sources = data.matches ? data.matches.map((match) => {
-        return {
-          id: match.metadata.id,
-          title: match.metadata.title,
-          type: match.metadata.type,
-          image: match.metadata.image || '',
-          source: match.metadata.source,
-          url: match.metadata.url,
-          score: match.score,
-        }
-      }) : []
-
-      setCurrentSources(sources)
-
-      // Create prompt using the template
-      const prompt = promptTemplate(question, userMessages, data.matches || [])
-
-      // Get completion using the hook
-      const completion = await getCompletion(
-        [...currentThreadMessages, { role: 'user', content: prompt }]
+  const handleThreadRemove = useCallback(
+    (id) => {
+      const updatedThreads = threads.filter((thread) => thread.id !== id)
+      setThreads(updatedThreads)
+      localStorage.setItem(
+        'threadedChatThreads',
+        JSON.stringify(updatedThreads)
       )
+      notifyParentOfThreadCount(updatedThreads.length)
+      setCurrentThreadId(null)
+      setSideBarOpen(true)
+    },
+    [threads, notifyParentOfThreadCount]
+  )
 
-      return {
-        completion: completion,
-        sources: sources
+  const askQuestion = useCallback(
+    async (question, userMessages, currentThreadMessages) => {
+      try {
+        // Get embedding for the question
+        const embedding = await getEmbedding(question)
+        console.log('embedding generated')
+
+        // Get relevant data from vector database
+        const data = await getData(
+          embedding,
+          filterBySourceArray,
+          filterByTypeArray
+        )
+        console.log('data retrieved')
+
+        // Extract sources for display
+        const sources = data.matches
+          ? data.matches.map((match) => {
+              return {
+                id: match.metadata.id,
+                title: match.metadata.title,
+                type: match.metadata.type,
+                image: match.metadata.image || '',
+                source: match.metadata.source,
+                url: match.metadata.url,
+                score: match.score,
+              }
+            })
+          : []
+
+        setCurrentSources(sources)
+
+        // Create prompt using the template
+        const prompt = promptTemplate(
+          question,
+          userMessages,
+          data.matches || []
+        )
+
+        // Get completion using the hook
+        const completion = await getCompletion([
+          ...currentThreadMessages,
+          { role: 'user', content: prompt },
+        ])
+
+        return {
+          completion: completion,
+          sources: sources,
+        }
+      } catch (error) {
+        console.error('Error asking question:', error)
+        return {
+          completion: 'Sorry, there was an error processing your question.',
+          sources: [],
+        }
       }
-    } catch (error) {
-      console.error('Error asking question:', error)
-      return {
-        completion: 'Sorry, there was an error processing your question.',
-        sources: []
-      }
-    }
-  }, [getEmbedding, getData, getCompletion, filterBySourceArray, filterByTypeArray, setCurrentSources])
+    },
+    [
+      getEmbedding,
+      getData,
+      getCompletion,
+      filterBySourceArray,
+      filterByTypeArray,
+      setCurrentSources,
+    ]
+  )
 
   // Memoize submit handler
-  const handleSubmit = useCallback(async (e) => {
-    e.preventDefault()
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault()
 
-    if (userMessage.trim().length === 0) {
-      return
-    }
-
-    // Create a new thread if none exists
-    let targetThreadId = currentThreadId
-    if (!targetThreadId) {
-      const newThread = {
-        id: uuidv4(),
-        date: new Date().toISOString(),
-        name: userMessage.length > 50 ? userMessage.slice(0, 50) + '...' : userMessage,
-        messages: [],
-      }
-      const updatedThreads = [...threads, newThread]
-      setThreads(updatedThreads)
-      targetThreadId = newThread.id
-      setCurrentThreadId(targetThreadId)
-      localStorage.setItem('threadedChatThreads', JSON.stringify(updatedThreads))
-      notifyParentOfThreadCount(updatedThreads.length)
-    }
-
-    const threadName = userMessage.length > 50 ? userMessage.slice(0, 50) + '...' : userMessage
-
-    // Add user message to thread
-    setThreads((previous) => {
-      const currentThread = previous.find((thread) => thread.id === targetThreadId)
-
-      if (!currentThread) {
-        return previous
+      if (userMessage.trim().length === 0) {
+        return
       }
 
-      const updatedThreads = [
-        ...previous.filter((thread) => thread.id !== targetThreadId),
-        {
-          ...currentThread,
-          name: currentThread.name === 'New Conversation' ? threadName : currentThread.name,
-          messages: [
-            ...currentThread.messages,
-            { role: 'user', content: userMessage },
-          ],
-        },
-      ]
+      // Create a new thread if none exists
+      let targetThreadId = currentThreadId
+      if (!targetThreadId) {
+        const newThread = {
+          id: uuidv4(),
+          date: new Date().toISOString(),
+          name:
+            userMessage.length > 50
+              ? userMessage.slice(0, 50) + '...'
+              : userMessage,
+          messages: [],
+        }
+        const updatedThreads = [...threads, newThread]
+        setThreads(updatedThreads)
+        targetThreadId = newThread.id
+        setCurrentThreadId(targetThreadId)
+        localStorage.setItem(
+          'threadedChatThreads',
+          JSON.stringify(updatedThreads)
+        )
+        notifyParentOfThreadCount(updatedThreads.length)
+      }
 
-      localStorage.setItem('threadedChatThreads', JSON.stringify(updatedThreads))
-      return updatedThreads
-    })
+      const threadName =
+        userMessage.length > 50 ? userMessage.slice(0, 50) + '...' : userMessage
 
-    setIsLoading(true)
-    setUserMessage('')
-    handleScrollIntoView()
-
-    try {
-      // Get current thread to pass existing messages
-      const currentThread = threads.find((thread) => thread.id === targetThreadId)
-      
-      // Create user messages array with previous user messages
-      const userMessages = currentThread ? 
-        currentThread.messages
-          .filter((message) => message.role === 'user')
-          .map((message) => message.content) : []
-
-      const { completion, sources } = await askQuestion(userMessage, userMessages, currentThread ? currentThread.messages : [])
-
-      // Add assistant response to thread with sources
+      // Add user message to thread
       setThreads((previous) => {
-        const currentThread = previous.find((thread) => thread.id === targetThreadId)
+        const currentThread = previous.find(
+          (thread) => thread.id === targetThreadId
+        )
 
         if (!currentThread) {
           return previous
@@ -321,25 +335,94 @@ export default function ThreadedChatWidget() {
           ...previous.filter((thread) => thread.id !== targetThreadId),
           {
             ...currentThread,
+            name:
+              currentThread.name === 'New Conversation'
+                ? threadName
+                : currentThread.name,
             messages: [
               ...currentThread.messages,
-              { role: 'assistant', content: completion, sources: sources },
+              { role: 'user', content: userMessage },
             ],
           },
         ]
 
-        localStorage.setItem('threadedChatThreads', JSON.stringify(updatedThreads))
+        localStorage.setItem(
+          'threadedChatThreads',
+          JSON.stringify(updatedThreads)
+        )
         return updatedThreads
       })
-    } catch (error) {
-      console.error('Error in handleSubmit:', error)
-      toast.error('Failed to send message')
-    }
 
-    setIsLoading(false)
-    setCurrentSources([])
-    handleScrollIntoView()
-  }, [userMessage, currentThreadId, threads, notifyParentOfThreadCount, handleScrollIntoView, askQuestion, setIsLoading, setCurrentSources])
+      setIsLoading(true)
+      setUserMessage('')
+      handleScrollIntoView()
+
+      try {
+        // Get current thread to pass existing messages
+        const currentThread = threads.find(
+          (thread) => thread.id === targetThreadId
+        )
+
+        // Create user messages array with previous user messages
+        const userMessages = currentThread
+          ? currentThread.messages
+              .filter((message) => message.role === 'user')
+              .map((message) => message.content)
+          : []
+
+        const { completion, sources } = await askQuestion(
+          userMessage,
+          userMessages,
+          currentThread ? currentThread.messages : []
+        )
+
+        // Add assistant response to thread with sources
+        setThreads((previous) => {
+          const currentThread = previous.find(
+            (thread) => thread.id === targetThreadId
+          )
+
+          if (!currentThread) {
+            return previous
+          }
+
+          const updatedThreads = [
+            ...previous.filter((thread) => thread.id !== targetThreadId),
+            {
+              ...currentThread,
+              messages: [
+                ...currentThread.messages,
+                { role: 'assistant', content: completion, sources: sources },
+              ],
+            },
+          ]
+
+          localStorage.setItem(
+            'threadedChatThreads',
+            JSON.stringify(updatedThreads)
+          )
+          return updatedThreads
+        })
+      } catch (error) {
+        console.error('Error in handleSubmit:', error)
+        toast.error('Failed to send message')
+      }
+
+      setIsLoading(false)
+      setCurrentSources([])
+      handleScrollIntoView()
+    },
+    [
+      userMessage,
+      currentThreadId,
+      threads,
+      notifyParentOfThreadCount,
+      handleScrollIntoView,
+      askQuestion,
+      setIsLoading,
+      setCurrentSources,
+    ]
+  )
 
   // Memoize question click handler
   const handleQuestionClick = useCallback((question) => {
@@ -357,7 +440,9 @@ export default function ThreadedChatWidget() {
   // Load threads from localStorage on mount
   useEffect(() => {
     try {
-      const localThreads = JSON.parse(localStorage.getItem('threadedChatThreads') || '[]')
+      const localThreads = JSON.parse(
+        localStorage.getItem('threadedChatThreads') || '[]'
+      )
       if (localThreads.length > 0) {
         setThreads(localThreads)
         notifyParentOfThreadCount(localThreads.length)
@@ -382,7 +467,7 @@ export default function ThreadedChatWidget() {
   return (
     <div className="h-screen bg-gray-50 flex flex-col">
       <Toaster position="top-center" />
-      
+
       {/* Header */}
       <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
         <div className="flex items-center space-x-3">
@@ -393,7 +478,9 @@ export default function ThreadedChatWidget() {
             height={38}
             className="object-contain"
           />
-          <h1 className="text-lg font-semibold text-gray-900">AI Chat Assistant</h1>
+          <h1 className="text-lg font-semibold text-gray-900">
+            AI Chat Assistant
+          </h1>
         </div>
         <button
           onClick={handleSidebarToggle}
@@ -445,7 +532,9 @@ export default function ThreadedChatWidget() {
               {/* Thread Header */}
               <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
                 <div>
-                  <h2 className="font-semibold text-gray-900 truncate">{currentThread.name}</h2>
+                  <h2 className="font-semibold text-gray-900 truncate">
+                    {currentThread.name}
+                  </h2>
                   <p className="text-sm text-gray-500">
                     Created: {new Date(currentThread.date).toLocaleString()}
                   </p>
@@ -468,45 +557,53 @@ export default function ThreadedChatWidget() {
                       message.role === 'user' ? 'justify-end' : 'justify-start'
                     }`}
                   >
-                  {message.role === 'assistant' && (
-                    <div className="flex-shrink-0">
-                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                        🤖
-                      </div>
-                    </div>
-                  )}
-                  <div className="flex-1">
-                    <MessageBubble
-                      role={message.role}
-                      message={message.content}
-                      className={message.role === 'user' ? 'text-slate-800' : 'text-gray-900'}
-                    />
-                    {message.sources && message.sources.length > 0 && (
-                      <div className="flex flex-wrap  ml-0 gap-2">
-                        <div className="leading-none font-semibold w-full mb-3 text-sm text-gray-700">
-                          Resources used:
+                    {message.role === 'assistant' && (
+                      <div className="flex-shrink-0">
+                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                          🤖
                         </div>
-                        {message.sources
-                          .filter(
-                            (item, idx, arr) =>
-                              arr.findIndex((t) => t.url === item.url) === idx
-                          )
-                          .map((item, idx) => (
-                            <SourceCardCompact key={`source-${idx}`} item={item} index={idx} />
-                          ))}
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <MessageBubble
+                        role={message.role}
+                        message={message.content}
+                        className={
+                          message.role === 'user'
+                            ? 'text-slate-800'
+                            : 'text-gray-900'
+                        }
+                      />
+                      {message.sources && message.sources.length > 0 && (
+                        <div className="flex flex-wrap  ml-0 gap-2">
+                          <div className="leading-none font-semibold w-full mb-3 text-sm text-gray-700">
+                            Resources used:
+                          </div>
+                          {message.sources
+                            .filter(
+                              (item, idx, arr) =>
+                                arr.findIndex((t) => t.url === item.url) === idx
+                            )
+                            .map((item, idx) => (
+                              <SourceCardCompact
+                                key={`source-${idx}`}
+                                item={item}
+                                index={idx}
+                              />
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                    {message.role === 'user' && (
+                      <div className="flex-shrink-0">
+                        <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                          👤
+                        </div>
                       </div>
                     )}
                   </div>
-                  {message.role === 'user' && (
-                    <div className="flex-shrink-0">
-                      <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                        👤
-                      </div>
-                    </div>
-                  )}
-                  </div>
                 ))}
-                
+
                 {isLoading && (
                   <div className="flex justify-start gap-3">
                     <div className="flex-shrink-0">
@@ -519,7 +616,7 @@ export default function ThreadedChatWidget() {
                     </div>
                   </div>
                 )}
-                
+
                 <div ref={scrollTargetRef} />
               </div>
             </>
@@ -540,11 +637,14 @@ export default function ThreadedChatWidget() {
                   Welcome to AI Chat
                 </h2>
                 <p className="text-gray-600 mb-6">
-                  Start a conversation by creating a new thread or selecting from example questions below.
+                  Start a conversation by creating a new thread or selecting
+                  from example questions below.
                 </p>
-                
+
                 <div className="space-y-2">
-                  <p className="text-sm font-medium text-gray-700 mb-3">Try asking:</p>
+                  <p className="text-sm font-medium text-gray-700 mb-3">
+                    Try asking:
+                  </p>
                   {questionExamples.slice(0, 3).map((question, idx) => (
                     <button
                       key={idx}

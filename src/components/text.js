@@ -50,7 +50,7 @@ function TextsList() {
       .catch((error) => console.log('error', error))
     console.log(res)
   }
-  
+
   const handleRemoveAll = async () => {
     const res = await fetch(`/api/texts`, delRequsetOptions)
       .then((response) => {
@@ -84,10 +84,10 @@ function TextsList() {
       const response = await fetch('/api/texts', postRequestOptions)
       if (response.status === 200) {
         console.log('Text added successfully')
-        
+
         // Reset form state
         setFormState(initialFormState)
-        
+
         // Refresh the data
         fetch(url)
           .then((res) => res.json())
@@ -162,7 +162,10 @@ function TextsList() {
                           </label>
                           <input
                             onChange={(e) =>
-                              setFormState({ ...formState, name: e.target.value })
+                              setFormState({
+                                ...formState,
+                                name: e.target.value,
+                              })
                             }
                             value={formState.name}
                             type="text"
@@ -182,14 +185,19 @@ function TextsList() {
                           </label>
                           <textarea
                             onChange={(e) =>
-                              setFormState({ ...formState, text: e.target.value })
+                              setFormState({
+                                ...formState,
+                                text: e.target.value,
+                              })
                             }
                             rows={10}
                             id="text"
                             value={formState.text}
                             className="block w-full rounded-md border-0 px-3 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-kruze-blueDark sm:text-sm sm:leading-6"
                           ></textarea>
-                          <div className="text-xs text-gray-500 text-right mt-1">{formState.text.length} characters</div>
+                          <div className="text-xs text-gray-500 text-right mt-1">
+                            {formState.text.length} characters
+                          </div>
                         </div>
 
                         <button
@@ -247,9 +255,7 @@ function TextsList() {
 
       <div className="mt-6">
         {data && data.length === 0 ? (
-          <p className="italic opacity-60 text-center">
-            No uploaded items
-          </p>
+          <p className="italic opacity-60 text-center">No uploaded items</p>
         ) : null}
       </div>
       <div>

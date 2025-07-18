@@ -1,4 +1,4 @@
-import { DocumentTextIcon, FileIcon, LinkIcon } from './SidebarIcons';
+import { DocumentTextIcon, FileIcon, LinkIcon } from './SidebarIcons'
 
 /**
  * Common sidebar configuration for content management pages (links, files, texts)
@@ -30,8 +30,8 @@ export const getContentSidebarConfig = (activePage) => {
           label: 'Texts',
           href: '/texts',
           icon: <DocumentTextIcon />,
-        }
-      ]
-    }
-  ];
-};
+        },
+      ],
+    },
+  ]
+}

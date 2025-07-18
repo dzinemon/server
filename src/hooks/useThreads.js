@@ -18,10 +18,13 @@ export function useThreads() {
   }, [])
 
   // Helper function to update threads with automatic localStorage sync
-  const updateThreadsWithStorage = useCallback((newThreads) => {
-    setThreads(newThreads)
-    saveToStorage(newThreads)
-  }, [saveToStorage])
+  const updateThreadsWithStorage = useCallback(
+    (newThreads) => {
+      setThreads(newThreads)
+      saveToStorage(newThreads)
+    },
+    [saveToStorage]
+  )
 
   // Load threads from localStorage on mount
   useEffect(() => {
@@ -64,7 +67,7 @@ export function useThreads() {
   const removeThread = (id) => {
     const updatedThreads = threads.filter((thread) => thread.id !== id)
     updateThreadsWithStorage(updatedThreads)
-    
+
     // Reset current thread if it was the one being removed
     if (currentThreadId === id) {
       setCurrentThreadId(null)
@@ -78,7 +81,8 @@ export function useThreads() {
         return previous
       }
 
-      const updatedThread = typeof updater === 'function' ? updater(currentThread) : updater
+      const updatedThread =
+        typeof updater === 'function' ? updater(currentThread) : updater
       const updatedThreads = [
         ...previous.filter((thread) => thread.id !== threadId),
         updatedThread,

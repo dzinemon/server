@@ -12,12 +12,27 @@ import {
   DocumentMagnifyingGlassIcon,
 } from '@heroicons/react/24/solid'
 
-
 const Loading = () => (
   <div className="flex items-center justify-center h-32">
-    <svg className="animate-spin h-6 w-6 text-blue-500 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+    <svg
+      className="animate-spin h-6 w-6 text-blue-500 mr-2"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      ></circle>
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8v8z"
+      ></path>
     </svg>
     <span className="text-slate-600 text-sm">Loading...</span>
   </div>
@@ -45,16 +60,22 @@ export default function AllQuestionsDataTable() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   // Handle page changes
-  const handlePageChange = useCallback((newPage) => {
-    fetchAllQuestions(newPage, pagination.pageSize, searchTerm)
-    setSelectedItems([]) // Clear selections when changing pages
-  }, [fetchAllQuestions, pagination.pageSize, searchTerm])
+  const handlePageChange = useCallback(
+    (newPage) => {
+      fetchAllQuestions(newPage, pagination.pageSize, searchTerm)
+      setSelectedItems([]) // Clear selections when changing pages
+    },
+    [fetchAllQuestions, pagination.pageSize, searchTerm]
+  )
 
   // Handle page size changes
-  const handlePageSizeChange = useCallback((newPageSize) => {
-    fetchAllQuestions(1, newPageSize, searchTerm) // Reset to page 1 when changing page size
-    setSelectedItems([]) // Clear selections when changing page size
-  }, [fetchAllQuestions, searchTerm])
+  const handlePageSizeChange = useCallback(
+    (newPageSize) => {
+      fetchAllQuestions(1, newPageSize, searchTerm) // Reset to page 1 when changing page size
+      setSelectedItems([]) // Clear selections when changing page size
+    },
+    [fetchAllQuestions, searchTerm]
+  )
 
   // Debounced search effect - trigger for any search term change
   useEffect(() => {
@@ -73,18 +94,21 @@ export default function AllQuestionsDataTable() {
     }
   }, [fetchAllQuestions, pagination.pageSize, isInitialized])
 
-  const handleSetCurrentQuestion = useCallback(async (id) => {
-    const existingItem = fetchedItems.find((item) => item.id === id)
-    if (existingItem) {
-      setItemToRemove(existingItem)
-    } else {
-      const res = await fetchQuestionById(id)
-      console.log(res)
-      setItemToRemove(res)
-      setFetchedItems((prev) => [...prev, res])
-    }
-    setIsDialogOpen(true)
-  }, [fetchedItems, fetchQuestionById])
+  const handleSetCurrentQuestion = useCallback(
+    async (id) => {
+      const existingItem = fetchedItems.find((item) => item.id === id)
+      if (existingItem) {
+        setItemToRemove(existingItem)
+      } else {
+        const res = await fetchQuestionById(id)
+        console.log(res)
+        setItemToRemove(res)
+        setFetchedItems((prev) => [...prev, res])
+      }
+      setIsDialogOpen(true)
+    },
+    [fetchedItems, fetchQuestionById]
+  )
 
   const handleRemove = async (id) => {
     try {
@@ -105,7 +129,7 @@ export default function AllQuestionsDataTable() {
     if (loading) {
       return <Loading />
     }
-    
+
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
@@ -190,7 +214,10 @@ export default function AllQuestionsDataTable() {
                         setSelectedItems([])
                       }
                     }}
-                    checked={selectedItems.length === allQuestions.length && allQuestions.length > 0}
+                    checked={
+                      selectedItems.length === allQuestions.length &&
+                      allQuestions.length > 0
+                    }
                   />
                 </th>
                 <th className="px-2 py-1 border">Id</th>
@@ -332,7 +359,6 @@ export default function AllQuestionsDataTable() {
           setOpen={setIsDialogOpen}
         />
       </Suspense>
-      
     </>
   )
 }

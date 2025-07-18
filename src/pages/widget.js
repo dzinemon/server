@@ -10,9 +10,9 @@ import { useQAAPI } from '@/hooks/useAPI'
 import { usedModel } from '../../utils/hardcoded'
 
 // Lazy load the QuestionSearchResult component
-const QuestionSearchResult = lazy(() => 
-  import('../components/web-widget/question-search-result').then(module => ({
-    default: module.default
+const QuestionSearchResult = lazy(() =>
+  import('../components/web-widget/question-search-result').then((module) => ({
+    default: module.default,
   }))
 )
 
@@ -32,13 +32,9 @@ const questionExamples = [
   'How much time do you spend monthly doing bookkeeping?',
   'Who are good bookkeepers in Mountain View CA?',
   'Which tools should every startup CFO know/use?',
-  
 ]
 
-const searchExamples = [
-  'C-Corp Tax Deadlines 2025',
-  'Top pre-seed funds',
-]
+const searchExamples = ['C-Corp Tax Deadlines 2025', 'Top pre-seed funds']
 
 const limitSearchAttempts = 20
 
@@ -70,7 +66,13 @@ const QuestionSearchResultSkeleton = () => (
 
 export default function ChatWidget() {
   const router = useRouter()
-  const { isLoading, setIsLoading, getEmbeddingAndPrompt, getCompletion, saveQuestionAnswer } = useQAAPI()
+  const {
+    isLoading,
+    setIsLoading,
+    getEmbeddingAndPrompt,
+    getCompletion,
+    saveQuestionAnswer,
+  } = useQAAPI()
   const scrollTargetRef = useRef(null)
   const [isAccepted, setIsAccepted] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
@@ -247,11 +249,7 @@ export default function ChatWidget() {
       })
 
       // Save to database
-      await saveQuestionAnswer(
-        question,
-        completion,
-        JSON.stringify(sources)
-      )
+      await saveQuestionAnswer(question, completion, JSON.stringify(sources))
     } catch (error) {
       console.error('Error in askQuestion flow:', error)
       toast(error.message || 'Error processing your question', {
@@ -310,8 +308,8 @@ export default function ChatWidget() {
           {questions.length > 0
             ? questions.map((item, idx, arr) => {
                 return (
-                  <Suspense 
-                    key={`qsr-${idx}`} 
+                  <Suspense
+                    key={`qsr-${idx}`}
                     fallback={<QuestionSearchResultSkeleton />}
                   >
                     <QuestionSearchResult

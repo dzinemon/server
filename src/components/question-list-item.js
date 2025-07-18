@@ -9,7 +9,7 @@ import {
   ChevronDownIcon,
   DocumentTextIcon,
   TrashIcon,
-  XMarkIcon
+  XMarkIcon,
 } from '@heroicons/react/24/solid'
 
 import ReactMarkdown from 'react-markdown'
@@ -85,7 +85,11 @@ export default function QuestionListItem({ question, onClick, id }) {
                 >
                   {resources &&
                     resources.map((item, idx) => (
-                      <SourceCard key={`source-${idx}`} item={item} index={idx} />
+                      <SourceCard
+                        key={`source-${idx}`}
+                        item={item}
+                        index={idx}
+                      />
                     ))}
                 </div>
 

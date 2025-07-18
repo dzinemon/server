@@ -235,8 +235,8 @@ function LinksList() {
                 </div>
                 {formState.internal && (
                   <p className="ml-6 mt-1 text-xs text-gray-500 italic">
-                    These submitted resources/URLs will be used for
-                    answering questions on Internal Chat only
+                    These submitted resources/URLs will be used for answering
+                    questions on Internal Chat only
                   </p>
                 )}
               </div>
@@ -251,13 +251,11 @@ function LinksList() {
         </form>
       </div>
       <div className="mt-6">
-        {
-          isLoading && (
-            <div className="flex justify-center items-center">
-              <Loading />
-            </div>
-          )
-        }
+        {isLoading && (
+          <div className="flex justify-center items-center">
+            <Loading />
+          </div>
+        )}
 
         {data && data.length === 0 ? (
           <p className="italic opacity-60 text-center">No uploaded URLs</p>

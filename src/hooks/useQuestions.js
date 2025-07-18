@@ -16,10 +16,13 @@ export function useQuestions() {
   }, [])
 
   // Helper function to update questions with automatic localStorage sync
-  const updateQuestionsWithStorage = useCallback((newQuestions) => {
-    setQuestions(newQuestions)
-    saveToStorage(newQuestions)
-  }, [saveToStorage])
+  const updateQuestionsWithStorage = useCallback(
+    (newQuestions) => {
+      setQuestions(newQuestions)
+      saveToStorage(newQuestions)
+    },
+    [saveToStorage]
+  )
 
   // Load questions from localStorage on mount
   useEffect(() => {
@@ -41,10 +44,10 @@ export function useQuestions() {
   }, [questions, saveToStorage])
 
   const addQuestion = (questionText) => {
-    const newQuestion = { 
-      question: questionText, 
-      answer: '', 
-      sources: [] 
+    const newQuestion = {
+      question: questionText,
+      answer: '',
+      sources: [],
     }
     const newQuestions = [...questions, newQuestion]
     updateQuestionsWithStorage(newQuestions)
@@ -53,7 +56,7 @@ export function useQuestions() {
   }
 
   const updateQuestionSources = (questionIndex, sources) => {
-    setQuestions(previous => {
+    setQuestions((previous) => {
       const updated = [...previous]
       updated[questionIndex] = { ...updated[questionIndex], sources }
       saveToStorage(updated)
@@ -62,7 +65,7 @@ export function useQuestions() {
   }
 
   const updateQuestionAnswer = (questionIndex, answer) => {
-    setQuestions(previous => {
+    setQuestions((previous) => {
       const updated = [...previous]
       updated[questionIndex] = { ...updated[questionIndex], answer }
       saveToStorage(updated)
@@ -72,18 +75,21 @@ export function useQuestions() {
   }
 
   // Helper function to update question properties
-  const updateQuestionProperty = useCallback((questionText, property, value) => {
-    setQuestions(previous => {
-      const updated = previous.map((item) => {
-        if (item.question === questionText) {
-          return { ...item, [property]: value }
-        }
-        return item
+  const updateQuestionProperty = useCallback(
+    (questionText, property, value) => {
+      setQuestions((previous) => {
+        const updated = previous.map((item) => {
+          if (item.question === questionText) {
+            return { ...item, [property]: value }
+          }
+          return item
+        })
+        saveToStorage(updated)
+        return updated
       })
-      saveToStorage(updated)
-      return updated
-    })
-  }, [saveToStorage])
+    },
+    [saveToStorage]
+  )
 
   const handleLike = (question) => {
     updateQuestionProperty(question.question, 'like', true)

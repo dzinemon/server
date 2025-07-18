@@ -31,12 +31,8 @@ export default function ChatWidget() {
     clearQuestions,
   } = useQuestions()
 
-  const {
-    isLoading,
-    setIsLoading,
-    getEmbeddingAndPrompt,
-    getCompletion,
-  } = useQAAPI()
+  const { isLoading, setIsLoading, getEmbeddingAndPrompt, getCompletion } =
+    useQAAPI()
 
   const [question, setQuestion] = useState('')
 
@@ -71,20 +67,20 @@ export default function ChatWidget() {
 
     const questionIndex = questions.length
     addQuestion(question)
-    
+
     // Set attempt date and clear input
     setQuestion('')
     if (window.gtag !== undefined) {
       console.log('gtag')
     }
-    
+
     handleScrollIntoView()
     setIsLoading(true)
 
     // Get embedding and sources
     const { sources, prompt } = await getEmbeddingAndPrompt(
-      question, 
-      filterBySourceArray, 
+      question,
+      filterBySourceArray,
       filterByTypeArray
     )
 

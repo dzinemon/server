@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { useRouter } from 'next/router';
-import { useSession } from 'next-auth/react'; // Added for auth check
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { useRouter } from 'next/router'
+import { useSession } from 'next-auth/react' // Added for auth check
 
 import {
   LinkIcon,
@@ -21,22 +21,22 @@ export const sidebarSections = [
     items: [
       {
         label: 'Links',
-        href: '/links'
+        href: '/links',
       },
       {
         label: 'Files (CSV)',
-        href: '/files-csv'
+        href: '/files-csv',
       },
       {
         label: 'Files (PDF)',
-        href: '/files-pdf'
+        href: '/files-pdf',
       },
       {
         label: 'Texts',
-        href: '/texts'
-      }
-    ]
-  }
+        href: '/texts',
+      },
+    ],
+  },
 ]
 
 /**
@@ -52,17 +52,16 @@ const SidebarNavItem = ({ href, children, isActive }) => {
           : 'text-gray-600 hover:bg-gray-100'
       }`}
     >
-      
       {children}
     </Link>
-  );
-};
+  )
+}
 
 /**
  * Collapsible sidebar section component
  */
 const SidebarSection = ({ title, children, defaultOpen = true }) => {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [isOpen, setIsOpen] = useState(defaultOpen)
 
   return (
     <div className="px-3 py-2">
@@ -72,7 +71,9 @@ const SidebarSection = ({ title, children, defaultOpen = true }) => {
       >
         <span>{title}</span>
         <svg
-          className={`h-5 w-5 transition-transform ${isOpen ? 'rotate-90' : ''}`}
+          className={`h-5 w-5 transition-transform ${
+            isOpen ? 'rotate-90' : ''
+          }`}
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 20 20"
           fill="currentColor"
@@ -86,8 +87,8 @@ const SidebarSection = ({ title, children, defaultOpen = true }) => {
       </button>
       {isOpen && <div className="mt-2 space-y-1">{children}</div>}
     </div>
-  );
-};
+  )
+}
 
 /**
  * Sidebar layout component
@@ -97,25 +98,25 @@ const SidebarSection = ({ title, children, defaultOpen = true }) => {
  * @param {function} props.toggleSidebar - Function to toggle sidebar visibility
  * @param {Array} props.sidebarSections - Array of section objects with title and items
  */
-export default function SidebarLayout({ children}) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const router = useRouter();
-  const { data: session, status } = useSession(); // Use session
+export default function SidebarLayout({ children }) {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const router = useRouter()
+  const { data: session, status } = useSession() // Use session
 
   // Always call hooks first
   useEffect(() => {
     const handleRouteChange = () => {
-      setSidebarOpen(false);
-    };
-    router.events.on('routeChangeComplete', handleRouteChange);
+      setSidebarOpen(false)
+    }
+    router.events.on('routeChangeComplete', handleRouteChange)
     return () => {
-      router.events.off('routeChangeComplete', handleRouteChange);
-    };
-  }, [router.events]);
+      router.events.off('routeChangeComplete', handleRouteChange)
+    }
+  }, [router.events])
 
   // Show loading or nothing while session is loading
   if (status === 'loading') {
-    return null;
+    return null
   }
 
   // If not logged in, show nothing (or you can redirect or show a message)
@@ -125,20 +126,20 @@ export default function SidebarLayout({ children}) {
         Not signed in <br />
         <button
           className="hover:bg-sky-700 text-sm font-semibold leading-6  text-gray-100 px-6 bg-sky-600 rounded-lg py-2 mx-5"
-          onClick={() => import('next-auth/react').then(mod => mod.signIn())}
+          onClick={() => import('next-auth/react').then((mod) => mod.signIn())}
         >
           Sign in
         </button>
       </div>
-    );
+    )
   }
 
   return (
     <div className="h-full flex overflow-hidden bg-white">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-gray-600 bg-opacity-50 z-20 lg:hidden" 
+        <div
+          className="fixed inset-0 bg-gray-600 bg-opacity-50 z-20 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -158,21 +159,37 @@ export default function SidebarLayout({ children}) {
               height={20}
               className="w-auto h-6"
             />
-            <span className="ml-2 text-lg font-semibold text-gray-800">Kruze</span>
+            <span className="ml-2 text-lg font-semibold text-gray-800">
+              Kruze
+            </span>
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}
             className="p-1 text-gray-400 hover:text-gray-500 focus:outline-none"
           >
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4">
           {sidebarSections.map((section, idx) => (
-            <SidebarSection key={`mobile-section-${idx}`} title={section.title} defaultOpen={section.defaultOpen}>
+            <SidebarSection
+              key={`mobile-section-${idx}`}
+              title={section.title}
+              defaultOpen={section.defaultOpen}
+            >
               {section.items.map((item, itemIdx) => (
                 <SidebarNavItem
                   key={`mobile-item-${idx}-${itemIdx}`}
@@ -199,17 +216,23 @@ export default function SidebarLayout({ children}) {
                 height={20}
                 className="w-auto h-6"
               />
-              <span className="ml-2 text-lg font-semibold text-gray-800">Kruze</span>
+              <span className="ml-2 text-lg font-semibold text-gray-800">
+                Kruze
+              </span>
             </Link>
           </div>
           <div className="flex-1 flex flex-col overflow-y-auto">
             <div className="px-4 py-4">
               {sidebarSections.map((section, idx) => (
-                <SidebarSection key={`desktop-section-${idx}`} title={section.title} defaultOpen={section.defaultOpen}>
+                <SidebarSection
+                  key={`desktop-section-${idx}`}
+                  title={section.title}
+                  defaultOpen={section.defaultOpen}
+                >
                   {section.items.map((item, itemIdx) => (
                     <SidebarNavItem
                       key={`desktop-item-${idx}-${itemIdx}`}
-                      href={item.href} 
+                      href={item.href}
                       isActive={router.pathname === item.href}
                     >
                       {item.label}
@@ -232,7 +255,12 @@ export default function SidebarLayout({ children}) {
               onClick={() => setSidebarOpen(true)}
             >
               <span className="sr-only">Open sidebar</span>
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -249,7 +277,9 @@ export default function SidebarLayout({ children}) {
                 height={20}
                 className="w-auto h-6"
               />
-              <span className="ml-2 text-lg font-semibold text-gray-800">Kruze</span>
+              <span className="ml-2 text-lg font-semibold text-gray-800">
+                Kruze
+              </span>
             </div>
             <div className="w-6"></div> {/* Empty div for centering */}
           </div>
@@ -261,5 +291,5 @@ export default function SidebarLayout({ children}) {
         </main>
       </div>
     </div>
-  );
+  )
 }

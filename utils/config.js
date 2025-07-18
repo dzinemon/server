@@ -16,9 +16,10 @@ const config = {
 }
 
 // Export the appropriate configuration based on the environment
-const baseConfig = process.env.NEXT_PUBLIC_VERCEL_ENV === 'production'
-  ? config.production
-  : config.staging
+const baseConfig =
+  process.env.NEXT_PUBLIC_VERCEL_ENV === 'production'
+    ? config.production
+    : config.staging
 
 module.exports = {
   ...baseConfig,

@@ -7,7 +7,7 @@ import {
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
-  useReactTable
+  useReactTable,
 } from '@tanstack/react-table'
 
 import {
@@ -23,10 +23,7 @@ import DialogModal from './DialogModal'
 
 const columnHelper = createColumnHelper()
 
-export default function DataTable({ 
-  items, 
-  actions = []
-}) {
+export default function DataTable({ items, actions = [] }) {
   const [itemToRemove, setItemToRemove] = useState({})
 
   const [selectedItems, setSelectedItems] = useState([])
@@ -46,10 +43,10 @@ export default function DataTable({
   }, [items])
 
   // Get actions that support bulk operations
-  const bulkActions = actions.filter(action => action.showInBulk)
+  const bulkActions = actions.filter((action) => action.showInBulk)
 
   // Get the remove action for confirmation modal
-  const removeAction = actions.find(action => action.key === 'remove')
+  const removeAction = actions.find((action) => action.key === 'remove')
 
   const [pagination, setPagination] = useState({
     pageIndex: 0, //initial page index
@@ -180,9 +177,11 @@ export default function DataTable({
                         })
                         setSelectedItems([])
                       }}
-                      className={action.className || "ml-2"}
+                      className={action.className || 'ml-2'}
                     >
-                      <IconComponent className={action.iconClassName || "w-4 h-4 inline"} />
+                      <IconComponent
+                        className={action.iconClassName || 'w-4 h-4 inline'}
+                      />
                     </button>
                   )
                 })}
@@ -200,22 +199,40 @@ export default function DataTable({
                     type="checkbox"
                     id={`select-header-${idx}`}
                     onChange={(e) => {
-                      const currentPageItems = table.getRowModel().rows.map(row => row.original.id)
+                      const currentPageItems = table
+                        .getRowModel()
+                        .rows.map((row) => row.original.id)
                       if (e.target.checked) {
                         // Add current page items to selection (avoiding duplicates)
-                        setSelectedItems(prev => [...new Set([...prev, ...currentPageItems])])
+                        setSelectedItems((prev) => [
+                          ...new Set([...prev, ...currentPageItems]),
+                        ])
                       } else {
                         // Remove current page items from selection
-                        setSelectedItems(prev => prev.filter(id => !currentPageItems.includes(id)))
+                        setSelectedItems((prev) =>
+                          prev.filter((id) => !currentPageItems.includes(id))
+                        )
                       }
                     }}
                     checked={
-                      table.getRowModel().rows.length > 0 && 
-                      table.getRowModel().rows.every(row => selectedItems.includes(row.original.id))
+                      table.getRowModel().rows.length > 0 &&
+                      table
+                        .getRowModel()
+                        .rows.every((row) =>
+                          selectedItems.includes(row.original.id)
+                        )
                     }
                     indeterminate={
-                      table.getRowModel().rows.some(row => selectedItems.includes(row.original.id)) &&
-                      !table.getRowModel().rows.every(row => selectedItems.includes(row.original.id))
+                      table
+                        .getRowModel()
+                        .rows.some((row) =>
+                          selectedItems.includes(row.original.id)
+                        ) &&
+                      !table
+                        .getRowModel()
+                        .rows.every((row) =>
+                          selectedItems.includes(row.original.id)
+                        )
                     }
                   />
                 </th>
@@ -272,7 +289,9 @@ export default function DataTable({
                       return (
                         <IconComponent
                           key={action.key}
-                          className={action.iconClassName || "w-4 h-4 cursor-pointer"}
+                          className={
+                            action.iconClassName || 'w-4 h-4 cursor-pointer'
+                          }
                           title={action.title}
                           aria-label={action.title}
                           onClick={() => {
@@ -369,9 +388,7 @@ export default function DataTable({
             Item Will be deleted permanently. Are you sure you want to delete
             this item?
           </p>
-          { 
-            itemToRemove
-           && itemToRemove.id && (
+          {itemToRemove && itemToRemove.id && (
             <div>
               <p className="text-slate-700">{itemToRemove.name}</p>
               <p className="text-xs text-slate-500">
@@ -386,9 +403,7 @@ export default function DataTable({
           <button
             type="button"
             className="inline-flex justify-center rounded-md border border-transparent bg-gray-100 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
-            onClick={
-              () => setIsDialogOpen(false)
-            }
+            onClick={() => setIsDialogOpen(false)}
           >
             Cancel
           </button>
@@ -403,10 +418,7 @@ export default function DataTable({
               setIsDialogOpen(false)
             }}
           >
-            <TrashIcon
-              className="h-4 w-4 text-rose-500"
-            />{' '}
-            Yes Remove
+            <TrashIcon className="h-4 w-4 text-rose-500" /> Yes Remove
           </button>
         </div>
       </DialogModal>

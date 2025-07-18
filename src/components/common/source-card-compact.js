@@ -53,13 +53,13 @@ const SourceCardCompact = ({ item, index }) => {
                   <Type data={item.type} />
                 </div>
               </div>
-              
+
               {/* Title */}
               <h4 className="text-sm font-medium text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors">
                 {item.title}
               </h4>
             </div>
-            
+
             {/* External Link Icon */}
             <div className="flex-shrink-0 text-gray-400 group-hover:text-blue-600 transition-colors">
               <ArrowTopRightOnSquareIcon className="w-4 h-4 -ml-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-200" />

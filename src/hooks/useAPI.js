@@ -11,7 +11,14 @@ export function useAPI() {
   myHeaders.append('Content-Type', 'application/json')
 
   // Common API request handler
-  const makeAPIRequest = async (endpoint, body, successMessage, errorMessage, defaultReturn, expectedStatus = 200) => {
+  const makeAPIRequest = async (
+    endpoint,
+    body,
+    successMessage,
+    errorMessage,
+    defaultReturn,
+    expectedStatus = 200
+  ) => {
     const requestOptions = {
       method: 'POST',
       headers: myHeaders,
@@ -21,7 +28,7 @@ export function useAPI() {
 
     try {
       const response = await fetch(endpoint, requestOptions)
-      
+
       if (response.status === expectedStatus) {
         console.log('post success')
         if (successMessage) {
@@ -31,7 +38,7 @@ export function useAPI() {
           })
         }
       }
-      
+
       const result = await response.json()
       return result
     } catch (error) {
@@ -87,7 +94,11 @@ export function useAPI() {
   }
 
   // Q&A API methods
-  const getEmbeddingAndPrompt = async (question, sourceFilters, typeFilters) => {
+  const getEmbeddingAndPrompt = async (
+    question,
+    sourceFilters,
+    typeFilters
+  ) => {
     const result = await makeAPIRequest(
       '/api/openai/embedding',
       {
@@ -110,7 +121,8 @@ export function useAPI() {
         messages: [
           {
             role: 'system',
-            content: 'You are a helpful startup tax, accounting and bookkeeping assistant.',
+            content:
+              'You are a helpful startup tax, accounting and bookkeeping assistant.',
           },
           { role: 'user', content: prompt },
         ],
@@ -147,18 +159,18 @@ export function useAPI() {
     setIsLoading,
     currentSources,
     setCurrentSources,
-    
+
     // Internal Chat API methods
     getEmbedding,
     getData,
     getCompletion,
-    
+
     // Q&A API methods
     getEmbeddingAndPrompt,
     getSingleCompletion,
-    
+
     // Common utility methods
-    saveQuestionAnswer
+    saveQuestionAnswer,
   }
 }
 

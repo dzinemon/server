@@ -15,7 +15,7 @@ import {
   ArrowPathIcon,
   ChevronDoubleLeftIcon,
   ChevronDoubleRightIcon,
-  SquaresPlusIcon
+  SquaresPlusIcon,
 } from '@heroicons/react/24/solid'
 
 import LoadingIndicator, {
@@ -90,10 +90,7 @@ export default function InternalChatPage() {
 
   const handleAddNewThread = () => {
     // prevent from creating multiple empty threads
-    if (
-      threads.length === 0 ||
-      currentThread?.name !== 'New Thread'
-    ) {
+    if (threads.length === 0 || currentThread?.name !== 'New Thread') {
       const newThread = addNewThread()
       handleScrollIntoView()
       setSideBarOpen(false)
@@ -126,28 +123,34 @@ export default function InternalChatPage() {
     handleScrollIntoView()
 
     // Create user messages array with previous user messages
-    const userMessages = currentThread?.messages
-      ?.filter((message) => message.role === 'user')
-      ?.map((message) => message.content) || []
+    const userMessages =
+      currentThread?.messages
+        ?.filter((message) => message.role === 'user')
+        ?.map((message) => message.content) || []
 
     const embedding = await getEmbedding(userMessage)
     console.log('embedding-------start')
     console.log(embedding)
     console.log('embedding-------end')
 
-    const data = await getData(embedding, filterBySourceArray, filterByTypeArray)
+    const data = await getData(
+      embedding,
+      filterBySourceArray,
+      filterByTypeArray
+    )
 
-    const sources = data.matches?.map((match) => {
-      return {
-        id: match.metadata.id,
-        title: match.metadata.title,
-        type: match.metadata.type,
-        image: match.metadata.image || '',
-        source: match.metadata.source,
-        url: match.metadata.url,
-        score: match.score,
-      }
-    }) || []
+    const sources =
+      data.matches?.map((match) => {
+        return {
+          id: match.metadata.id,
+          title: match.metadata.title,
+          type: match.metadata.type,
+          image: match.metadata.image || '',
+          source: match.metadata.source,
+          url: match.metadata.url,
+          score: match.score,
+        }
+      }) || []
 
     setCurrentSources(sources)
     handleScrollIntoView()
@@ -354,7 +357,10 @@ export default function InternalChatPage() {
                             role={message.role}
                             message={message.content}
                             onRemove={() => {
-                              removeMessageFromThread(currentThreadId, message.content)
+                              removeMessageFromThread(
+                                currentThreadId,
+                                message.content
+                              )
                             }}
                           />
                           {message.sources && (
@@ -372,7 +378,11 @@ export default function InternalChatPage() {
                                     idx
                                 )
                                 .map((item, idx) => (
-                                  <SourceCard key={`source-${idx}`} item={item} index={idx} />
+                                  <SourceCard
+                                    key={`source-${idx}`}
+                                    item={item}
+                                    index={idx}
+                                  />
                                 ))}
                             </div>
                           )}

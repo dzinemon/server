@@ -7,46 +7,46 @@
  */
 export function parseUrls(input) {
   if (!input || typeof input !== 'string') {
-    return [];
+    return []
   }
 
   // Step 1: Handle different separators (newlines, commas, spaces)
-  let urls = [];
+  let urls = []
   if (input.includes('\n')) {
-    urls = input.split('\n');
+    urls = input.split('\n')
   } else if (input.includes(',')) {
-    urls = input.split(',');
+    urls = input.split(',')
   } else {
-    urls = input.split(' ');
+    urls = input.split(' ')
   }
 
   // Step 2: Clean up each URL
   urls = urls
-    .map(url => url.trim())
-    .filter(url => url.length > 0)
-    .filter(url => {
+    .map((url) => url.trim())
+    .filter((url) => url.length > 0)
+    .filter((url) => {
       try {
-        new URL(url);
-        return true;
+        new URL(url)
+        return true
       } catch {
         try {
           if (!url.startsWith('http://') && !url.startsWith('https://')) {
-            new URL(`https://${url}`);
-            return true;
+            new URL(`https://${url}`)
+            return true
           }
-          return false;
+          return false
         } catch {
-          return false;
+          return false
         }
       }
     })
-    .map(url => {
+    .map((url) => {
       if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        return `https://${url}`;
+        return `https://${url}`
       }
-      return url;
-    });
+      return url
+    })
 
   // Step 3: Remove duplicates
-  return [...new Set(urls)];
+  return [...new Set(urls)]
 }

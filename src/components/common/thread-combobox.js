@@ -1,6 +1,10 @@
 import { useState } from 'react'
 
-export default function ThreadCombobox({ threads, currentThreadId, setCurrentThreadId }) {
+export default function ThreadCombobox({
+  threads,
+  currentThreadId,
+  setCurrentThreadId,
+}) {
   const [query, setQuery] = useState('')
 
   const filteredThreads =

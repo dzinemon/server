@@ -41,39 +41,48 @@ export const ResourceProvider = ({ children }) => {
   const [searchTerm, setSearchTerm] = useState('')
   const [isInitialized, setIsInitialized] = useState(false)
 
-  const fetchAllQuestions = async (page = 1, pageSize = paginationConfig.defaultPageSize, search = '', showSuccessToast = false) => {
+  const fetchAllQuestions = async (
+    page = 1,
+    pageSize = paginationConfig.defaultPageSize,
+    search = '',
+    showSuccessToast = false
+  ) => {
     // Prevent multiple simultaneous loads
     if (loading) return
-    
+
     setLoading(true)
     try {
       const params = new URLSearchParams({
         page: page.toString(),
         pageSize: pageSize.toString(),
       })
-      
+
       if (search) {
         params.append('search', search)
       }
-      
-      const res = await fetch(`${url}?${params}`, { next: { revalidate: 86400 } })
-      const response = await res.json()
-      
-      setAllQuestions(response.data || [])
-      setPagination(response.pagination || {
-        currentPage: 1,
-        pageSize: paginationConfig.defaultPageSize,
-        totalItems: 0,
-        totalPages: 0,
-        hasNextPage: false,
-        hasPreviousPage: false,
+
+      const res = await fetch(`${url}?${params}`, {
+        next: { revalidate: 86400 },
       })
-      
+      const response = await res.json()
+
+      setAllQuestions(response.data || [])
+      setPagination(
+        response.pagination || {
+          currentPage: 1,
+          pageSize: paginationConfig.defaultPageSize,
+          totalItems: 0,
+          totalPages: 0,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        }
+      )
+
       // Mark as initialized after first successful load
       if (!isInitialized) {
         setIsInitialized(true)
       }
-      
+
       // Only show success toast when explicitly requested (like manual refresh)
       if (showSuccessToast) {
         toast.success('Questions loaded', {
@@ -103,7 +112,11 @@ export const ResourceProvider = ({ children }) => {
       await res.json()
 
       // Refresh the current page after deletion
-      await fetchAllQuestions(pagination.currentPage, pagination.pageSize, searchTerm)
+      await fetchAllQuestions(
+        pagination.currentPage,
+        pagination.pageSize,
+        searchTerm
+      )
 
       toast.success('Questions deleted', {
         icon: '🗑️',
@@ -154,10 +167,14 @@ export const ResourceProvider = ({ children }) => {
         headers: myHeaders,
       })
       const data = await res.json()
-      
+
       // Refresh the current page after deletion
-      await fetchAllQuestions(pagination.currentPage, pagination.pageSize, searchTerm)
-      
+      await fetchAllQuestions(
+        pagination.currentPage,
+        pagination.pageSize,
+        searchTerm
+      )
+
       console.log(data)
       toast.success('Question deleted', {
         icon: '🗑️',

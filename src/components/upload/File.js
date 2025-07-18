@@ -25,7 +25,6 @@ const Upload = () => {
     redirect: 'follow',
   }
 
-
   const handleRemove = async (id) => {
     // Find the item to get its uuids
     const item = data.find((item) => item.id === id)
@@ -36,12 +35,12 @@ const Upload = () => {
         `/api/upload-csv/${id}?ids=${JSON.stringify(item.uuids)}`,
         delRequsetOptions
       )
-      
+
       if (res.status === 200) {
         console.log(`deleted item with id ${id} successfully`)
         const newData = data.filter((item) => item.id !== id)
         setData(newData)
-        
+
         toast.success(`Removed item ${item.name} successfully!`, {
           duration: 2000,
           icon: '✅',
@@ -67,8 +66,8 @@ const Upload = () => {
       title: 'Remove Item',
       handler: handleRemove,
       showInBulk: true,
-      className: 'ml-2'
-    }
+      className: 'ml-2',
+    },
   ]
 
   const handleFileChange = (e) => {
@@ -156,18 +155,17 @@ const Upload = () => {
     }
   }, [])
 
-
-
   return (
     <div className="space-y-4">
-      <div className='p-4 bg-slate-200 rounded-lg '>
+      <div className="p-4 bg-slate-200 rounded-lg ">
         <div className="grid gap-4 grid-cols-1 lg:grid-cols-3 bg-white p-3 rounded-xl">
           <div>
             <h2 className="text-lg font-semibold text-gray-900">
               Upload a CSV
             </h2>
             <p className="text-sm text-gray-500">
-              file with the following columns: <strong>url</strong>, <strong>title</strong>, <strong>text</strong>
+              file with the following columns: <strong>url</strong>,{' '}
+              <strong>title</strong>, <strong>text</strong>
             </p>
             <input
               type="file"
@@ -182,7 +180,9 @@ const Upload = () => {
             />
           </div>
           <label className="bg-slate-100 rounded-md p-3 block">
-            <span className="w-full block">Selected Filter: {currentSource}</span>
+            <span className="w-full block">
+              Selected Filter: {currentSource}
+            </span>
             <select
               className="block w-full rounded-md border-0 px-3 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-kruze-blueDark sm:text-sm sm:leading-6"
               name="filter"

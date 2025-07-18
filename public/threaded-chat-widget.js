@@ -134,13 +134,15 @@
     document.body.appendChild(chatWidget)
 
     const btn = document.getElementById('btn-trigger-threaded-chat')
-    const btn_section = document.getElementById('btn-trigger-threaded-chat-section')
+    const btn_section = document.getElementById(
+      'btn-trigger-threaded-chat-section'
+    )
     const btn_close_chat = document.getElementById('btn-close-threaded-chat')
     const frameWidget = document.getElementById('threaded-chat-frame-widget')
     const threadCountBadge = document.getElementById('thread-count-badge')
 
     // Listen for messages from the iframe to update thread count
-    window.addEventListener('message', function(event) {
+    window.addEventListener('message', function (event) {
       if (event.data.type === 'THREAD_COUNT_UPDATE') {
         const count = event.data.count
         if (count > 0) {
@@ -153,7 +155,9 @@
     })
 
     // Check for buttons with class 'btn-trigger-threaded-chat' and add event listeners
-    const buttonsByClass = document.getElementsByClassName('btn-trigger-threaded-chat')
+    const buttonsByClass = document.getElementsByClassName(
+      'btn-trigger-threaded-chat'
+    )
     if (buttonsByClass.length > 0) {
       for (let i = 0; i < buttonsByClass.length; i++) {
         const btn = buttonsByClass[i]
@@ -178,28 +182,33 @@
     })
 
     function openWidget() {
-      btn.innerHTML = components.icon_close + '<span class="threaded-chat-badge" id="thread-count-badge" style="display: none;">0</span>'
+      btn.innerHTML =
+        components.icon_close +
+        '<span class="threaded-chat-badge" id="thread-count-badge" style="display: none;">0</span>'
       document.body.style.overflowY = 'hidden'
       btn_close_chat.style.display = 'block'
 
       frameWidget.style.display = 'block'
       setTimeout(() => {
-        frameWidget.style.transform = 'translate(0%, 0%) skewY(0deg) scale(1) rotate(0deg)'
+        frameWidget.style.transform =
+          'translate(0%, 0%) skewY(0deg) scale(1) rotate(0deg)'
         frameWidget.style.opacity = '1'
       }, 100)
     }
 
     function closeWidget() {
       const currentBadgeText = threadCountBadge.textContent
-      const badgeHtml = threadCountBadge.style.display !== 'none' 
-        ? `<span class="threaded-chat-badge" id="thread-count-badge" style="display: flex;">${currentBadgeText}</span>`
-        : '<span class="threaded-chat-badge" id="thread-count-badge" style="display: none;">0</span>'
-      
+      const badgeHtml =
+        threadCountBadge.style.display !== 'none'
+          ? `<span class="threaded-chat-badge" id="thread-count-badge" style="display: flex;">${currentBadgeText}</span>`
+          : '<span class="threaded-chat-badge" id="thread-count-badge" style="display: none;">0</span>'
+
       btn.innerHTML = components.icon_threads + badgeHtml
       document.body.style.overflowY = 'auto'
       btn_close_chat.style.display = 'none'
 
-      frameWidget.style.transform = 'translate(3%,3%) skewY(-3deg) scale(0.5) rotate(6deg)'
+      frameWidget.style.transform =
+        'translate(3%,3%) skewY(-3deg) scale(0.5) rotate(6deg)'
       frameWidget.style.opacity = '0'
       setTimeout(() => {
         frameWidget.style.display = 'none'
@@ -207,7 +216,10 @@
     }
 
     btn.addEventListener('click', () => {
-      if (frameWidget.style.display === 'none' || frameWidget.style.display === '') {
+      if (
+        frameWidget.style.display === 'none' ||
+        frameWidget.style.display === ''
+      ) {
         openWidget()
       } else {
         closeWidget()
@@ -217,7 +229,10 @@
     // Add event listener for the section button from the main page
     if (btn_section) {
       btn_section.addEventListener('click', () => {
-        if (frameWidget.style.display === 'none' || frameWidget.style.display === '') {
+        if (
+          frameWidget.style.display === 'none' ||
+          frameWidget.style.display === ''
+        ) {
           openWidget()
         } else {
           closeWidget()
@@ -227,7 +242,9 @@
 
     // Initialize thread count from localStorage
     try {
-      const localThreads = JSON.parse(localStorage.getItem('threadedChatThreads') || '[]')
+      const localThreads = JSON.parse(
+        localStorage.getItem('threadedChatThreads') || '[]'
+      )
       if (localThreads.length > 0) {
         threadCountBadge.textContent = localThreads.length
         threadCountBadge.style.display = 'flex'

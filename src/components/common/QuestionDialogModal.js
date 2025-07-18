@@ -1,16 +1,10 @@
 import { Dialog, Menu, Transition } from '@headlessui/react'
-import {
-  EnvelopeIcon,
-  TrashIcon
-} from '@heroicons/react/24/solid'
+import { EnvelopeIcon, TrashIcon } from '@heroicons/react/24/solid'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { Fragment } from 'react'
 
-import {
-  faLinkedinIn,
-  faTwitter
-} from '@fortawesome/free-brands-svg-icons'
+import { faLinkedinIn, faTwitter } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import ReactMarkdown from 'react-markdown'
 import SourceCard from './source-card'
@@ -77,7 +71,11 @@ export default function QuestionDialogModal({
                   <div className="flex flex-wrap my-4 -mx-0.5">
                     {data.resources &&
                       JSON.parse(data.resources).map((item, idx) => (
-                        <SourceCard key={`source-${idx}`} item={item} index={idx} />
+                        <SourceCard
+                          key={`source-${idx}`}
+                          item={item}
+                          index={idx}
+                        />
                       ))}
                   </div>
 

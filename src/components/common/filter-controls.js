@@ -1,14 +1,14 @@
 import { Listbox } from '@headlessui/react'
 import { FunnelIcon } from '@heroicons/react/24/solid'
 
-export default function FilterControls({ 
-  filterBySourceArray, 
+export default function FilterControls({
+  filterBySourceArray,
   setFilterBySourceArray,
   filterByTypeArray,
   setFilterByTypeArray,
   sourceFilters,
   typeFilters,
-  userRole 
+  userRole,
 }) {
   if (userRole !== 'admin') {
     return null

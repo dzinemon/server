@@ -15,7 +15,7 @@ import { usedModel } from '../../utils/hardcoded'
 import { sourceFilters, typeFilters } from '../../utils/hardcoded'
 
 import { useQuestions } from '@/hooks/useQuestions'
-import { useQAAPI } from '@/hooks/useQAAPI'
+import { useQAAPI } from '@/hooks/useAPI'
 
 export default function ChatWidget() {
   // Custom hooks

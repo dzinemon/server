@@ -17,6 +17,7 @@ import MessageBubble from '@/components/common/message-bubble'
 import SourceCardCompact from '@/components/common/source-card-compact'
 import { promptTemplate } from '../../utils/handleprompts/internal'
 import { sourceFilters, typeFilters } from '../../utils/hardcoded'
+import { useInternalChatAPI } from '../hooks/useAPI'
 
 const questionExamples = [
   'Is QuickBooks good for SaaS Startups?',
@@ -102,10 +103,20 @@ const ThreadCombobox = memo(function ThreadCombobox({ threads, currentThreadId, 
 export default function ThreadedChatWidget() {
   const router = useRouter()
   const [sideBarIsOpen, setSideBarOpen] = useState(true)
-  const [isLoading, setIsLoading] = useState(false)
   const [userMessage, setUserMessage] = useState('')
   const [threads, setThreads] = useState([])
   const [currentThreadId, setCurrentThreadId] = useState(null)
+
+  // Use the hook
+  const { 
+    isLoading, 
+    setIsLoading, 
+    currentSources, 
+    setCurrentSources, 
+    getEmbedding, 
+    getData, 
+    getCompletion 
+  } = useInternalChatAPI()
 
   // Add filter states for RAG
   const [filterBySourceArray, setFilterBySourceArray] = useState([
@@ -123,17 +134,8 @@ export default function ThreadedChatWidget() {
     typeFilters[5],
   ])
 
-  const [currentSources, setCurrentSources] = useState([])
-
   const scrollTargetRef = useRef(null)
   const messageInputRef = useRef(null)
-
-  // Memoize headers to prevent recreation on every render
-  const myHeaders = useMemo(() => {
-    const headers = new Headers()
-    headers.append('Content-Type', 'application/json')
-    return headers
-  }, [])
 
   // Memoize current thread calculation
   const currentThread = useMemo(() => {
@@ -194,76 +196,6 @@ export default function ThreadedChatWidget() {
     setSideBarOpen(true)
   }, [threads, notifyParentOfThreadCount])
 
-  // Memoize API functions
-  const getEmbedding = useCallback(async (question) => {
-    const questionRequestOptions = {
-      method: 'POST',
-      headers: myHeaders,
-      body: JSON.stringify({
-        question: question,
-      }),
-      redirect: 'follow',
-    }
-
-    try {
-      const response = await fetch('/api/v1/generateembedding', questionRequestOptions)
-      
-      if (response.status === 200) {
-        console.log('post success')
-        toast('Embedding generated', {
-          icon: '🚀',
-          duration: 2000,
-        })
-      }
-      
-      const result = await response.json()
-      return result.embedding || ''
-    } catch (error) {
-      console.log('error', error)
-      console.error('Error generating embedding:', error)
-      toast('Error generating embedding', {
-        icon: '❌',
-      })
-      return ''
-    }
-  }, [myHeaders])
-
-  const getData = useCallback(async (embedding) => {
-    const questionRequestOptions = {
-      method: 'POST',
-      headers: myHeaders,
-      body: JSON.stringify({
-        embedding: embedding,
-        sourceFilters: filterBySourceArray,
-        typeFilters: filterByTypeArray,
-        topK: 8,
-      }),
-      redirect: 'follow',
-    }
-
-    try {
-      const response = await fetch('/api/v1/queryembedding', questionRequestOptions)
-      
-      if (response.status === 200) {
-        console.log('post success')
-        toast('Data fetched', {
-          icon: '🚀',
-          duration: 2000,
-        })
-      }
-      
-      const result = await response.json()
-      return result.data || []
-    } catch (error) {
-      console.log('error', error)
-      console.error('Error generating completion:', error)
-      toast('Error generating completion', {
-        icon: '❌',
-      })
-      return []
-    }
-  }, [myHeaders, filterBySourceArray, filterByTypeArray])
-
   const askQuestion = useCallback(async (question, userMessages, currentThreadMessages) => {
     try {
       // Get embedding for the question
@@ -271,7 +203,7 @@ export default function ThreadedChatWidget() {
       console.log('embedding generated')
 
       // Get relevant data from vector database
-      const data = await getData(embedding)
+      const data = await getData(embedding, filterBySourceArray, filterByTypeArray)
       console.log('data retrieved')
 
       // Extract sources for display
@@ -292,24 +224,13 @@ export default function ThreadedChatWidget() {
       // Create prompt using the template
       const prompt = promptTemplate(question, userMessages, data.matches || [])
 
-      // Get completion from OpenAI
-      const response = await fetch('/api/openai/messages', {
-        method: 'POST',
-        headers: myHeaders,
-        body: JSON.stringify({
-          messages: [...currentThreadMessages, { role: 'user', content: prompt }],
-          model: 'gpt-3.5-turbo',
-          temperature: 0.1,
-        }),
-      })
+      // Get completion using the hook
+      const completion = await getCompletion(
+        [...currentThreadMessages, { role: 'user', content: prompt }]
+      )
 
-      if (!response.ok) {
-        throw new Error('Failed to get response')
-      }
-
-      const result = await response.json()
       return {
-        completion: result.completion || 'Sorry, I could not generate a response.',
+        completion: completion,
         sources: sources
       }
     } catch (error) {
@@ -319,7 +240,7 @@ export default function ThreadedChatWidget() {
         sources: []
       }
     }
-  }, [getEmbedding, getData, myHeaders])
+  }, [getEmbedding, getData, getCompletion, filterBySourceArray, filterByTypeArray, setCurrentSources])
 
   // Memoize submit handler
   const handleSubmit = useCallback(async (e) => {
@@ -418,7 +339,7 @@ export default function ThreadedChatWidget() {
     setIsLoading(false)
     setCurrentSources([])
     handleScrollIntoView()
-  }, [userMessage, currentThreadId, threads, notifyParentOfThreadCount, handleScrollIntoView, askQuestion])
+  }, [userMessage, currentThreadId, threads, notifyParentOfThreadCount, handleScrollIntoView, askQuestion, setIsLoading, setCurrentSources])
 
   // Memoize question click handler
   const handleQuestionClick = useCallback((question) => {

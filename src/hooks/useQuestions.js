@@ -1,24 +1,44 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+
+const STORAGE_KEY = 'localQuestions'
 
 export function useQuestions() {
   const [questions, setQuestions] = useState([])
   const [isSubmitted, setIsSubmitted] = useState(false)
 
+  // Helper function to save questions to localStorage
+  const saveToStorage = useCallback((questionsToSave) => {
+    if (questionsToSave.length > 0) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(questionsToSave))
+    } else {
+      localStorage.removeItem(STORAGE_KEY)
+    }
+  }, [])
+
+  // Helper function to update questions with automatic localStorage sync
+  const updateQuestionsWithStorage = useCallback((newQuestions) => {
+    setQuestions(newQuestions)
+    saveToStorage(newQuestions)
+  }, [saveToStorage])
+
   // Load questions from localStorage on mount
   useEffect(() => {
-    const localQuestions = JSON.parse(localStorage.getItem('localQuestions'))
-    if (localQuestions && localQuestions.length > 0) {
-      setQuestions(localQuestions)
-      setIsSubmitted(true)
+    try {
+      const localQuestions = JSON.parse(localStorage.getItem(STORAGE_KEY))
+      if (localQuestions && localQuestions.length > 0) {
+        setQuestions(localQuestions)
+        setIsSubmitted(true)
+      }
+    } catch (error) {
+      console.error('Error loading questions from localStorage:', error)
+      localStorage.removeItem(STORAGE_KEY)
     }
   }, [])
 
   // Save questions to localStorage whenever questions change
   useEffect(() => {
-    if (questions.length > 0) {
-      localStorage.setItem('localQuestions', JSON.stringify(questions))
-    }
-  }, [questions])
+    saveToStorage(questions)
+  }, [questions, saveToStorage])
 
   const addQuestion = (questionText) => {
     const newQuestion = { 
@@ -26,7 +46,8 @@ export function useQuestions() {
       answer: '', 
       sources: [] 
     }
-    setQuestions(prev => [...prev, newQuestion])
+    const newQuestions = [...questions, newQuestion]
+    updateQuestionsWithStorage(newQuestions)
     setIsSubmitted(true)
     return newQuestion
   }
@@ -35,6 +56,7 @@ export function useQuestions() {
     setQuestions(previous => {
       const updated = [...previous]
       updated[questionIndex] = { ...updated[questionIndex], sources }
+      saveToStorage(updated)
       return updated
     })
   }
@@ -43,64 +65,43 @@ export function useQuestions() {
     setQuestions(previous => {
       const updated = [...previous]
       updated[questionIndex] = { ...updated[questionIndex], answer }
-      localStorage.setItem('localQuestions', JSON.stringify(updated))
+      saveToStorage(updated)
       localStorage.setItem('lastAttempt', new Date())
       return updated
     })
   }
 
-  const handleLike = (question) => {
+  // Helper function to update question properties
+  const updateQuestionProperty = useCallback((questionText, property, value) => {
     setQuestions(previous => {
       const updated = previous.map((item) => {
-        if (item.question === question.question) {
-          return {
-            ...item,
-            like: true,
-            dislike: false,
-          }
+        if (item.question === questionText) {
+          return { ...item, [property]: value }
         }
         return item
       })
-      localStorage.setItem('localQuestions', JSON.stringify(updated))
+      saveToStorage(updated)
       return updated
     })
+  }, [saveToStorage])
+
+  const handleLike = (question) => {
+    updateQuestionProperty(question.question, 'like', true)
+    updateQuestionProperty(question.question, 'dislike', false)
   }
 
   const handleDislike = (question) => {
-    setQuestions(previous => {
-      const updated = previous.map((item) => {
-        if (item.question === question.question) {
-          return {
-            ...item,
-            dislike: true,
-            like: false,
-          }
-        }
-        return item
-      })
-      localStorage.setItem('localQuestions', JSON.stringify(updated))
-      return updated
-    })
+    updateQuestionProperty(question.question, 'dislike', true)
+    updateQuestionProperty(question.question, 'like', false)
   }
 
   const handleReport = (question, report) => {
-    setQuestions(previous => {
-      const updated = previous.map((item) => {
-        if (item.question === question.question) {
-          return {
-            ...item,
-            report: report,
-          }
-        }
-        return item
-      })
-      localStorage.setItem('localQuestions', JSON.stringify(updated))
-      return updated
-    })
+    updateQuestionProperty(question.question, 'report', report)
   }
 
   const clearQuestions = () => {
-    localStorage.removeItem('localQuestions')
+    localStorage.removeItem(STORAGE_KEY)
+    localStorage.removeItem('lastAttempt')
     setIsSubmitted(false)
     setQuestions([])
   }

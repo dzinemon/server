@@ -32,7 +32,7 @@ import MessageBubble from '@/components/common/message-bubble'
 import { sourceFilters, typeFilters } from '../../utils/hardcoded'
 
 import { useThreads } from '@/hooks/useThreads'
-import { useInternalChatAPI } from '@/hooks/useInternalChatAPI'
+import { useInternalChatAPI } from '@/hooks/useAPI'
 
 export default function InternalChatPage() {
   const { currentModel } = useResources()

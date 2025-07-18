@@ -1,31 +1,51 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { v4 as uuidv4 } from 'uuid'
+
+const STORAGE_KEY = 'localThreads'
 
 export function useThreads() {
   const [threads, setThreads] = useState([])
   const [currentThreadId, setCurrentThreadId] = useState(null)
   const [currentThread, setCurrentThread] = useState(null)
 
+  // Helper function to save threads to localStorage
+  const saveToStorage = useCallback((threadsToSave) => {
+    if (threadsToSave.length > 0) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(threadsToSave))
+    } else {
+      localStorage.removeItem(STORAGE_KEY)
+    }
+  }, [])
+
+  // Helper function to update threads with automatic localStorage sync
+  const updateThreadsWithStorage = useCallback((newThreads) => {
+    setThreads(newThreads)
+    saveToStorage(newThreads)
+  }, [saveToStorage])
+
   // Load threads from localStorage on mount
   useEffect(() => {
-    const localThreads = JSON.parse(localStorage.getItem('localThreads'))
-    if (localThreads) {
-      setThreads(localThreads)
+    try {
+      const localThreads = JSON.parse(localStorage.getItem(STORAGE_KEY))
+      if (localThreads && Array.isArray(localThreads)) {
+        setThreads(localThreads)
+      }
+    } catch (error) {
+      console.error('Error loading threads from localStorage:', error)
+      localStorage.removeItem(STORAGE_KEY)
     }
   }, [])
 
   // Update current thread when currentThreadId or threads change
   useEffect(() => {
     const thread = threads.find((thread) => thread.id === currentThreadId)
-    setCurrentThread(thread)
+    setCurrentThread(thread || null)
   }, [currentThreadId, threads])
 
   // Save threads to localStorage whenever threads change
   useEffect(() => {
-    if (threads.length > 0) {
-      localStorage.setItem('localThreads', JSON.stringify(threads))
-    }
-  }, [threads])
+    saveToStorage(threads)
+  }, [threads, saveToStorage])
 
   const addNewThread = () => {
     const newThread = {
@@ -35,16 +55,20 @@ export function useThreads() {
       messages: [],
     }
 
-    setThreads((previous) => [...previous, newThread])
+    const newThreads = [...threads, newThread]
+    updateThreadsWithStorage(newThreads)
     setCurrentThreadId(newThread.id)
     return newThread
   }
 
   const removeThread = (id) => {
     const updatedThreads = threads.filter((thread) => thread.id !== id)
-    setThreads(updatedThreads)
-    localStorage.setItem('localThreads', JSON.stringify(updatedThreads))
-    setCurrentThreadId(null)
+    updateThreadsWithStorage(updatedThreads)
+    
+    // Reset current thread if it was the one being removed
+    if (currentThreadId === id) {
+      setCurrentThreadId(null)
+    }
   }
 
   const updateThread = (threadId, updater) => {
@@ -60,7 +84,8 @@ export function useThreads() {
         updatedThread,
       ]
 
-      localStorage.setItem('localThreads', JSON.stringify(updatedThreads))
+      // Save to localStorage immediately for thread updates
+      saveToStorage(updatedThreads)
       return updatedThreads
     })
   }
@@ -89,7 +114,7 @@ export function useThreads() {
   const clearAllThreads = () => {
     setThreads([])
     setCurrentThreadId(null)
-    localStorage.removeItem('localThreads')
+    localStorage.removeItem(STORAGE_KEY)
   }
 
   return {

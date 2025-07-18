@@ -4,10 +4,17 @@ import { AnimatePresence, motion } from 'framer-motion'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import Script from 'next/script'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, lazy, Suspense } from 'react'
 import toast, { Toaster } from 'react-hot-toast'
+import { useQAAPI } from '@/hooks/useAPI'
 import { usedModel } from '../../utils/hardcoded'
-import QuestionSearchResult from '../components/web-widget/question-search-result'
+
+// Lazy load the QuestionSearchResult component
+const QuestionSearchResult = lazy(() => 
+  import('../components/web-widget/question-search-result').then(module => ({
+    default: module.default
+  }))
+)
 
 const questionExamples = [
   'Are VC Investments Taxed?',
@@ -37,12 +44,35 @@ const limitSearchAttempts = 20
 
 const NEXT_PUBLIC_GA4_ID = process.env.NEXT_PUBLIC_GA4_ID
 
+// Loading fallback component for QuestionSearchResult
+const QuestionSearchResultSkeleton = () => (
+  <div className="w-full bg-white rounded-lg bg-gradient-to-b from-white to-gray-100/50 animate-pulse">
+    <div className="flex flex-row justify-between items-center">
+      <div className="py-2 px-3 md:p-4 flex-1">
+        <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+      </div>
+      <div className="px-2 py-2 md:px-4">
+        <div className="w-7 h-7 bg-gray-200 rounded-full"></div>
+      </div>
+    </div>
+    <div className="border-t border-gray-300/50 p-4 space-y-3">
+      <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+      <div className="h-20 bg-gray-200 rounded"></div>
+      <div className="h-4 bg-gray-200 rounded w-1/6"></div>
+      <div className="space-y-2">
+        <div className="h-3 bg-gray-200 rounded"></div>
+        <div className="h-3 bg-gray-200 rounded w-5/6"></div>
+        <div className="h-3 bg-gray-200 rounded w-4/6"></div>
+      </div>
+    </div>
+  </div>
+)
+
 export default function ChatWidget() {
   const router = useRouter()
-  const [response, setResponse] = useState({})
+  const { isLoading, setIsLoading, getEmbeddingAndPrompt, getCompletion, saveQuestionAnswer } = useQAAPI()
   const scrollTargetRef = useRef(null)
   const [isAccepted, setIsAccepted] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [question, setQuestion] = useState(
     router.query.question ? router.query.question : ''
@@ -50,13 +80,15 @@ export default function ChatWidget() {
   const [questions, setQuestions] = useState([])
   const [attemptCount, setAttemptCount] = useState(0)
 
-  const myHeaders = new Headers()
-  myHeaders.append('Content-Type', 'application/json')
+  // Prefetch QuestionSearchResult when user starts typing
+  const prefetchQuestionSearchResult = () => {
+    import('../components/web-widget/question-search-result')
+  }
 
   const handleLike = (question) => {
-    const questions = JSON.parse(localStorage.getItem('localQuestions'))
+    const localQuestions = JSON.parse(localStorage.getItem('localQuestions'))
 
-    const updatedQuestions = questions.map((item) => {
+    const updatedQuestions = localQuestions.map((item) => {
       if (item.question === question.question) {
         return {
           ...item,
@@ -72,9 +104,9 @@ export default function ChatWidget() {
   }
 
   const handleDislike = (question) => {
-    const questions = JSON.parse(localStorage.getItem('localQuestions'))
+    const localQuestions = JSON.parse(localStorage.getItem('localQuestions'))
 
-    const updatedQuestions = questions.map((item) => {
+    const updatedQuestions = localQuestions.map((item) => {
       if (item.question === question.question) {
         return {
           ...item,
@@ -90,9 +122,9 @@ export default function ChatWidget() {
   }
 
   const handleReport = (question, report) => {
-    const questions = JSON.parse(localStorage.getItem('localQuestions'))
+    const localQuestions = JSON.parse(localStorage.getItem('localQuestions'))
 
-    const updatedQuestions = questions.map((item) => {
+    const updatedQuestions = localQuestions.map((item) => {
       if (item.question === question.question) {
         return {
           ...item,
@@ -116,9 +148,9 @@ export default function ChatWidget() {
   }
 
   const handleSetQuestionsFromLocalStorage = () => {
-    const questions = JSON.parse(localStorage.getItem('localQuestions'))
-    if (questions && questions.length > 0) {
-      setQuestions(questions)
+    const localQuestions = JSON.parse(localStorage.getItem('localQuestions'))
+    if (localQuestions && localQuestions.length > 0) {
+      setQuestions(localQuestions)
       setIsSubmitted(true)
     }
   }
@@ -127,11 +159,6 @@ export default function ChatWidget() {
     localStorage.removeItem('localQuestions')
     setIsSubmitted(false)
     setQuestions([])
-  }
-
-  function handleClearLocalStorageDateCount() {
-    sessionStorage.removeItem('attemptCount')
-    setAttemptCount(0)
   }
 
   const handleScrollIntoView = () => {
@@ -159,35 +186,6 @@ export default function ChatWidget() {
     }
   }
 
-  const handleSaveQuestionAnswer = async (question, answer, resources) => {
-    try {
-      const requestOptions = {
-        method: 'POST',
-        headers: myHeaders,
-        body: JSON.stringify({
-          question: question,
-          answer: answer,
-          resources: resources,
-        }),
-        redirect: 'follow',
-      }
-
-      const response = await fetch('/api/questions', requestOptions)
-      const result = await response.json()
-
-      if (response.status !== 201) {
-        // Correct check for 201 status
-        console.error('Error saving question:', result)
-        return null
-      }
-
-      return result
-    } catch (error) {
-      console.error('Error saving question answer:', error)
-      return null
-    }
-  }
-
   const askQuestion = async (e) => {
     router.query = {}
     e.preventDefault()
@@ -211,29 +209,12 @@ export default function ChatWidget() {
     handleScrollIntoView()
 
     try {
-      // Get embedding sources
-      const questionRequestOptions = {
-        method: 'POST',
-        headers: myHeaders,
-        body: JSON.stringify({
-          question: question,
-          sourceFilters: ['website'],
-          typeFilters: ['webpage', 'post', 'tip', 'tax_calendar', 'qna'],
-          topK: 8,
-        }),
-        redirect: 'follow',
-      }
-
-      const embeddingResponse = await fetch(
-        '/api/openai/embedding',
-        questionRequestOptions
+      // Get embedding and prompt using the consolidated API
+      const { sources, prompt } = await getEmbeddingAndPrompt(
+        question,
+        ['website'],
+        ['webpage', 'post', 'tip', 'tax_calendar', 'qna']
       )
-
-      if (!embeddingResponse.ok) {
-        throw new Error('Failed to generate embeddings')
-      }
-
-      const { sources, prompt } = await embeddingResponse.json()
 
       // Update sources in question
       setQuestions((previous) => [
@@ -246,35 +227,8 @@ export default function ChatWidget() {
 
       handleScrollIntoView()
 
-      // Get completion from OpenAI
-      const promptRequestOptions = {
-        method: 'POST',
-        headers: myHeaders,
-        body: JSON.stringify({
-          messages: [
-            {
-              role: 'system',
-              content:
-                'You are a helpful startup tax, accounting and bookkeeping assistant.',
-            },
-            { role: 'user', content: prompt },
-          ],
-          model: usedModel,
-          temperature: 0.1,
-        }),
-        redirect: 'follow',
-      }
-
-      const completionResponse = await fetch(
-        '/api/v1/singlecompletion',
-        promptRequestOptions
-      )
-
-      if (!completionResponse.ok) {
-        throw new Error('Failed to generate completion')
-      }
-
-      const { completion } = await completionResponse.json()
+      // Get completion using the consolidated API
+      const completion = await getCompletion(prompt, usedModel)
 
       // Update answer in question
       setQuestions((previous) => {
@@ -293,7 +247,7 @@ export default function ChatWidget() {
       })
 
       // Save to database
-      await handleSaveQuestionAnswer(
+      await saveQuestionAnswer(
         question,
         completion,
         JSON.stringify(sources)
@@ -339,11 +293,9 @@ export default function ChatWidget() {
       {process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production' && (
         <div className="absolute  left-4 bottom-4 rounded border p-3 bg-white text-[9px]">
           <div>
-            <div>limit: {response.limit}</div>
-            <div>remaining: {response.remaining}</div>
             <div>attemptCount: {attemptCount}</div>
-            <div>status: {response.status}</div>
-            <div>body: {JSON.stringify(response.body)}</div>
+            <div>limit: {limitSearchAttempts}</div>
+            <div>remaining: {limitSearchAttempts - questions.length}</div>
           </div>
         </div>
       )}
@@ -358,18 +310,22 @@ export default function ChatWidget() {
           {questions.length > 0
             ? questions.map((item, idx, arr) => {
                 return (
-                  <QuestionSearchResult
-                    handleLike={() => {
-                      handleLike(item)
-                    }}
-                    handleDislike={() => {
-                      handleDislike(item)
-                    }}
-                    handleReport={handleReport}
-                    question={item}
-                    key={`qsr-${idx}`}
-                    isLatest={idx === arr.length - 1}
-                  />
+                  <Suspense 
+                    key={`qsr-${idx}`} 
+                    fallback={<QuestionSearchResultSkeleton />}
+                  >
+                    <QuestionSearchResult
+                      handleLike={() => {
+                        handleLike(item)
+                      }}
+                      handleDislike={() => {
+                        handleDislike(item)
+                      }}
+                      handleReport={handleReport}
+                      question={item}
+                      isLatest={idx === arr.length - 1}
+                    />
+                  </Suspense>
                 )
               })
             : ''}
@@ -381,7 +337,6 @@ export default function ChatWidget() {
         <AnimatePresence>
           <motion.div
             key={'form-div'}
-            // animate positionin top and bottom
             animate={{
               bottom: isSubmitted ? '16px' : 'auto',
               top: isSubmitted ? 'auto' : '0px',
@@ -391,19 +346,10 @@ export default function ChatWidget() {
             } w-full max-w-[720px]`}
           >
             <div className="md:bg-gray-50 md:rounded-lg relative z-10 md:border border-slate-200">
-              {response.status === 429 ||
-              limitSearchAttempts < questions.length ? (
+              {limitSearchAttempts < questions.length ? (
                 <div className="py-3 text-center text-sm text-slate-400">
                   <p className="">Search Limit Reached.</p>
                   <p>Please try again later.</p>
-                  <div className="hidden">
-                    {/* <div>limitReached: {JSON.stringify(limitReached)}</div> */}
-                    <div>
-                      {' '}
-                      questions exceeded:{' '}
-                      {JSON.stringify(limitSearchAttempts < questions.length)}
-                    </div>
-                  </div>
                 </div>
               ) : (
                 <div>
@@ -415,6 +361,10 @@ export default function ChatWidget() {
                       name="message"
                       onChange={(e) => {
                         setQuestion(e.target.value)
+                        // Prefetch component when user starts typing
+                        if (e.target.value.length === 1) {
+                          prefetchQuestionSearchResult()
+                        }
                       }}
                       value={question || ''}
                       placeholder="Ask Kruze anything"
@@ -433,7 +383,6 @@ export default function ChatWidget() {
                       after:z-[0]
                     `}
                     >
-                      {/* prettier-ignore */}
                       {isLoading ? (
                         <InlineLoading />
                       ) : (
@@ -466,17 +415,6 @@ export default function ChatWidget() {
                           <ArrowPathIcon className="inline-block mr-2 w-3.5 h-3.5" />
                           Clear results
                         </button>
-                        {/* <button
-        type="button"
-        className="border-b border-gray-600 hover:border-dashed"
-        onClick={() => handleClearLocalStorageDateCount()}
-      >
-        <ArrowPathIcon className="inline-block mr-2 w-3.5 h-3.5" />
-        Clear Date & Count
-      </button> */}
-                        {/* <span className='px-2'>
-          attemptCount: {attemptCount} attemptDate: {JSON.stringify(attemptDate)}
-        </span> */}
                       </div>
                     </div>
                   )}
@@ -492,15 +430,12 @@ export default function ChatWidget() {
             key={'examples-div'}
             className="w-full overflow-hidden space-y-4 pt-4"
             layout
-            // animate={{ opacity: 1 }}
             transition={{
-              // opacity: { ease: "linear" },
               layout: { duration: 0.3 },
             }}
             style={{ height: isSubmitted ? '0px' : 'auto' }}
           >
             <p className="text-center text-gray-800 text-base max-w-xl mx-auto">
-              {/* ask any question, or pick up one below */}
               Search any term or question to access comprehensive resources and
               detailed information from Kruze Consulting.
             </p>
@@ -523,6 +458,7 @@ export default function ChatWidget() {
                       "
                         onClick={() => {
                           setQuestion(item)
+                          prefetchQuestionSearchResult()
                         }}
                       >
                         {item}

@@ -283,7 +283,7 @@ export default function LiPost() {
       }
 
       const { completion } = await fetch(
-        '/api/openai/messages',
+        '/api/v1/messages',
         requestOptions
       ).then((res) => res.json())
 

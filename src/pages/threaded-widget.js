@@ -13,12 +13,10 @@ import toast, { Toaster } from 'react-hot-toast'
 import { v4 as uuidv4 } from 'uuid'
 
 import {
-  ChevronDoubleLeftIcon,
-  ChevronDoubleRightIcon,
-  PaperAirplaneIcon,
-  SquaresPlusIcon,
   TrashIcon,
   ArrowUpIcon,
+  ArrowRightOnRectangleIcon,
+  ArrowLeftOnRectangleIcon
 } from '@heroicons/react/24/solid'
 
 import ModelPicker from '@/components/common/modelpicker'
@@ -32,6 +30,8 @@ const MessageBubble = lazy(() => import('@/components/common/message-bubble'))
 const SourceCardCompact = lazy(() =>
   import('@/components/common/source-card-compact')
 )
+
+import Layout from '@/components/layout'
 
 import { promptTemplate } from '../../utils/handleprompts/internal'
 import { sourceFilters, typeFilters } from '../../utils/hardcoded'
@@ -135,10 +135,12 @@ const questionExamples = [
   // 'Which tools should every startup CFO know/use?',
 ]
 // Memoized ThreadCombobox component
+// Memoized ThreadCombobox component
 const ThreadCombobox = memo(function ThreadCombobox({
   threads,
   currentThreadId,
   setCurrentThreadId,
+  handleThreadRemove,
 }) {
   const [query, setQuery] = useState('')
 
@@ -163,6 +165,15 @@ const ThreadCombobox = memo(function ThreadCombobox({
     [setCurrentThreadId]
   )
 
+  // Memoize thread removal handler
+  const handleRemoveClick = useCallback(
+    (e, threadId) => {
+      e.stopPropagation() // Prevent thread selection when clicking remove
+      handleThreadRemove(threadId)
+    },
+    [handleThreadRemove]
+  )
+
   return (
     <div className="space-y-3 w-full">
       <div>
@@ -183,10 +194,9 @@ const ThreadCombobox = memo(function ThreadCombobox({
       </div>
       <div className="flex flex-col divide-y border rounded-lg max-h-70vh overflow-y-auto">
         {filteredThreads.map((thread, idx, arr) => (
-          <button
+          <div
             key={thread.id}
-            onClick={() => handleThreadSelect(thread.id)}
-            className={`${
+            className={`relative group ${
               thread.id === currentThreadId
                 ? 'bg-blue-50 text-blue-600'
                 : 'bg-white text-gray-700'
@@ -200,19 +210,34 @@ const ThreadCombobox = memo(function ThreadCombobox({
             }
             ${arr.length === 1 ? 'rounded-b-md' : ''}
             ${idx !== 0 && idx !== arr.length - 1 ? 'rounded-none' : ''}
-            p-2 hover:bg-blue-50 hover:text-blue-600 text-left leading-tight text-sm`}
+            hover:bg-blue-50 hover:text-blue-600`}
           >
-            <div className="truncate">{thread.name}</div>
-            <div className="text-xs text-gray-400 mt-1">
-              {new Date(thread.date).toLocaleDateString()}
-            </div>
-          </button>
+            <button
+              onClick={() => handleThreadSelect(thread.id)}
+              className="w-full p-2 text-left leading-tight text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-inset rounded-inherit"
+              title={thread.name}
+            >
+              <div className="truncate pr-8">{thread.name}</div>
+              <div className="text-xs text-gray-400 mt-0.5 leading-none">
+                {new Date(thread.date).toLocaleDateString()}
+              </div>
+            </button>
+            
+            {/* Remove button - appears on hover */}
+            <button
+              onClick={(e) => handleRemoveClick(e, thread.id)}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 rounded-md opacity-0 group-hover:opacity-100 hover:bg-red-100 hover:text-red-600 transition-all duration-200 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-red-300"
+              title="Delete conversation"
+              aria-label={`Delete conversation: ${thread.name}`}
+            >
+              <TrashIcon className="w-4 h-4" />
+            </button>
+          </div>
         ))}
       </div>
     </div>
   )
 })
-
 export default function ThreadedChatWidget() {
   const [sideBarIsOpen, setSideBarOpen] = useState(true)
   const [userMessage, setUserMessage] = useState('')
@@ -277,6 +302,26 @@ export default function ThreadedChatWidget() {
 
   // Memoize add new thread handler
   const handleAddNewThread = useCallback(() => {
+    // Check if there's already a "New Conversation" thread without messages
+    const existingNewThread = threads.find(
+      (thread) => thread.name === 'New Conversation' && thread.messages.length === 0
+    )
+
+    // If an empty "New Conversation" already exists, just select it
+    if (existingNewThread) {
+      setCurrentThreadId(existingNewThread.id)
+      setSideBarOpen(false)
+      
+      // Focus on input
+      setTimeout(() => {
+        if (messageInputRef.current) {
+          messageInputRef.current.focus()
+        }
+      }, 300)
+      return
+    }
+
+    // Create new thread only if no empty "New Conversation" exists
     const newThread = {
       id: uuidv4(),
       date: new Date().toISOString(),
@@ -562,210 +607,198 @@ export default function ThreadedChatWidget() {
   }, [notifyParentOfThreadCount])
 
   return (
-    <div className="h-screen bg-gray-50 flex flex-col">
-      <Toaster position="top-center" />
+    <Layout hasNavar={false}>
+      <div className="h-screen bg-gray-50 flex flex-col">
+        <Toaster position="top-center" />
+     
 
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <Image
-            src="/logo-color.png"
-            alt="Logo"
-            width={32}
-            height={38}
-            className="object-contain"
-          />
-          <h1 className="text-lg font-semibold text-gray-900">
-            AI Chat Assistant
-          </h1>
-        </div>
-        <button
-          onClick={handleSidebarToggle}
-          className="p-2 rounded-md hover:bg-gray-100 text-gray-600"
-        >
-          {sideBarIsOpen ? (
-            <ChevronDoubleLeftIcon className="w-5 h-5" />
-          ) : (
-            <ChevronDoubleRightIcon className="w-5 h-5" />
-          )}
-        </button>
-      </div>
-
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar - remains the same */}
-        <div
-          className={`bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ease-in-out ${
-            sideBarIsOpen ? 'w-80' : 'w-0'
-          } overflow-hidden`}
-        >
-          <div className="p-4 space-y-4 flex-1 overflow-y-auto">
-            <button
-              onClick={handleAddNewThread}
-              className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 flex items-center justify-center space-x-2 text-sm font-medium"
+        <div className={`absolute left-2 rounded-lg top-2 p-1 z-10 ${ sideBarIsOpen ? '' : 'bg-blue-50' }`}>
+           <button
+              onClick={handleSidebarToggle}
+              className="p-2 rounded-md hover:bg-white hover:text-blue-600  text-gray-600"
             >
-              <SquaresPlusIcon className="w-4 h-4" />
-              <span>New Conversation</span>
+              {sideBarIsOpen ? (
+                <ArrowLeftOnRectangleIcon className="w-5 h-5" />
+              ) : (
+                <ArrowRightOnRectangleIcon className="w-5 h-5" />
+              )}
             </button>
-
-            <ThreadCombobox
-              threads={threads}
-              currentThreadId={currentThreadId}
-              setCurrentThreadId={setCurrentThreadId}
-            />
-
-            {threads.length === 0 && (
-              <div className="text-center text-gray-500 text-sm mt-8">
-                <p>No conversations yet.</p>
-                <p>Start a new conversation to begin!</p>
-              </div>
-            )}
-          </div>
         </div>
 
-        {/* Main Chat Area */}
-        <div className="flex-1 flex flex-col">
-          {currentThread ? (
-            <>
-              {/* Thread Header - remains the same */}
-              <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
-                <div>
-                  <h2 className="font-semibold text-gray-900 truncate">
-                    {currentThread.name}
-                  </h2>
-                  <p className="text-sm text-gray-500">
-                    Created: {new Date(currentThread.date).toLocaleString()}
-                  </p>
-                </div>
-                <button
-                  onClick={() => handleThreadRemove(currentThreadId)}
-                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
-                  title="Delete conversation"
-                >
-                  <TrashIcon className="w-4 h-4" />
-                </button>
+        <div className="flex flex-1 overflow-hidden bg-blue-50/50">
+          {/* Sidebar - remains the same */}
+          <div
+            className={`flex flex-col transition-all duration-100 ease-in-out ${
+              sideBarIsOpen ? 'w-80' : 'w-0'
+            } overflow-hidden`}
+          >
+           
+            <div className="px-4 pt-16 flex items-center justify-between">
+              <div className="flex items-center justify-center w-full">
+                <Image
+                  src="/logo-color.png"
+                  alt="Logo"
+                  width={23}
+                  height={27}
+                  className="object-contain"
+                />
+                <h1 className="text-lg font-semibold text-gray-900 text-center">
+                  AI Chat Assistant
+                </h1>
               </div>
+            </div>
+           
+            <div className="p-4 space-y-4 flex-1 overflow-y-auto">
+              <button
+                onClick={handleAddNewThread}
+                className="w-full bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 flex items-center justify-center space-x-2 text-sm font-medium bg-gradient-to-b from-blue-600 via-sky-700 to-blue-600"
+              >
+                <span>New Conversation</span>
+              </button>
+              <ThreadCombobox
+                threads={threads}
+                currentThreadId={currentThreadId}
+                setCurrentThreadId={setCurrentThreadId}
+                handleThreadRemove={handleThreadRemove}
+              />
+              {threads.length === 0 && (
+                <div className="text-center text-gray-500 text-sm mt-8">
+                  <p>No conversations yet.</p>
+                  <p>Start a new conversation to begin!</p>
+                </div>
+              )}
+            </div>
+          </div>
+          {/* Main Chat Area */}
+          <div className={`relative
+              ${sideBarIsOpen ? 'w-[calc(100%-20rem)] mt-4 border border-blue-100 rounded-tl-lg shadow-lg' : 'w-full'}
+              flex-1 flex flex-col bg-white
+            `}>
+            {currentThread && currentThread.messages.length > 0 ? (
+              <>
 
-              {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {currentThread.messages.map((message, idx) => (
-                  <div
-                    key={idx}
-                    className={`flex gap-3 ${
-                      message.role === 'user' ? 'justify-end' : 'justify-start'
-                    }`}
-                  >
-                    {message.role === 'assistant' && (
+                {/* Messages */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-24">
+                  {currentThread.messages.map((message, idx) => (
+                    <div
+                      key={idx}
+                      className={`mx-auto max-w-5xl flex gap-3 ${
+                        message.role === 'user' ? 'justify-end' : 'justify-start'
+                      }`}
+                    >
+                      {message.role === 'assistant' && (
+                        <div className="flex-shrink-0">
+                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                            🤖
+                          </div>
+                        </div>
+                      )}
+                      <div className="flex-1">
+                        <Suspense
+                          fallback={
+                            <div className="bg-white border border-gray-200 rounded-lg p-4">
+                              <div className="animate-pulse">
+                                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                              </div>
+                            </div>
+                          }
+                        >
+                          <MessageBubble
+                            role={message.role}
+                            message={message.content}
+                            className={
+                              message.role === 'user'
+                                ? 'text-slate-800'
+                                : 'text-gray-900'
+                            }
+                          />
+                        </Suspense>
+                        {message.sources && message.sources.length > 0 && (
+                          <Suspense
+                            fallback={
+                              <div className="flex gap-2 mt-2">
+                                <div className="text-sm text-gray-700">
+                                  Loading sources...
+                                </div>
+                              </div>
+                            }
+                          >
+                            <MessageSources sources={message.sources} />
+                          </Suspense>
+                        )}
+                      </div>
+                      {message.role === 'user' && (
+                        <div className="flex-shrink-0">
+                          <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                            👤
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {isLoading && (
+                    <div className="mx-auto max-w-5xl flex justify-start gap-3">
                       <div className="flex-shrink-0">
                         <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                           🤖
                         </div>
                       </div>
-                    )}
-                    <div className="flex-1">
-                      <Suspense
-                        fallback={
-                          <div className="bg-white border border-gray-200 rounded-lg p-4">
-                            <div className="animate-pulse">
-                              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                            </div>
-                          </div>
-                        }
-                      >
-                        <MessageBubble
-                          role={message.role}
-                          message={message.content}
-                          className={
-                            message.role === 'user'
-                              ? 'text-slate-800'
-                              : 'text-gray-900'
-                          }
-                        />
-                      </Suspense>
-                      {message.sources && message.sources.length > 0 && (
-                        <Suspense
-                          fallback={
-                            <div className="flex gap-2 mt-2">
-                              <div className="text-sm text-gray-700">
-                                Loading sources...
-                              </div>
-                            </div>
-                          }
-                        >
-                          <MessageSources sources={message.sources} />
-                        </Suspense>
-                      )}
-                    </div>
-                    {message.role === 'user' && (
-                      <div className="flex-shrink-0">
-                        <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                          👤
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-
-                {isLoading && (
-                  <div className="flex justify-start gap-3">
-                    <div className="flex-shrink-0">
-                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                        🤖
+                      <div className="bg-white border border-gray-200 rounded-lg p-4">
+                        <LoadingIndicator />
                       </div>
                     </div>
-                    <div className="bg-white border border-gray-200 rounded-lg p-4">
-                      <LoadingIndicator />
-                    </div>
-                  </div>
-                )}
-
-                <div ref={scrollTargetRef} />
-              </div>
-            </>
-          ) : (
-            // Welcome Screen with Suspense
-            <Suspense
-              fallback={
-                <div className="flex-1 flex items-center justify-center">
-                  <div className="text-gray-500">Loading...</div>
+                  )}
+                  <div ref={scrollTargetRef} />
                 </div>
-              }
-            >
-              <WelcomeScreen
-                questionExamples={questionExamples}
-                onQuestionClick={handleQuestionClick}
-              />
-            </Suspense>
-          )}
-
-          {/* Input Area - remains the same */}
-          <div className="bg-white shadow-lg rounded-t-2xl border-gray-200 px-2 pt-2 max-w-3xl mx-auto w-full relative">
-            <form onSubmit={handleSubmit} className="flex space-x-3">
-              <input
-                ref={messageInputRef}
-                type="text"
-                value={userMessage}
-                onChange={(e) => setUserMessage(e.target.value)}
-                placeholder="Type your message..."
-                className="flex-1 px-2 pt-2 pb-16 rounded-t-lg focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent"
-                disabled={isLoading}
-              />
-            </form>
-            <div className="absolute bottom-2 left-4 w-40">
-              <ModelPicker />
-            </div>
-            <div className="absolute bottom-2 right-4">
-              <button
-                type="submit"
-                disabled={isLoading || !userMessage.trim()}
-                className="px-2 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              </>
+            ) : (
+              // Welcome Screen with Suspense
+              <Suspense
+                fallback={
+                  <div className="flex-1 flex items-center justify-center">
+                    <div className="text-gray-500">Loading...</div>
+                  </div>
+                }
               >
-                <ArrowUpIcon className="w-5 h-5" />
-              </button>
+                <WelcomeScreen
+                  questionExamples={questionExamples}
+                  onQuestionClick={handleQuestionClick}
+                />
+              </Suspense>
+            )}
+            {/* Input Area - remains the same */}
+            <div className="absolute bottom-0 w-full left-0 right-0">
+              <div className="shadow-2xl border-t-[8px] border-x-[8px] border-blue-50/90 rounded-t-2xl max-w-3xl mx-auto w-full relative">
+                <form onSubmit={handleSubmit} className="flex">
+                  <input
+                    ref={messageInputRef}
+                    type="text"
+                    value={userMessage}
+                    onChange={(e) => setUserMessage(e.target.value)}
+                    placeholder="Type your message..."
+                    name='user message'
+                    className="flex-1 px-2 pt-2 pb-16 rounded-t-lg backdrop-blur-md bg-white/50 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent text-gray-600"
+                    disabled={isLoading}
+                  />
+                  <div className="absolute bottom-2 left-4 w-40">
+                    <ModelPicker />
+                  </div>
+                  <div className="absolute bottom-2 right-4">
+                    <button
+                      type="submit"
+                      disabled={isLoading || !userMessage.trim()}
+                      className="px-2 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                    >
+                      <ArrowUpIcon className="w-5 h-5" />
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </Layout>
   )
 }

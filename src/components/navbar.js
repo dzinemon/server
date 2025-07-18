@@ -92,7 +92,7 @@ export default function Navbar() {
     },
     {
       name: 'Internal Chat',
-      slug: 'internal-chat',
+      slug: 'threaded-widget',
     },
     // {
     //   name: 'Generate Content',

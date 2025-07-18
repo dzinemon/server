@@ -120,7 +120,7 @@
     margin: 0px; max-height: 100vh; max-width: 100vw; 
     visibility: visible; z-index: 999999999 !important;"></iframe>
     <button id="btn-trigger-threaded-chat" class="shadow-xl ring-1">
-      ${components.icon_threads}
+      ${components.icon_message}
       <span class="threaded-chat-badge" id="thread-count-badge" style="display: none;">0</span>
     </button>
     <button id="btn-close-threaded-chat" style="display:none" class="">${components.icon_close}</button>`
@@ -203,7 +203,7 @@
           ? `<span class="threaded-chat-badge" id="thread-count-badge" style="display: flex;">${currentBadgeText}</span>`
           : '<span class="threaded-chat-badge" id="thread-count-badge" style="display: none;">0</span>'
 
-      btn.innerHTML = components.icon_threads + badgeHtml
+      btn.innerHTML = components.icon_message + badgeHtml
       document.body.style.overflowY = 'auto'
       btn_close_chat.style.display = 'none'
 

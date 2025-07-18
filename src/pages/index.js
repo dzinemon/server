@@ -48,8 +48,8 @@ export default function Home() {
               },
               {
                 name: 'Internal Chat',
-                url: 'internal-chat',
-                description: 'Similar to Internal QA but with chat behaviour',
+                url: 'threaded-widget',
+                description: 'AI Chat Widget for internal use. Uses website, slack, internal data, uploaded to pinecone',
               },
               {
                 name: 'LinkedIn Post Generator',
@@ -105,28 +105,6 @@ export default function Home() {
                   className={`m-0 max-w-[30ch] text-sm opacity-50 pointer-events-none`}
                 >
                   Use the chat widget to ask questions
-                </p>
-              </button>
-            </div>
-
-            <div className="text-left">
-              <button
-                type="button"
-                id="btn-trigger-threaded-chat-section"
-                className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-              >
-                <h2
-                  className={`mb-3 text-2xl font-semibold group-hover:text-kruze-blueLight`}
-                >
-                  Ai Widget (Threads){' '}
-                  <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-                    -&gt;
-                  </span>
-                </h2>
-                <p
-                  className={`m-0 max-w-[30ch] text-sm opacity-50 pointer-events-none`}
-                >
-                  Use the threaded chat widget with conversations
                 </p>
               </button>
             </div>

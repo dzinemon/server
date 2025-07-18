@@ -20,7 +20,7 @@ const ModelPicker = () => {
         ></path>
       </svg>
       <select
-        className="form-select appearance-none w-full p-2 rounded-lg bg-gray-50 hover:bg-blue-100 active:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-200 cursor-pointer text-sm font-mono"
+        className="form-select appearance-none w-full p-2 rounded-lg bg-gray-50 hover:bg-blue-100 active:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-200 cursor-pointer text-sm font-mono tracking-wider"
         value={currentModel}
         name="model"
         onChange={(e) => setCurrentModel(e.target.value)}

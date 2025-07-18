@@ -6,7 +6,7 @@ import Loading from './Loading'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export default function Layout({ children }) {
+export default function Layout({ children, hasNavar = true }) {
   const { data: session } = useSession()
 
   if (session === undefined) {
@@ -16,8 +16,8 @@ export default function Layout({ children }) {
   if (session) {
     return (
       <>
-        <Navbar />
-        <main className={`${inter.className}  min-h-screen bg-white/60`}>
+        {hasNavar && <Navbar />}
+        <main className={`${inter.className} ${ hasNavar && "pt-14 lg:pt-16"}  min-h-screen bg-white/60`}>
           {children}
         </main>
         {/* <Footer /> */}

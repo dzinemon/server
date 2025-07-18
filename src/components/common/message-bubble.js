@@ -45,7 +45,7 @@ export const UserMessageWrapper = ({ children, role, onRemove }) => {
           </div>
         )}
       </div>
-      <div className="flex justify-end gap-3 border-t border-slate-300 mt-2 pt-2">
+      <div className="flex justify-end gap-3 border-t border-slate-100 mt-1 pt-1">
         {/* <button
           title="copy to clipboard"
           onClick={async () => {
@@ -115,7 +115,7 @@ export const AssistantMessageWrapper = ({ children, role, onRemove }) => {
         )}
       </div>
 
-      <div className="flex flex-wrap gap-3 border-t border-slate-300 mt-2 pt-2">
+      <div className="flex flex-wrap gap-3 border-t border-slate-300 mt-1 pt-1">
         {/* Toolbar */}
         <button
           title="copy to clipboard"
@@ -168,7 +168,7 @@ export default function MessageBubble({ message, role, onRemove }) {
     <div
       className={`p-3 ${
         role === 'user'
-          ? 'bg-white text-right'
+          ? 'text-right bg-blue-50/50 text-blue-700'
           : 'bg-white border border-slate-200'
       } ${role === 'assistant' ? '' : ''} rounded-md w-full m-b-content`}
     >

@@ -157,21 +157,20 @@ export default function LiPost() {
     }
   }
 
-  const handleSelectedReposterChange = async (e) => {
-    // check if the selected reposter exists in the list of fetched members
-
-    for (const reposter of e) {
+  const handleSelectedReposterChange = async (selectedReposters) => {
+    // Reset selectedReposter to the new selection
+    setSelectedReposter([])
+    
+    // Process each selected reposter
+    const newReposters = []
+    
+    for (const reposter of selectedReposters) {
       const existingMember = fetchedMembers.find(
         (member) => member.id === reposter.id
       )
 
       if (existingMember) {
-        setSelectedReposter((prev) => {
-          if (prev.find((m) => m.id === reposter.id)) {
-            return prev
-          }
-          return [...prev, existingMember]
-        })
+        newReposters.push(existingMember)
         console.log('Selected Reposter from cache:', existingMember)
       } else {
         // Fetch member by id using fetchMemberById
@@ -180,10 +179,12 @@ export default function LiPost() {
         console.log('Selected Reposter Fetched:', m)
 
         if (m) {
-          setSelectedReposter((prev) => [...prev, m])
+          newReposters.push(m)
         }
       }
     }
+    
+    setSelectedReposter(newReposters)
   }
 
   const handleSelectedReposterPromptChange = async (e) => {
@@ -384,10 +385,6 @@ export default function LiPost() {
   }, [selectedPrompt, setCurrentPrompt])
 
   useEffect(() => {
-    setSelectedReposterPrompt(selectedReposterPrompt)
-  }, [selectedReposterPrompt, setSelectedReposterPrompt])
-
-  useEffect(() => {
     setCurrentMember(selectedPoster)
   }, [selectedPoster, setCurrentMember])
 
@@ -402,11 +399,14 @@ export default function LiPost() {
     }
 
     if (selectedReposter && selectedReposter.length > 0) {
-      const reposter = selectedReposter.filter((reposter) => {
+      const validReposters = selectedReposter.filter((reposter) => {
         return members.find((member) => member.id === reposter.id)
       })
 
-      setSelectedReposter(reposter)
+      // Only update if the filtered array is different from current
+      if (validReposters.length !== selectedReposter.length) {
+        setSelectedReposter(validReposters)
+      }
     }
   }, [members, selectedPoster, selectedReposter])
 
@@ -1035,9 +1035,7 @@ export default function LiPost() {
                               {selectedReposter.length > 0
                                 ? 'Reposters: '
                                 : 'Select Reposter'}
-                              {selectedReposter
-                                .map((person) => person.name)
-                                .join(', ')}
+                              {selectedReposter.length > 0 ? <strong>{selectedReposter.length}</strong> : '' }
                             </span>
                             <ChevronDownIcon
                               className={`

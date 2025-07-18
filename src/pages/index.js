@@ -1,10 +1,9 @@
-import { useEffect } from 'react'
+import { useSession } from 'next-auth/react'
+import { Inter } from 'next/font/google'
 import Image from 'next/image'
 import Script from 'next/script'
-import { Inter } from 'next/font/google'
-import { useSession } from 'next-auth/react'
-import Navbar from '../components/navbar'
 import Loading from '../components/Loading'
+import Navbar from '../components/navbar'
 
 const inter = Inter({ subsets: ['latin'] })
 

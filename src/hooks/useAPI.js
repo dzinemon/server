@@ -84,7 +84,7 @@ export function useAPI() {
       {
         messages,
         model,
-        temperature: 0.1,
+        temperature: 0,
       },
       null, // No success toast for completions
       'Error generating completion',
@@ -100,7 +100,7 @@ export function useAPI() {
     typeFilters
   ) => {
     const result = await makeAPIRequest(
-      '/api/openai/embedding',
+      '/api/v1/embeddingprompt',
       {
         question,
         sourceFilters,
@@ -127,7 +127,7 @@ export function useAPI() {
           { role: 'user', content: prompt },
         ],
         model,
-        temperature: 0.1,
+        temperature: 0,
       },
       null, // No success toast
       'Error generating completion',

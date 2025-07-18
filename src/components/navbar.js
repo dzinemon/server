@@ -138,7 +138,7 @@ export default function Navbar() {
 
         <div className="hidden lg:flex lg:gap-x-12">
           {/* Quotes Dropdown - Available for all users */}
-          <NavDropdown
+          {/* <NavDropdown
             label="Quotes"
             items={quotesItems}
             isOpen={isDropdownOpen('quotes')}
@@ -146,7 +146,7 @@ export default function Navbar() {
             pathname={pathname}
             closeDropdown={() => closeDropdown('quotes')}
             id="quotes"
-          />
+          /> */}
 
           {navItems.map((item, idx) => {
             return (
@@ -252,12 +252,12 @@ export default function Navbar() {
             <div className="-my-6 divide-y divide-gray-500/10">
               <div className="space-y-2 py-6">
                 {/* Quotes Section in Mobile Menu */}
-                <MobileNavSection
+                {/* <MobileNavSection
                   title="Quotes"
                   items={quotesItems}
                   pathname={pathname}
                   onItemClick={() => setIsOpen(false)}
-                />
+                /> */}
 
                 {navItems.map((item, idx) => {
                   return (

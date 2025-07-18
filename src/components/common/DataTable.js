@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useCallback } from 'react'
 
 import toast, { Toaster } from 'react-hot-toast'
 
@@ -23,6 +23,23 @@ import DialogModal from './DialogModal'
 
 const columnHelper = createColumnHelper()
 
+// Custom hook for debounced search
+function useDebounce(value, delay) {
+  const [debouncedValue, setDebouncedValue] = useState(value)
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value)
+    }, delay)
+
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [value, delay])
+
+  return debouncedValue
+}
+
 export default function DataTable({ items, actions = [] }) {
   const [itemToRemove, setItemToRemove] = useState({})
 
@@ -33,13 +50,20 @@ export default function DataTable({ items, actions = [] }) {
   const [filteredData, setFilteredData] = useState(items)
 
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  
+  const [isBulkOperationLoading, setIsBulkOperationLoading] = useState(false)
 
   const [searchTerm, setSearchTerm] = useState('')
+  
+  // Debounce search term to improve performance
+  const debouncedSearchTerm = useDebounce(searchTerm, 300)
 
   // Update data when items prop changes
   useEffect(() => {
     setData(items)
     setFilteredData(items)
+    // Clear selection when data changes to avoid stale selections
+    setSelectedItems([])
   }, [items])
 
   // Get actions that support bulk operations
@@ -75,7 +99,7 @@ export default function DataTable({ items, actions = [] }) {
             <p className="text-sm text-gray-900 ">
               {row.original.name}
               <span className="bg-gray-50 text-xs px-1 font-light text-gray-500">
-                {row.original.uuids[0]}
+                {row.original.uuids?.[0] || 'N/A'}
               </span>
             </p>
           </div>
@@ -99,7 +123,7 @@ export default function DataTable({ items, actions = [] }) {
         cell: ({ row }) => (
           <div>
             <p className="text-sm font-semibold text-gray-900">
-              {row.original.uuids.length}
+              {row.original.uuids?.length || 0}
             </p>
           </div>
         ),
@@ -121,26 +145,43 @@ export default function DataTable({ items, actions = [] }) {
     },
   })
 
+  // Search filtering with debounced search term
   useEffect(() => {
-    if (searchTerm === '') return setFilteredData(data)
+    if (debouncedSearchTerm === '') return setFilteredData(data)
 
-    const filteredData = data.filter((link) => {
+    const filtered = data.filter((link) => {
+      // Safe access to prevent crashes when properties are missing
+      const name = link.name?.toLowerCase() || ''
+      const url = link.url?.toLowerCase() || ''
+      const firstUuid = link.uuids?.[0]?.toLowerCase() || ''
+      
+      const searchLower = debouncedSearchTerm.toLowerCase()
+      
       return (
-        link.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        link.url.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        link.uuids[0].toLowerCase().includes(searchTerm.toLowerCase())
+        name.includes(searchLower) ||
+        url.includes(searchLower) ||
+        firstUuid.includes(searchLower)
       )
     })
 
-    setFilteredData(filteredData)
-  }, [searchTerm, data])
+    setFilteredData(filtered)
+  }, [debouncedSearchTerm, data])
 
-  if (!filteredData || filteredData.length === 0)
+  // Clear selection when page changes
+  const handlePageChange = useCallback((pageIndex) => {
+    table.setPageIndex(pageIndex)
+    // Optionally clear selection on page change
+    // setSelectedItems([])
+  }, [table])
+
+  // Only show "No data found" if there's no initial data at all
+  if (!data || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-gray-900 text-lg font-semibold">No data found</div>
       </div>
     )
+  }
 
   return (
     <>
@@ -171,17 +212,41 @@ export default function DataTable({ items, actions = [] }) {
                       key={action.key}
                       title={action.title}
                       aria-label={action.title}
-                      onClick={() => {
-                        selectedItems.forEach((id) => {
-                          action.handler(id)
-                        })
-                        setSelectedItems([])
+                      disabled={isBulkOperationLoading}
+                      onClick={async () => {
+                        setIsBulkOperationLoading(true)
+                        try {
+                          // Execute bulk operations with some delay to show loading state
+                          await Promise.all(
+                            selectedItems.map((id) => action.handler(id))
+                          )
+                          setSelectedItems([])
+                          toast.success(`Bulk ${action.title.toLowerCase()} completed!`, {
+                            duration: 2000,
+                            icon: '✅',
+                          })
+                        } catch (error) {
+                          console.error(`Bulk ${action.title} failed:`, error)
+                          toast.error(`Bulk ${action.title.toLowerCase()} failed`, {
+                            duration: 2000,
+                            icon: '❌',
+                          })
+                        } finally {
+                          setIsBulkOperationLoading(false)
+                        }
                       }}
-                      className={action.className || 'ml-2'}
+                      className={`${action.className || 'ml-2'} ${isBulkOperationLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
-                      <IconComponent
-                        className={action.iconClassName || 'w-4 h-4 inline'}
-                      />
+                      {isBulkOperationLoading ? (
+                        <svg className="animate-spin w-4 h-4 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      ) : (
+                        <IconComponent
+                          className={action.iconClassName || 'w-4 h-4 inline'}
+                        />
+                      )}
                     </button>
                   )
                 })}
@@ -189,7 +254,24 @@ export default function DataTable({ items, actions = [] }) {
             </div>
           )}
         </div>
-        <table className="table-auto bg-white w-full">
+        {filteredData && filteredData.length === 0 ? (
+          <div className="flex items-center justify-center h-32 border border-gray-200 rounded-lg bg-gray-50">
+            <div className="text-center">
+              <div className="text-gray-500 text-lg font-medium">No results found</div>
+              <div className="text-gray-400 text-sm mt-1">
+                Try adjusting your search terms or{' '}
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="text-blue-500 hover:text-blue-700 underline"
+                >
+                  clear search
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <>
+            <table className="table-auto bg-white w-full">
           <thead className="bg-gray-100">
             {table.getHeaderGroups().map((headerGroup, idx) => (
               <tr key={headerGroup.id}>
@@ -352,10 +434,14 @@ export default function DataTable({ items, actions = [] }) {
             | Go to page:
             <input
               type="number"
+              min="1"
+              max={table.getPageCount()}
               defaultValue={table.getState().pagination.pageIndex + 1}
               onChange={(e) => {
                 const page = e.target.value ? Number(e.target.value) - 1 : 0
-                table.setPageIndex(page)
+                const maxPage = table.getPageCount() - 1
+                const validPage = Math.max(0, Math.min(page, maxPage))
+                handlePageChange(validPage)
               }}
               className="border p-1 rounded w-16"
             />
@@ -377,6 +463,8 @@ export default function DataTable({ items, actions = [] }) {
           Showing {table.getRowModel().rows.length.toLocaleString()} of{' '}
           {table.getRowCount().toLocaleString()} Rows
         </div>
+          </>
+        )}
       </div>
 
       <DialogModal open={isDialogOpen} setOpen={setIsDialogOpen}>
@@ -393,7 +481,7 @@ export default function DataTable({ items, actions = [] }) {
               <p className="text-slate-700">{itemToRemove.name}</p>
               <p className="text-xs text-slate-500">
                 id <strong>{itemToRemove.id}</strong> & associated{' '}
-                <strong>{itemToRemove.uuids.length}</strong> uuids/chunks
+                <strong>{itemToRemove.uuids?.length || 0}</strong> uuids/chunks
               </p>
             </div>
           )}

@@ -1,18 +1,15 @@
-import { Tab } from '@headlessui/react'
 import { useEffect, useState } from 'react'
+import { addUrls, fetchUrls, removeAllUrls, removeUrl } from '../../utils/api'
 import { parseUrls } from '../../utils/links'
-import { removeAllUrls, removeUrl, fetchUrls, addUrls } from '../../utils/api'
 
 import {
   ArrowPathIcon,
-  CheckIcon,
   LinkIcon,
-  TrashIcon,
-  XMarkIcon,
+  TrashIcon
 } from '@heroicons/react/24/solid'
 
-import DataTable from './common/DataTable'
 import toast from 'react-hot-toast'
+import DataTable from './common/DataTable'
 
 import Loading from './Loading'
 
@@ -22,18 +19,7 @@ function LinksList() {
   const [data, setData] = useState(null)
 
   const [isLoading, setLoading] = useState(true)
-
-  const [isToDelete, setIsToDelete] = useState(false)
-
-  const url = '/api/urls'
-
-  const myHeaders = new Headers()
-  myHeaders.append('Content-Type', 'application/json')
-
-  const delRequsetOptions = {
-    method: 'DELETE',
-    redirect: 'follow',
-  }
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const initialFormState = {
     url: '',
@@ -43,25 +29,39 @@ function LinksList() {
 
   const [formState, setFormState] = useState(initialFormState)
 
-  const handleRemoveAll = async () => {
-    try {
-      await removeAllUrls()
-      setData([])
-    } catch (error) {
-      console.log('error', error)
-    }
-  }
-
   const handleSubmitMultiple = async (e) => {
     e.preventDefault()
     const urls = parseUrls(formState.urls)
-    if (!urls.length) return
-    await addUrls(urls, formState.internal)
-    setFormState(initialFormState)
-    // Refresh the data
-    fetchUrls()
-      .then((data) => setData(data))
-      .catch((error) => console.log(error))
+    if (!urls.length) {
+      toast.error('Please enter at least one valid URL', {
+        duration: 2000,
+        icon: '⚠️',
+      })
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      await addUrls(urls, formState.internal)
+      setFormState(initialFormState)
+      
+      // Refresh the data
+      const updatedData = await fetchUrls()
+      setData(updatedData)
+      
+      toast.success(`Successfully added ${urls.length} URL${urls.length > 1 ? 's' : ''}!`, {
+        duration: 2000,
+        icon: '✅',
+      })
+    } catch (error) {
+      console.error('Error adding URLs:', error)
+      toast.error('Failed to add URLs. Please try again.', {
+        duration: 2000,
+        icon: '❌',
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleRemove = async (id) => {
@@ -109,10 +109,16 @@ function LinksList() {
       const urls = parseUrls(item.url)
       if (urls.length === 0) {
         console.error('No valid URLs found to reupload')
+        toast.error('No valid URLs found to reupload', {
+          duration: 2000,
+          icon: '❌',
+        })
         return
       }
 
-      await addUrls(urls, false) // assuming internal is false for reupload
+      // Preserve the original internal flag from the item's metadata or default to false
+      const isInternal = item.internal || false
+      await addUrls(urls, isInternal)
 
       // Refresh the data after reuploading
       const updatedData = await fetchUrls()
@@ -160,7 +166,11 @@ function LinksList() {
         setLoading(false)
       })
       .catch((error) => {
-        console.log(error)
+        console.error('Error fetching URLs:', error)
+        toast.error('Failed to load URLs', {
+          duration: 2000,
+          icon: '❌',
+        })
         setLoading(false)
       })
   }, [])
@@ -243,9 +253,20 @@ function LinksList() {
             </div>
             <button
               type="submit"
-              className="flex w-auto flex-grow whitespace-nowrap rounded-md bg-kruze-blueDark px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-kruze-blue focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kruze-blueDark"
+              disabled={isSubmitting || !formState.urls.trim()}
+              className="flex w-auto flex-grow whitespace-nowrap rounded-md bg-kruze-blueDark px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-kruze-blue focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kruze-blueDark disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Submit URLs
+              {isSubmitting ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Submitting...
+                </>
+              ) : (
+                'Submit URLs'
+              )}
             </button>
           </div>
         </form>

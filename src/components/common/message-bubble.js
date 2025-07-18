@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 import {
   ChevronDownIcon,
@@ -174,13 +175,173 @@ export default function MessageBubble({ message, role, onRemove }) {
       {role === 'user' ? (
         <UserMessageWrapper onRemove={onRemove}>
           <div ref={contentRef}>
-            <ReactMarkdown>{message}</ReactMarkdown>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                // Style tables properly
+                table: ({ children }) => (
+                  <div className="overflow-x-auto my-4">
+                    <table className="min-w-full divide-y divide-gray-200 border border-gray-300 rounded-lg">
+                      {children}
+                    </table>
+                  </div>
+                ),
+                thead: ({ children }) => (
+                  <thead className="bg-gray-50">{children}</thead>
+                ),
+                tbody: ({ children }) => (
+                  <tbody className="bg-white divide-y divide-gray-200">{children}</tbody>
+                ),
+                tr: ({ children }) => (
+                  <tr className="hover:bg-gray-50">{children}</tr>
+                ),
+                th: ({ children }) => (
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 last:border-r-0">
+                    {children}
+                  </th>
+                ),
+                td: ({ children }) => (
+                  <td className="px-4 py-3 text-sm text-gray-900 border-r border-gray-200 last:border-r-0">
+                    {children}
+                  </td>
+                ),
+                // Style other markdown elements
+                h1: ({ children }) => (
+                  <h1 className="text-2xl font-bold mt-6 mb-4 text-gray-900">{children}</h1>
+                ),
+                h2: ({ children }) => (
+                  <h2 className="text-xl font-bold mt-5 mb-3 text-gray-900">{children}</h2>
+                ),
+                h3: ({ children }) => (
+                  <h3 className="text-lg font-semibold mt-4 mb-2 text-gray-900">{children}</h3>
+                ),
+                p: ({ children }) => (
+                  <p className="mb-3 leading-relaxed text-gray-700">{children}</p>
+                ),
+                ul: ({ children }) => (
+                  <ul className="list-disc list-inside mb-3 space-y-1">{children}</ul>
+                ),
+                ol: ({ children }) => (
+                  <ol className="list-decimal list-inside mb-3 space-y-1">{children}</ol>
+                ),
+                li: ({ children }) => (
+                  <li className="text-gray-700">{children}</li>
+                ),
+                code: ({ inline, children }) =>
+                  inline ? (
+                    <code className="bg-gray-100 px-1 py-0.5 rounded text-sm font-mono text-gray-800">
+                      {children}
+                    </code>
+                  ) : (
+                    <pre className="bg-gray-100 p-3 rounded-lg overflow-x-auto mb-3">
+                      <code className="text-sm font-mono text-gray-800">{children}</code>
+                    </pre>
+                  ),
+                blockquote: ({ children }) => (
+                  <blockquote className="border-l-4 border-blue-500 pl-4 py-2 my-3 bg-blue-50 italic text-gray-700">
+                    {children}
+                  </blockquote>
+                ),
+                a: ({ href, children }) => (
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 underline"
+                  >
+                    {children}
+                  </a>
+                ),
+              }}
+            >
+              {message}
+            </ReactMarkdown>
           </div>
         </UserMessageWrapper>
       ) : (
         <AssistantMessageWrapper role={role} onRemove={onRemove}>
           <div ref={contentRef}>
-            <ReactMarkdown>{message}</ReactMarkdown>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                // Style tables properly
+                table: ({ children }) => (
+                  <div className="overflow-x-auto my-4">
+                    <table className="min-w-full divide-y divide-gray-200 border border-gray-300 rounded-lg">
+                      {children}
+                    </table>
+                  </div>
+                ),
+                thead: ({ children }) => (
+                  <thead className="bg-gray-50">{children}</thead>
+                ),
+                tbody: ({ children }) => (
+                  <tbody className="bg-white divide-y divide-gray-200">{children}</tbody>
+                ),
+                tr: ({ children }) => (
+                  <tr className="hover:bg-gray-50">{children}</tr>
+                ),
+                th: ({ children }) => (
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200 last:border-r-0">
+                    {children}
+                  </th>
+                ),
+                td: ({ children }) => (
+                  <td className="px-4 py-3 text-sm text-gray-900 border-r border-gray-200 last:border-r-0">
+                    {children}
+                  </td>
+                ),
+                // Style other markdown elements
+                h1: ({ children }) => (
+                  <h1 className="text-2xl font-bold mt-6 mb-4 text-gray-900">{children}</h1>
+                ),
+                h2: ({ children }) => (
+                  <h2 className="text-xl font-bold mt-5 mb-3 text-gray-900">{children}</h2>
+                ),
+                h3: ({ children }) => (
+                  <h3 className="text-lg font-semibold mt-4 mb-2 text-gray-900">{children}</h3>
+                ),
+                p: ({ children }) => (
+                  <p className="mb-3 leading-relaxed text-gray-700">{children}</p>
+                ),
+                ul: ({ children }) => (
+                  <ul className="list-disc list-inside mb-3 space-y-1">{children}</ul>
+                ),
+                ol: ({ children }) => (
+                  <ol className="list-decimal list-inside mb-3 space-y-1">{children}</ol>
+                ),
+                li: ({ children }) => (
+                  <li className="text-gray-700">{children}</li>
+                ),
+                code: ({ inline, children }) =>
+                  inline ? (
+                    <code className="bg-gray-100 px-1 py-0.5 rounded text-sm font-mono text-gray-800">
+                      {children}
+                    </code>
+                  ) : (
+                    <pre className="bg-gray-100 p-3 rounded-lg overflow-x-auto mb-3">
+                      <code className="text-sm font-mono text-gray-800">{children}</code>
+                    </pre>
+                  ),
+                blockquote: ({ children }) => (
+                  <blockquote className="border-l-4 border-blue-500 pl-4 py-2 my-3 bg-blue-50 italic text-gray-700">
+                    {children}
+                  </blockquote>
+                ),
+                a: ({ href, children }) => (
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 underline"
+                  >
+                    {children}
+                  </a>
+                ),
+              }}
+            >
+              {message}
+            </ReactMarkdown>
           </div>
         </AssistantMessageWrapper>
       )}

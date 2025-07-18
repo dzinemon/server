@@ -1,12 +1,13 @@
 import Image from 'next/image'
-import { useRouter } from 'next/router'
-import React, {
+import {
+  lazy,
+  memo,
+  Suspense,
+  useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
-  useCallback,
-  useMemo,
-  memo,
 } from 'react'
 import toast, { Toaster } from 'react-hot-toast'
 import { v4 as uuidv4 } from 'uuid'
@@ -20,11 +21,88 @@ import {
 } from '@heroicons/react/24/solid'
 
 import LoadingIndicator from '@/components/common/chatloadingstate'
-import MessageBubble from '@/components/common/message-bubble'
-import SourceCardCompact from '@/components/common/source-card-compact'
+
+// Lazy load MessageBubble since it now contains heavy markdown processing
+const MessageBubble = lazy(() => import('@/components/common/message-bubble'))
+
+// Lazy load components that are conditionally rendered
+const SourceCardCompact = lazy(() => import('@/components/common/source-card-compact'))
+
 import { promptTemplate } from '../../utils/handleprompts/internal'
 import { sourceFilters, typeFilters } from '../../utils/hardcoded'
 import { useInternalChatAPI } from '../hooks/useAPI'
+
+// Lazy load the welcome screen component
+const WelcomeScreen = lazy(() => Promise.resolve({
+  default: memo(function WelcomeScreen({ questionExamples, onQuestionClick }) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="text-center max-w-md">
+          <div className="mb-6">
+            <Image
+              src="/logo-color.png"
+              alt="Logo"
+              width={64}
+              height={76}
+              className="mx-auto object-contain opacity-50"
+            />
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            Welcome to AI Chat
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Start a conversation by creating a new thread or selecting
+            from example questions below.
+          </p>
+
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-gray-700 mb-3">
+              Try asking:
+            </p>
+            {questionExamples.slice(0, 3).map((question, idx) => (
+              <button
+                key={idx}
+                onClick={() => onQuestionClick(question)}
+                className="block w-full text-left p-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 text-sm text-gray-700"
+              >
+                {question}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  })
+}))
+
+// Lazy load sources section
+const MessageSources = lazy(() => Promise.resolve({
+  default: memo(function MessageSources({ sources }) {
+    return (
+      <div className="flex flex-wrap ml-0 gap-2">
+        <div className="leading-none font-semibold w-full mb-3 text-sm text-gray-700">
+          Resources used:
+        </div>
+        {sources
+          .filter(
+            (item, idx, arr) =>
+              arr.findIndex((t) => t.url === item.url) === idx
+          )
+          .map((item, idx) => (
+            <Suspense 
+              key={`source-${idx}`}
+              fallback={<div className="w-16 h-8 bg-gray-100 rounded animate-pulse" />}
+            >
+              <SourceCardCompact
+                item={item}
+                index={idx}
+              />
+            </Suspense>
+          ))}
+      </div>
+    )
+  })
+}))
 
 const questionExamples = [
   'Is QuickBooks good for SaaS Startups?',
@@ -115,7 +193,6 @@ const ThreadCombobox = memo(function ThreadCombobox({
 })
 
 export default function ThreadedChatWidget() {
-  const router = useRouter()
   const [sideBarIsOpen, setSideBarOpen] = useState(true)
   const [userMessage, setUserMessage] = useState('')
   const [threads, setThreads] = useState([])
@@ -125,7 +202,6 @@ export default function ThreadedChatWidget() {
   const {
     isLoading,
     setIsLoading,
-    currentSources,
     setCurrentSources,
     getEmbedding,
     getData,
@@ -495,7 +571,7 @@ export default function ThreadedChatWidget() {
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
+        {/* Sidebar - remains the same */}
         <div
           className={`bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ease-in-out ${
             sideBarIsOpen ? 'w-80' : 'w-0'
@@ -529,7 +605,7 @@ export default function ThreadedChatWidget() {
         <div className="flex-1 flex flex-col">
           {currentThread ? (
             <>
-              {/* Thread Header */}
+              {/* Thread Header - remains the same */}
               <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
                 <div>
                   <h2 className="font-semibold text-gray-900 truncate">
@@ -565,33 +641,36 @@ export default function ThreadedChatWidget() {
                       </div>
                     )}
                     <div className="flex-1">
-                      <MessageBubble
-                        role={message.role}
-                        message={message.content}
-                        className={
-                          message.role === 'user'
-                            ? 'text-slate-800'
-                            : 'text-gray-900'
-                        }
-                      />
-                      {message.sources && message.sources.length > 0 && (
-                        <div className="flex flex-wrap  ml-0 gap-2">
-                          <div className="leading-none font-semibold w-full mb-3 text-sm text-gray-700">
-                            Resources used:
+                      <Suspense 
+                        fallback={
+                          <div className="bg-white border border-gray-200 rounded-lg p-4">
+                            <div className="animate-pulse">
+                              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                            </div>
                           </div>
-                          {message.sources
-                            .filter(
-                              (item, idx, arr) =>
-                                arr.findIndex((t) => t.url === item.url) === idx
-                            )
-                            .map((item, idx) => (
-                              <SourceCardCompact
-                                key={`source-${idx}`}
-                                item={item}
-                                index={idx}
-                              />
-                            ))}
-                        </div>
+                        }
+                      >
+                        <MessageBubble
+                          role={message.role}
+                          message={message.content}
+                          className={
+                            message.role === 'user'
+                              ? 'text-slate-800'
+                              : 'text-gray-900'
+                          }
+                        />
+                      </Suspense>
+                      {message.sources && message.sources.length > 0 && (
+                        <Suspense 
+                          fallback={
+                            <div className="flex gap-2 mt-2">
+                              <div className="text-sm text-gray-700">Loading sources...</div>
+                            </div>
+                          }
+                        >
+                          <MessageSources sources={message.sources} />
+                        </Suspense>
                       )}
                     </div>
                     {message.role === 'user' && (
@@ -621,45 +700,22 @@ export default function ThreadedChatWidget() {
               </div>
             </>
           ) : (
-            // Welcome Screen
-            <div className="flex-1 flex items-center justify-center p-8">
-              <div className="text-center max-w-md">
-                <div className="mb-6">
-                  <Image
-                    src="/logo-color.png"
-                    alt="Logo"
-                    width={64}
-                    height={76}
-                    className="mx-auto object-contain opacity-50"
-                  />
+            // Welcome Screen with Suspense
+            <Suspense 
+              fallback={
+                <div className="flex-1 flex items-center justify-center">
+                  <div className="text-gray-500">Loading...</div>
                 </div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                  Welcome to AI Chat
-                </h2>
-                <p className="text-gray-600 mb-6">
-                  Start a conversation by creating a new thread or selecting
-                  from example questions below.
-                </p>
-
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-gray-700 mb-3">
-                    Try asking:
-                  </p>
-                  {questionExamples.slice(0, 3).map((question, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => handleQuestionClick(question)}
-                      className="block w-full text-left p-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 text-sm text-gray-700"
-                    >
-                      {question}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
+              }
+            >
+              <WelcomeScreen 
+                questionExamples={questionExamples}
+                onQuestionClick={handleQuestionClick}
+              />
+            </Suspense>
           )}
 
-          {/* Input Area */}
+          {/* Input Area - remains the same */}
           <div className="bg-white border-t border-gray-200 p-4">
             <form onSubmit={handleSubmit} className="flex space-x-3">
               <input

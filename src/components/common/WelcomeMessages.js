@@ -1,5 +1,6 @@
 import { Tab, Dialog, Transition } from '@headlessui/react'
 import { useState, Fragment } from 'react'
+import { motion } from 'framer-motion'
 
 export const categories = [
   {
@@ -173,7 +174,7 @@ export function WelcomeMessages({ categories, onMessageClick }) {
       <Tab.Group selectedIndex={selectedIndex} onChange={setSelectedIndex}>
         <>
           <div className="lg:text-lg">
-            Ask questions about{' '}
+            {`I'm here to provide quick, reliable answers based on our company's extensive knowledge base. Feel free to ask me about`}{' '}
             {categories.slice(0, 7).map((category, idx) => (
               <span key={category.name + idx + '-welcome-msg'}>
                 <button
@@ -203,7 +204,7 @@ export function WelcomeMessages({ categories, onMessageClick }) {
               more
             </button>
             .{' '}
-            <div className="my-4 text-gray-600">
+            <div className="my-6 text-gray-600 text-sm lg:text-base">
               Here are some <strong>{categories[selectedIndex]?.name}</strong>{' '}
               questions to get you started:
             </div>
@@ -236,7 +237,15 @@ export function WelcomeMessages({ categories, onMessageClick }) {
                       className={`block w-full text-left px-4 py-2 mt-2 rounded-lg hover:bg-blue-50 hover:text-blue-800 text-gray-800 bg-gray-50`}
                       onClick={() => onMessageClick(question)}
                     >
-                      {question}
+                      <motion.span
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        dela
+                        transition={{ duration: 0.4, delay: 0.2 }}
+                      >
+                        {question}
+                      </motion.span>
                     </button>
                   ))}
               </Tab.Panel>

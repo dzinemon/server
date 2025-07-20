@@ -56,11 +56,11 @@ const WelcomeScreen = lazy(() =>
                 alt="Logo"
                 width={64}
                 height={76}
-                className="mx-auto object-contain opacity-50"
+                className="mr-auto object-contain opacity-50"
               />
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Kruze AI Chat Assistant
+            <h2 className="text-2xl lg:text-3xl font-semibold text-gray-900 mb-4">
+              How can I help you today?
             </h2>
             <WelcomeMessages
               categories={questionExamples}

@@ -13,10 +13,10 @@ import toast, { Toaster } from 'react-hot-toast'
 import { v4 as uuidv4 } from 'uuid'
 
 import {
-  TrashIcon,
-  ArrowUpIcon,
+  ArrowLeftOnRectangleIcon,
   ArrowRightOnRectangleIcon,
-  ArrowLeftOnRectangleIcon
+  ArrowUpIcon,
+  TrashIcon,
 } from '@heroicons/react/24/solid'
 
 import ModelPicker from '@/components/common/modelpicker'
@@ -37,6 +37,11 @@ import { promptTemplate } from '../../utils/handleprompts/internal'
 import { sourceFilters, typeFilters } from '../../utils/hardcoded'
 import { useInternalChatAPI } from '../hooks/useAPI'
 
+import {
+  categories,
+  WelcomeMessages,
+} from '@/components/common/WelcomeMessages'
+
 // Lazy load the welcome screen component
 const WelcomeScreen = lazy(() =>
   Promise.resolve({
@@ -45,8 +50,8 @@ const WelcomeScreen = lazy(() =>
       onQuestionClick,
     }) {
       return (
-        <div className="flex-1 flex items-center justify-center p-8">
-          <div className="text-center w-full max-w-6xl">
+        <div className="flex-1 flex items-center justify-start p-8">
+          <div className="w-full max-w-4xl mx-auto">
             <div className="mb-6">
               <Image
                 src="/logo-color.png"
@@ -57,29 +62,12 @@ const WelcomeScreen = lazy(() =>
               />
             </div>
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Welcome to AI Chat
+              Kruze AI Chat Assistant
             </h2>
-            <p className="text-gray-600 mb-6">
-              Start a conversation by creating a new thread or selecting from
-              example questions below.
-            </p>
-
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-gray-700 mb-3">
-                Try asking:
-              </p>
-              <div className="flex flex-wrap gap-2 justify-center">
-                {questionExamples.map((question, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => onQuestionClick(question)}
-                    className="text-left px-1.5 py-1 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 text-sm text-gray-700"
-                  >
-                    {question}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <WelcomeMessages
+              categories={questionExamples}
+              onMessageClick={onQuestionClick}
+            />
           </div>
         </div>
       )
@@ -117,24 +105,6 @@ const MessageSources = lazy(() =>
   })
 )
 
-const questionExamples = [
-  'Are VC Investments Taxed?',
-  'How do you raise VC funding?',
-  'Best banks for startups',
-  'What is a chart of accounts?',
-  'State tax filing requirements',
-  'What does a startup CFO do?',
-  '409A Valuation for Startups',
-  'VC diligence process',
-  'What is a SAFE note?',
-  // 'Is QuickBooks good for SaaS Startups?',
-  // 'What is the best accounting software for SaaS startups?',
-  // 'What taxes should I pay as a Delaware C-corp startup?',
-  // 'How much time do you spend monthly doing bookkeeping?',
-  // 'Who are good bookkeepers in Mountain View CA?',
-  // 'Which tools should every startup CFO know/use?',
-]
-// Memoized ThreadCombobox component
 // Memoized ThreadCombobox component
 const ThreadCombobox = memo(function ThreadCombobox({
   threads,
@@ -151,6 +121,8 @@ const ThreadCombobox = memo(function ThreadCombobox({
       return thread.name.toLowerCase().includes(query.toLowerCase())
     })
   }, [threads, query])
+
+  //
 
   // Memoize query change handler
   const handleQueryChange = useCallback((e) => {
@@ -222,7 +194,7 @@ const ThreadCombobox = memo(function ThreadCombobox({
                 {new Date(thread.date).toLocaleDateString()}
               </div>
             </button>
-            
+
             {/* Remove button - appears on hover */}
             <button
               onClick={(e) => handleRemoveClick(e, thread.id)}
@@ -273,6 +245,17 @@ export default function ThreadedChatWidget() {
   const scrollTargetRef = useRef(null)
   const messageInputRef = useRef(null)
 
+  const drawerRef = useRef(null)
+
+  const handleOutsideClick = useCallback(
+    (e) => {
+      if (drawerRef.current && e.target == drawerRef.current && sideBarIsOpen) {
+        setSideBarOpen(false)
+      }
+    },
+    [sideBarIsOpen]
+  )
+
   // Memoize current thread calculation
   const currentThread = useMemo(() => {
     return threads.find((thread) => thread.id === currentThreadId) || null
@@ -304,14 +287,15 @@ export default function ThreadedChatWidget() {
   const handleAddNewThread = useCallback(() => {
     // Check if there's already a "New Conversation" thread without messages
     const existingNewThread = threads.find(
-      (thread) => thread.name === 'New Conversation' && thread.messages.length === 0
+      (thread) =>
+        thread.name === 'New Conversation' && thread.messages.length === 0
     )
 
     // If an empty "New Conversation" already exists, just select it
     if (existingNewThread) {
       setCurrentThreadId(existingNewThread.id)
       setSideBarOpen(false)
-      
+
       // Focus on input
       setTimeout(() => {
         if (messageInputRef.current) {
@@ -606,33 +590,50 @@ export default function ThreadedChatWidget() {
     }
   }, [notifyParentOfThreadCount])
 
+  // Add event listener for outside clicks to close sidebar
+  useEffect(() => {
+    document.addEventListener('mousedown', handleOutsideClick)
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick)
+    }
+  }, [handleOutsideClick])
+
   return (
     <Layout hasNavar={false}>
       <div className="h-screen bg-gray-50 flex flex-col">
         <Toaster position="top-center" />
-     
 
-        <div className={`absolute left-2 rounded-lg top-2 p-1 z-10 ${ sideBarIsOpen ? '' : 'bg-blue-50' }`}>
-           <button
-              onClick={handleSidebarToggle}
-              className="p-2 rounded-md hover:bg-white hover:text-blue-600  text-gray-600"
-            >
-              {sideBarIsOpen ? (
-                <ArrowLeftOnRectangleIcon className="w-5 h-5" />
-              ) : (
-                <ArrowRightOnRectangleIcon className="w-5 h-5" />
-              )}
-            </button>
+        <div
+          className={`absolute left-2 rounded-lg top-2 p-1 z-10 ${
+            sideBarIsOpen ? '' : 'bg-blue-50'
+          }`}
+        >
+          <button
+            onClick={handleSidebarToggle}
+            className="p-2 rounded-md hover:bg-white hover:text-blue-600  text-gray-600"
+          >
+            {sideBarIsOpen ? (
+              <ArrowLeftOnRectangleIcon className="w-5 h-5" />
+            ) : (
+              <ArrowRightOnRectangleIcon className="w-5 h-5" />
+            )}
+          </button>
         </div>
 
         <div className="flex flex-1 overflow-hidden bg-blue-50/50">
+          {sideBarIsOpen && (
+            <div
+              ref={drawerRef}
+              className="block md:hidden absolute inset-0 bg-gray-500/60 backdrop-blur-lg z-[1]"
+            />
+          )}
           {/* Sidebar - remains the same */}
           <div
-            className={`flex flex-col transition-all duration-100 ease-in-out ${
-              sideBarIsOpen ? 'w-80' : 'w-0'
-            } overflow-hidden`}
+            className={`flex flex-col transition-all duration-100 ease-in-out 
+              absolute md:shadow-none bg-white md:bg-transparent md:static left-0 top-0 bottom-0 z-[1]
+               ${sideBarIsOpen ? 'w-80 shadow-lg ' : 'w-0'} overflow-hidden
+            `}
           >
-           
             <div className="px-4 pt-16 flex items-center justify-between">
               <div className="flex items-center justify-center w-full">
                 <Image
@@ -647,11 +648,11 @@ export default function ThreadedChatWidget() {
                 </h1>
               </div>
             </div>
-           
+
             <div className="p-4 space-y-4 flex-1 overflow-y-auto">
               <button
                 onClick={handleAddNewThread}
-                className="w-full bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 flex items-center justify-center space-x-2 text-sm font-medium bg-gradient-to-b from-blue-600 via-sky-700 to-blue-600"
+                className="w-full bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 flex items-center justify-center space-x-2 text-sm font-medium bg-gradient-to-b from-blue-600 via-blue-700 to-blue-600"
               >
                 <span>New Conversation</span>
               </button>
@@ -670,20 +671,27 @@ export default function ThreadedChatWidget() {
             </div>
           </div>
           {/* Main Chat Area */}
-          <div className={`relative
-              ${sideBarIsOpen ? 'w-[calc(100%-20rem)] mt-4 border border-blue-100 rounded-tl-lg shadow-lg' : 'w-full'}
+          <div
+            className={`relative
+              ${
+                sideBarIsOpen
+                  ? 'w-[calc(100%-20rem)] mt-0 md:mt-4 border border-blue-100 rounded-tl-lg shadow-lg'
+                  : 'w-full'
+              }
               flex-1 flex flex-col bg-white
-            `}>
+            `}
+          >
             {currentThread && currentThread.messages.length > 0 ? (
               <>
-
                 {/* Messages */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-24">
                   {currentThread.messages.map((message, idx) => (
                     <div
                       key={idx}
                       className={`mx-auto max-w-5xl flex gap-3 ${
-                        message.role === 'user' ? 'justify-end' : 'justify-start'
+                        message.role === 'user'
+                          ? 'justify-end'
+                          : 'justify-start'
                       }`}
                     >
                       {message.role === 'assistant' && (
@@ -762,7 +770,7 @@ export default function ThreadedChatWidget() {
                 }
               >
                 <WelcomeScreen
-                  questionExamples={questionExamples}
+                  questionExamples={categories}
                   onQuestionClick={handleQuestionClick}
                 />
               </Suspense>
@@ -777,18 +785,20 @@ export default function ThreadedChatWidget() {
                     value={userMessage}
                     onChange={(e) => setUserMessage(e.target.value)}
                     placeholder="Type your message..."
-                    name='user message'
-                    className="flex-1 px-2 pt-2 pb-16 rounded-t-lg backdrop-blur-md bg-white/50 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent text-gray-600"
+                    name="user message"
+                    className="flex-1 px-2 pt-2 pb-16 rounded-t-lg active:bg-white focus:bg-white backdrop-blur-md bg-white/50 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent text-gray-600"
                     disabled={isLoading}
                   />
-                  <div className="absolute bottom-2 left-4 w-40">
+                  <div className="absolute bottom-2 left-2 w-40">
                     <ModelPicker />
                   </div>
-                  <div className="absolute bottom-2 right-4">
+                  <div className="absolute bottom-2 right-2">
                     <button
                       type="submit"
                       disabled={isLoading || !userMessage.trim()}
-                      className="px-2 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                      className={`px-2 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center
+                        ${userMessage}
+                        `}
                     >
                       <ArrowUpIcon className="w-5 h-5" />
                     </button>

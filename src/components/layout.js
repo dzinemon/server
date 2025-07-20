@@ -17,7 +17,11 @@ export default function Layout({ children, hasNavar = true }) {
     return (
       <>
         {hasNavar && <Navbar />}
-        <main className={`${inter.className} ${ hasNavar && "pt-14 lg:pt-16"}  min-h-screen bg-white/60`}>
+        <main
+          className={`${inter.className} ${
+            hasNavar && 'pt-14 lg:pt-16'
+          }  min-h-screen bg-white/60`}
+        >
           {children}
         </main>
         {/* <Footer /> */}

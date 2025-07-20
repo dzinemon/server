@@ -48,7 +48,8 @@ export default function Home() {
               {
                 name: 'Internal Chat',
                 url: 'threaded-widget',
-                description: 'AI Chat Widget for internal use. Uses website, slack, internal data, uploaded to pinecone',
+                description:
+                  'AI Chat Widget for internal use. Uses website, slack, internal data, uploaded to pinecone',
               },
               {
                 name: 'LinkedIn Post Generator',
@@ -59,7 +60,7 @@ export default function Home() {
                 name: 'All Questions',
                 url: 'all-questions',
                 description: 'View the questions users have asked on AI Widget',
-              },  
+              },
             ].map(({ name, url, description }, id) => (
               <a
                 key={`link-${id}-${name}`}

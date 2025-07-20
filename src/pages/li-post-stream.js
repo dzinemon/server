@@ -160,10 +160,10 @@ export default function LiPost() {
   const handleSelectedReposterChange = async (selectedReposters) => {
     // Reset selectedReposter to the new selection
     setSelectedReposter([])
-    
+
     // Process each selected reposter
     const newReposters = []
-    
+
     for (const reposter of selectedReposters) {
       const existingMember = fetchedMembers.find(
         (member) => member.id === reposter.id
@@ -183,7 +183,7 @@ export default function LiPost() {
         }
       }
     }
-    
+
     setSelectedReposter(newReposters)
   }
 
@@ -1035,7 +1035,11 @@ export default function LiPost() {
                               {selectedReposter.length > 0
                                 ? 'Reposters: '
                                 : 'Select Reposter'}
-                              {selectedReposter.length > 0 ? <strong>{selectedReposter.length}</strong> : '' }
+                              {selectedReposter.length > 0 ? (
+                                <strong>{selectedReposter.length}</strong>
+                              ) : (
+                                ''
+                              )}
                             </span>
                             <ChevronDownIcon
                               className={`

@@ -10,6 +10,20 @@ import {
   TrashIcon,
 } from '@heroicons/react/20/solid'
 
+export const copyToClipboardText = async (element) => {
+  if (element) {
+    try {
+      const text = element.textContent || element.innerText || ''
+      await navigator.clipboard.writeText(text)
+      return true
+    } catch (err) {
+      console.error('Failed to copy text!', err)
+      return false
+    }
+  }
+  return false
+}
+
 export const copyToClipboardRichText = async (element) => {
   if (element) {
     const innerHtml = element.innerHTML
@@ -115,14 +129,13 @@ const markdownComponents = {
 // create component for message bubble that will be expandable and collapsible with a button and max height, should have 2 variants: for user and system/assistant; system  messages are expanded by default but with a button to collapse, and user messages are collapsed by default with a button to expand
 
 export const UserMessageWrapper = ({ children, onRemove }) => {
-  const [isExpanded, setIsExpanded] = useState(false)
   const [isCopied, setIsCopied] = useState(false)
   const contentRef = useRef(null)
 
   const handleCopy = async () => {
     if (contentRef.current) {
       setIsCopied(true)
-      const success = await copyToClipboardRichText(contentRef.current)
+      const success = await copyToClipboardText(contentRef.current)
       if (!success) {
         // Could show a toast notification here
         console.warn('Copy to clipboard failed')
@@ -133,15 +146,7 @@ export const UserMessageWrapper = ({ children, onRemove }) => {
 
   return (
     <div>
-      <div ref={contentRef}>
-        {isExpanded ? (
-          <div>{children}</div>
-        ) : (
-          <div className="overflow-hidden" style={{ maxHeight: '200px' }}>
-            <div className="relative">{children}</div>
-          </div>
-        )}
-      </div>
+      <div ref={contentRef}>{children}</div>
       <div className="flex justify-end gap-2 border-t border-blue-100 mt-2 pt-2">
         <button
           title="Copy to clipboard"
@@ -163,19 +168,6 @@ export const UserMessageWrapper = ({ children, onRemove }) => {
           className="inline-flex items-center p-1.5 text-xs font-medium text-red-600 bg-red-50 rounded hover:bg-red-100 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
         >
           <TrashIcon className="w-3.5 h-3.5" />
-        </button>
-
-        <button
-          title={isExpanded ? 'Collapse message' : 'Expand message'}
-          onClick={() => setIsExpanded(!isExpanded)}
-          type="button"
-          className="inline-flex items-center p-1.5 text-xs font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-        >
-          {isExpanded ? (
-            <ChevronUpIcon className="w-3.5 h-3.5" />
-          ) : (
-            <ChevronDownIcon className="w-3.5 h-3.5" />
-          )}
         </button>
       </div>
     </div>

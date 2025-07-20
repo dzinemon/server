@@ -26,10 +26,8 @@ import LoadingIndicator from '@/components/common/chatloadingstate'
 // Lazy load MessageBubble since it now contains heavy markdown processing
 const MessageBubble = lazy(() => import('@/components/common/message-bubble'))
 
-// Lazy load components that are conditionally rendered
-const SourceCardCompact = lazy(() =>
-  import('@/components/common/source-card-compact')
-)
+// Lazy load MessageSources component
+const MessageSources = lazy(() => import('@/components/common/message-sources'))
 
 import Layout from '@/components/layout'
 
@@ -69,36 +67,6 @@ const WelcomeScreen = lazy(() =>
               onMessageClick={onQuestionClick}
             />
           </div>
-        </div>
-      )
-    }),
-  })
-)
-
-// Lazy load sources section
-const MessageSources = lazy(() =>
-  Promise.resolve({
-    default: memo(function MessageSources({ sources }) {
-      return (
-        <div className="flex flex-wrap ml-0 gap-2">
-          <div className="leading-none font-semibold w-full mb-3 text-sm text-gray-700">
-            Resources used:
-          </div>
-          {sources
-            .filter(
-              (item, idx, arr) =>
-                arr.findIndex((t) => t.url === item.url) === idx
-            )
-            .map((item, idx) => (
-              <Suspense
-                key={`source-${idx}`}
-                fallback={
-                  <div className="w-16 h-8 bg-gray-100 rounded animate-pulse" />
-                }
-              >
-                <SourceCardCompact item={item} index={idx} />
-              </Suspense>
-            ))}
         </div>
       )
     }),

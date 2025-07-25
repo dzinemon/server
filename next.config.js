@@ -33,6 +33,11 @@ const nextConfig = {
         destination: '/generate',
         permanent: true,
       },
+      {
+        source: '/internal-chat',
+        destination: '/threaded-widget',
+        permanent: true,
+      },
       // Wildcard path matching
       // {
       //   source: '/blog/:slug',

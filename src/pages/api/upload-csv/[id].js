@@ -6,8 +6,6 @@ import db from '../../../db'
 
 import { deleteEmbedding, upsertEmbedding } from '../../../../utils/pinecone'
 
-// http://localhost:3000/api/urls/:id
-
 export default async function csvById(req, res) {
   const {
     query: { id },

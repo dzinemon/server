@@ -9,8 +9,6 @@ import { parseWithCheerio } from '../../../../utils/cheerio-axios'
 import { deleteAllVectors, upsertEmbedding } from '../../../../utils/pinecone'
 import { getTextChunks } from '../../../../utils/textbreakdown'
 
-// http://localhost:3000/api/urls
-
 const getUrls = async (req, res) => {
   const result = await db.query('SELECT * FROM links')
   res.status(200).json(result.rows)

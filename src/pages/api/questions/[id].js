@@ -1,7 +1,5 @@
 import db from '../../../db'
 
-// http://localhost:3000/api/questions/:id
-
 const getQaById = async (req, res) => {
   const {
     query: { id },

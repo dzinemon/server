@@ -2,8 +2,6 @@ import db from '../../../db'
 
 import { deleteEmbedding, upsertEmbedding } from '../../../../utils/pinecone'
 
-// http://localhost:3000/api/texts/:id
-
 export default async function textById(req, res) {
   const {
     query: { id },

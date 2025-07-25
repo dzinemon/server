@@ -9,7 +9,6 @@ import DataTable from './common/DataTable'
 
 import Loading from './Loading'
 
-// http://localhost:3000/api/urls/:id
 function LinksList() {
   // name, url, id, uuids
   const [data, setData] = useState(null)

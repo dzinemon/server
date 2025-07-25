@@ -5,10 +5,8 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '../auth/[...nextauth]'
 
 import { v4 as uuidv4 } from 'uuid'
-import { deleteEmbedding, upsertEmbedding } from '../../../../utils/pinecone'
+import { upsertEmbedding } from '../../../../utils/pinecone'
 import { getTextChunks } from '../../../../utils/textbreakdown'
-
-// http://localhost:3000/api/texts
 
 const getAllTexts = async (req, res) => {
   const result = await db.query('SELECT * FROM text_items')

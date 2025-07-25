@@ -2,8 +2,6 @@
 import db from '../../../db'
 import { pagination as paginationConfig } from '../../../../utils/config'
 
-// http://localhost:3000/api/questions
-
 const getAllQa = async (req, res) => {
   try {
     const {

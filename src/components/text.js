@@ -10,7 +10,6 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/solid'
 
-// http://localhost:3000/api/urls/:id
 function TextsList() {
   const [data, setData] = useState(null)
   const [isLoading, setLoading] = useState(true)

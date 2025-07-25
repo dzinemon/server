@@ -31,7 +31,7 @@ const createPrompt = async (req, res) => {
 
   try {
     const result = await db.query(
-      'INSERT INTO prompts (name, content, type) VALUES ($1, $2, $3) RETURNING *',
+      'INSERT INTO prompts (name, content, type, created_at, updated_at) VALUES ($1, $2, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING *',
       [name, content, type]
     )
     res.status(201).json(result.rows[0])

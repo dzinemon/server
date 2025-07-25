@@ -8,7 +8,7 @@ import { deleteEmbedding, upsertEmbedding } from '../../../../utils/pinecone'
 
 // const upload = multer({ dest: 'uploads/' });
 
-const postUrl = async (req, res) => {
+const postAction = async (req, res) => {
   const uuids_array = []
 
   try {
@@ -73,7 +73,7 @@ const postUrl = async (req, res) => {
   }
 }
 
-const getUrls = async (req, res) => {
+const getAction = async (req, res) => {
   const result = await db.query('SELECT * FROM pdf_file')
   res.status(200).json(result.rows)
 }
@@ -81,9 +81,9 @@ const getUrls = async (req, res) => {
 export default async function handler(req, res) {
   switch (req.method) {
     case 'POST':
-      return postUrl(req, res)
+      return postAction(req, res)
     case 'GET':
-      return getUrls(req, res)
+      return getAction(req, res)
 
     default:
       return res.status(405).end(`Method ${req.method} Not Allowed`)

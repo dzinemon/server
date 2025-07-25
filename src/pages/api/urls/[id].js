@@ -2,7 +2,7 @@
 
 import db from '../../../db'
 
-import { deleteEmbedding, upsertEmbedding } from '../../../../utils/pinecone'
+import { deleteEmbedding } from '../../../../utils/pinecone'
 
 export default async function urlById(req, res) {
   const {
@@ -24,18 +24,6 @@ export default async function urlById(req, res) {
       }
       break
 
-    case 'PUT':
-      try {
-        const { name, url } = req.body
-        const result = await db.query(
-          'UPDATE links SET name = $1, url = $2 WHERE id = $3 RETURNING *',
-          [name, url, id]
-        )
-        res.status(200).json(result.rows[0])
-      } catch (error) {
-        res.status(500).json({ error })
-      }
-      break
     case 'DELETE':
       try {
         const result = await db.query('DELETE FROM links WHERE id = $1', [id])
@@ -54,7 +42,7 @@ export default async function urlById(req, res) {
       }
       break
     default:
-      res.setHeader('Allow', ['GET', 'PUT', 'DELETE'])
+      res.setHeader('Allow', ['GET', 'DELETE'])
       res.status(405).end(`Method ${method} Not Allowed`)
   }
 }

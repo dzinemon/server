@@ -10,7 +10,9 @@ import { deleteAllVectors, upsertEmbedding } from '../../../../utils/pinecone'
 import { getTextChunks } from '../../../../utils/textbreakdown'
 
 const getUrls = async (req, res) => {
-  const result = await db.query('SELECT * FROM links')
+  const result = await db.query(
+    'SELECT id, name, url, uuids, created_at FROM links'
+  )
   res.status(200).json(result.rows)
 }
 
@@ -62,7 +64,7 @@ const postUrls = async (req, res) => {
   // INSERT INTO links (name, url, uuids) VALUES ('Google', 'https://www.google.com', ARRAY['a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13']);
 
   const result = await db.query(
-    'INSERT INTO links (name, url, uuids) VALUES ($1, $2, $3) RETURNING *',
+    'INSERT INTO links (name, url, uuids, created_at, updated_at) VALUES ($1, $2, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING *',
     [name, url, uuids_array]
   )
 

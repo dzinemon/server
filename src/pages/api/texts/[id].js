@@ -22,18 +22,6 @@ export default async function textById(req, res) {
         res.status(500).json({ error })
       }
       break
-    case 'PUT':
-      try {
-        const { name, text } = req.body
-        const result = await db.query(
-          'UPDATE text_items SET name = $1, text = $2 WHERE id = $3 RETURNING *',
-          [name, text, id]
-        )
-        res.status(200).json(result.rows[0])
-      } catch (error) {
-        res.status(500).json({ error })
-      }
-      break
     case 'DELETE':
       try {
         const result = await db.query('DELETE FROM text_items WHERE id = $1', [
@@ -54,7 +42,7 @@ export default async function textById(req, res) {
       }
       break
     default:
-      res.setHeader('Allow', ['GET', 'PUT', 'DELETE'])
+      res.setHeader('Allow', ['GET', 'DELETE'])
       res.status(405).end(`Method ${method} Not Allowed`)
   }
 }

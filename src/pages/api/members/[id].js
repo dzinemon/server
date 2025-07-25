@@ -21,7 +21,7 @@ const updateMemberById = async (req, res) => {
   const { name, content } = req.body
   try {
     const result = await db.query(
-      'UPDATE members SET name = $1, content = $2 WHERE id = $3 RETURNING id, name, content',
+      'UPDATE members SET name = $1, content = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3 RETURNING id, name, content',
       [name, content, id]
     )
     if (result.rows.length === 0) {

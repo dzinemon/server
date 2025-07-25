@@ -9,7 +9,9 @@ import { deleteAllVectors, upsertEmbedding } from '../../../../utils/pinecone'
 import { getTextChunks } from '../../../../utils/textbreakdown'
 
 const getCsv = async (req, res) => {
-  const result = await db.query('SELECT * FROM csv_file')
+  const result = await db.query(
+    'SELECT id, name, url, uuids, created_at FROM csv_file'
+  )
   res.status(200).json(result.rows)
 }
 
@@ -47,12 +49,8 @@ const postCsv = async (req, res) => {
     console.log('Pinecone UpsertCount: ', pineconeResult.upsertedCount)
   }
 
-  // INSERT INTO links (name, url, uuids) VALUES ('Google', 'https://www.google.com', ARRAY['a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11']::uuid[]);
-  // const result = await db.query('INSERT INTO links (name, url, uuids) VALUES ($1, $2, ARRAY[$3]::uuid[]) RETURNING *', [name, url, uuid]);
-  // INSERT INTO links (name, url, uuids) VALUES ('Google', 'https://www.google.com', ARRAY['a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13']);
-
   const result = await db.query(
-    'INSERT INTO csv_file (name, url, uuids) VALUES ($1, $2, $3) RETURNING *',
+    'INSERT INTO csv_file (name, url, uuids, created_at, updated_at) VALUES ($1, $2, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING *',
     [title, url, uuids_array]
   )
 

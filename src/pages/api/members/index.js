@@ -1,5 +1,4 @@
 import db from '../../../db'
-import { v4 as uuidv4 } from 'uuid'
 
 const getMembers = async (req, res) => {
   try {
@@ -19,7 +18,7 @@ const createMember = async (req, res) => {
 
   try {
     const result = await db.query(
-      'INSERT INTO members (name, content) VALUES ($1, $2) RETURNING *',
+      'INSERT INTO members (name, content, created_at, updated_at) VALUES ($1, $2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING *',
       [name, content]
     )
     res.status(201).json(result.rows[0])

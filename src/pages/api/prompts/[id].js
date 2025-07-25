@@ -18,7 +18,7 @@ const updatePromptById = async (req, res) => {
   const { name, content } = req.body
   try {
     const result = await db.query(
-      'UPDATE prompts SET name = $1, content = $2 WHERE id = $3 RETURNING *',
+      'UPDATE prompts SET name = $1, content = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3 RETURNING *',
       [name, content, id]
     )
     if (result.rows.length === 0) {

@@ -5,6 +5,13 @@ import GoogleProvider from 'next-auth/providers/google'
 import db from '../../../db'
 import bcrypt from 'bcrypt'
 
+// Environment Variables Validation
+if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+  throw new Error(
+    'Missing required Google OAuth environment variables: GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET'
+  )
+}
+
 const getUserByEmail = async (email) => {
   try {
     const result = await db.query('SELECT * FROM users WHERE email = $1', [
@@ -13,11 +20,12 @@ const getUserByEmail = async (email) => {
     return result.rows[0]
   } catch (error) {
     console.log('error', error)
-    return error.message
+    return null // Return null instead of error message
   }
 }
+
+// Remove top-level await - generate salt when needed
 const saltRounds = 10
-const salt = await bcrypt.genSalt(saltRounds)
 
 /* create users table */
 
@@ -26,7 +34,9 @@ const salt = await bcrypt.genSalt(saltRounds)
 //   name VARCHAR(255),
 //   email VARCHAR(255) UNIQUE,
 //   role VARCHAR(255),
-//   password VARCHAR(255)
+//   password VARCHAR(255),
+//   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+//   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 // );
 
 export const authOptions = {
@@ -86,31 +96,77 @@ export const authOptions = {
     // ...add more providers here
   ],
   callbacks: {
+    async jwt({ token, account, profile }) {
+      // Save user data to JWT token to reduce DB calls
+      if (account && profile) {
+        // Only fetch user data during initial sign-in
+        const user = await getUserByEmail(profile.email)
+        if (user) {
+          token.role = user.role
+          token.userId = user.id
+          token.email = user.email
+          token.name = user.name
+        }
+      }
+      return token
+    },
     async signIn({ account, profile }) {
       if (account.provider === 'google') {
-        const email_verified = profile.email_verified
-        const matchesDomain = profile.email.endsWith('@kruzeconsulting.com')
+        try {
+          const email_verified = profile.email_verified
+          const matchesDomain = profile.email.endsWith('@kruzeconsulting.com')
 
-        if (email_verified && matchesDomain) {
-          const existingUser = await getUserByEmail(profile.email)
+          if (email_verified && matchesDomain) {
+            const existingUser = await getUserByEmail(profile.email)
 
-          if (!existingUser) {
-            await db.query(
-              'INSERT INTO users (name, email, role) VALUES ($1, $2, $3)',
-              [profile.name, profile.email, 'user']
-            )
+            if (!existingUser) {
+              await db.query(
+                'INSERT INTO users (name, email, role, created_at, updated_at) VALUES ($1, $2, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)',
+                [profile.name, profile.email, 'user']
+              )
+              console.log('New user created:', profile.email)
+            } else {
+              // Update existing user's last login time
+              await db.query(
+                'UPDATE users SET updated_at = CURRENT_TIMESTAMP WHERE email = $1',
+                [profile.email]
+              )
+            }
+            return true
           }
-          return true
+          console.log(
+            'Sign in rejected - domain or email verification failed:',
+            profile.email
+          )
+          return false // Reject unverified emails or wrong domain
+        } catch (error) {
+          console.error('Error during sign in process:', error)
+          return false // Reject sign in if database operations fail
         }
-        return false // Reject unverified emails or wrong domain
       }
       return true // Do different verification for other providers that don't have `email_verified`
     },
-    async session({ session }) {
-      // Send properties to the client, like an access_token and user id from a provider.
-      const user = await getUserByEmail(session.user.email)
-      if (user) {
-        session.user.role = user.role
+    async session({ session, token }) {
+      // Use data from JWT token instead of making DB calls every time
+      if (token) {
+        session.user.role = token.role
+        session.user.id = token.userId
+
+        // Only update activity timestamp occasionally to reduce DB load
+        // We can do this less frequently since we're using JWT tokens
+        const shouldUpdateActivity = Math.random() < 0.1 // 10% chance to update
+
+        if (shouldUpdateActivity) {
+          try {
+            await db.query(
+              'UPDATE users SET updated_at = CURRENT_TIMESTAMP WHERE email = $1',
+              [session.user.email]
+            )
+          } catch (error) {
+            console.error('Error updating user activity timestamp:', error)
+            // Don't fail the session if timestamp update fails
+          }
+        }
       }
       return session
     },

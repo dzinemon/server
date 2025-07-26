@@ -47,7 +47,9 @@ export default async function urlById(req, res) {
           }
         }
 
-        res.status(200).json({ success: true, message: 'URL deleted successfully' })
+        res
+          .status(200)
+          .json({ success: true, message: 'URL deleted successfully' })
       } catch (error) {
         console.error('Delete error:', error)
         res.status(500).json({ error: error.message })

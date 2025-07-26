@@ -1,12 +1,12 @@
-import { useState } from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
-import LoginComponent from './login-btn'
-import { useRouter } from 'next/router'
 import { useUser } from '@/context/user'
+import Image from 'next/image'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+import { useState } from 'react'
+import LoginComponent from './login-btn'
 import {
-  NavDropdown,
   MobileNavSection,
+  NavDropdown,
   useNavDropdowns,
 } from './navigation/nav-components'
 

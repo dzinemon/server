@@ -1,18 +1,8 @@
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
-import { useRouter } from 'next/router'
 import { useSession } from 'next-auth/react' // Added for auth check
-
-import {
-  LinkIcon,
-  FileIcon,
-  DocumentTextIcon,
-  FolderArrowDownIcon,
-  TrashIcon,
-  CheckIcon,
-  XMarkIcon,
-} from '@heroicons/react/24/solid'
+import Image from 'next/image'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
 
 export const sidebarSections = [
   {

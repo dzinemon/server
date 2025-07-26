@@ -12,16 +12,21 @@
                 position: fixed;
                 top: 8px;
                 right: 8px;
+                padding: 8px 8px 8px 8px;
                 display: block;
                 z-index: 999999999 !important;
-                border-radius: 9999px;
+                border-radius: 0px 8px 0px 8px;
+                border: 1px solid #dbeafe;
                 color: #4791ce;
                 cursor: pointer;
-                border: 2px solid #4791ce;
                 align-items: center;
                 justify-content: center;
-                padding: 0.1rem;
                 background: white;
+            }
+
+            #btn-close-threaded-chat:hover {
+                background: #4791ce;
+                color: white;
             }
 
             #threaded-chat-widget {

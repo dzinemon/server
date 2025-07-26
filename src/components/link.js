@@ -5,7 +5,7 @@ import { parseUrls } from '../../utils/links'
 import { ArrowPathIcon, LinkIcon, TrashIcon } from '@heroicons/react/24/solid'
 
 import toast from 'react-hot-toast'
-import DataTable from './common/DataTable'
+import ServerDataTable from './common/ServerDataTable'
 
 import Loading from './Loading'
 
@@ -295,7 +295,7 @@ function LinksList() {
         {data && data.length === 0 ? (
           <p className="italic opacity-60 text-center">No uploaded URLs</p>
         ) : (
-          <DataTable items={data} actions={actions} />
+          <ServerDataTable items={data} actions={actions} />
         )}
       </div>
     </div>

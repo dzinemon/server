@@ -34,13 +34,34 @@ export async function removeUrl(id, ids) {
 }
 
 /**
- * Fetch all URLs from the server
- * @returns {Promise<Array>}
+ * Fetch all URLs from the server with pagination
+ * @param {number} page - Page number (default: 1)
+ * @param {number} pageSize - Number of items per page (default: 100)
+ * @param {string} search - Search term (default: '')
+ * @returns {Promise<Object>} Response with data and pagination info
  */
-export async function fetchUrls() {
-  const response = await fetch('/api/urls')
+export async function fetchUrls(page = 1, pageSize = 100, search = '') {
+  const params = new URLSearchParams({
+    page: page.toString(),
+    pageSize: pageSize.toString(),
+  })
+
+  if (search) {
+    params.append('search', search)
+  }
+
+  const response = await fetch(`/api/urls?${params}`)
   if (!response.ok) throw new Error('Failed to fetch URLs')
   return response.json()
+}
+
+/**
+ * Fetch all URLs from the server (legacy function for backward compatibility)
+ * @returns {Promise<Array>}
+ */
+export async function fetchAllUrls() {
+  const response = await fetchUrls(1, 1000) // Get a large number to fetch all
+  return response.data || []
 }
 
 /**

@@ -1,5 +1,5 @@
 import SidebarLayout from '@/components/layout/SidebarLayout'
-import LinksList from '@/components/link'
+import LinksList from '@/components/LinksList'
 
 export default function Links() {
   return (

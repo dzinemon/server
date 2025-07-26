@@ -32,14 +32,6 @@ export default function Navbar() {
       name: 'Upload Links',
       slug: 'links',
     },
-    {
-      name: 'Upload Files',
-      slug: 'files',
-    },
-    {
-      name: 'Upload Text',
-      slug: 'texts',
-    },
   ]
 
   // deprecated items

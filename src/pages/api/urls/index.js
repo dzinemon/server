@@ -4,16 +4,71 @@
 
 import db from '../../../db'
 import { v4 as uuidv4 } from 'uuid'
+import { pagination as paginationConfig } from '../../../../utils/config'
 
 import { parseWithCheerio } from '../../../../utils/cheerio-axios'
 import { deleteAllVectors, upsertEmbedding } from '../../../../utils/pinecone'
 import { getTextChunks } from '../../../../utils/textbreakdown'
 
 const getUrls = async (req, res) => {
-  const result = await db.query(
-    'SELECT id, name, url, uuids, created_at FROM links'
-  )
-  res.status(200).json(result.rows)
+  try {
+    const {
+      page = 1,
+      pageSize = paginationConfig.defaultPageSize,
+      search = '',
+    } = req.query
+
+    // Validate pagination parameters
+    const currentPage = Math.max(1, parseInt(page))
+    const limit = Math.min(parseInt(pageSize), paginationConfig.maxPageSize)
+    const offset = (currentPage - 1) * limit
+
+    // Build the query with optional search
+    let countQuery = 'SELECT COUNT(*) FROM links'
+    let dataQuery = 'SELECT id, name, url, uuids, created_at FROM links'
+    let queryParams = []
+    let countParams = []
+
+    if (search) {
+      const searchCondition = ' WHERE name ILIKE $1 OR url ILIKE $1'
+      countQuery += searchCondition
+      dataQuery += searchCondition
+      const searchParam = `%${search}%`
+      queryParams.push(searchParam)
+      countParams.push(searchParam)
+    }
+
+    // Add ordering and pagination to data query
+    dataQuery +=
+      ' ORDER BY created_at DESC LIMIT $' +
+      (queryParams.length + 1) +
+      ' OFFSET $' +
+      (queryParams.length + 2)
+    queryParams.push(limit, offset)
+
+    // Get total count
+    const countResult = await db.query(countQuery, countParams)
+    const totalItems = parseInt(countResult.rows[0].count)
+    const totalPages = Math.ceil(totalItems / limit)
+
+    // Get paginated data
+    const dataResult = await db.query(dataQuery, queryParams)
+
+    return res.status(200).json({
+      data: dataResult.rows,
+      pagination: {
+        currentPage,
+        pageSize: limit,
+        totalItems,
+        totalPages,
+        hasNextPage: currentPage < totalPages,
+        hasPreviousPage: currentPage > 1,
+      },
+    })
+  } catch (error) {
+    console.error('Error fetching URLs:', error)
+    return res.status(500).json({ error: 'Failed to fetch URLs' })
+  }
 }
 
 const postUrls = async (req, res) => {

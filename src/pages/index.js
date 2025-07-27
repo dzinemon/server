@@ -121,7 +121,7 @@ export default function Home() {
                 By{' '}
                 <Image
                   src="/logo-color.png"
-                  alt="Kruze COnsulting Logo"
+                  alt="Kruze Consulting Logo"
                   className="dark:invert"
                   width={20}
                   height={24}

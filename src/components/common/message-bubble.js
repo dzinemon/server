@@ -90,7 +90,14 @@ const markdownComponents = {
     </h3>
   ),
   p: ({ children }) => (
-    <p className="mb-3 leading-relaxed text-gray-700">{children}</p>
+    <p
+      className={`
+      mb-3 leading-relaxed text-gray-700
+      first:mt-0 last:mb-0
+      `}
+    >
+      {children}
+    </p>
   ),
   ul: ({ children }) => (
     <ul className="list-disc list-inside mb-3 space-y-1">{children}</ul>
@@ -128,7 +135,7 @@ const markdownComponents = {
 
 // create component for message bubble that will be expandable and collapsible with a button and max height, should have 2 variants: for user and system/assistant; system  messages are expanded by default but with a button to collapse, and user messages are collapsed by default with a button to expand
 
-export const UserMessageWrapper = ({ children, onRemove }) => {
+export const UserMessageWrapper = ({ children, onRemove, onEdit }) => {
   const [isCopied, setIsCopied] = useState(false)
   const contentRef = useRef(null)
 
@@ -146,8 +153,13 @@ export const UserMessageWrapper = ({ children, onRemove }) => {
 
   return (
     <div>
-      <div ref={contentRef}>{children}</div>
-      <div className="flex justify-end gap-2 border-t border-blue-100 mt-2 pt-2">
+      <div
+        ref={contentRef}
+        className="px-4 py-3 bg-blue-50/70 border border-blue-100 rounded-lg"
+      >
+        {children}
+      </div>
+      <div className="flex justify-end gap-2 mt-2">
         <button
           title="Copy to clipboard"
           onClick={handleCopy}
@@ -174,20 +186,35 @@ export const UserMessageWrapper = ({ children, onRemove }) => {
   )
 }
 
+const MAX_MESSAGE_HEIGHT = 360
+
 export const AssistantMessageWrapper = ({ children, onRemove }) => {
   const [isExpanded, setIsExpanded] = useState(true)
   const [showButton, setShowButton] = useState(false)
   const [isCopied, setIsCopied] = useState(false)
   const contentRef = useRef(null)
 
-  useEffect(() => {
+  const updateButtonVisibility = () => {
     if (contentRef.current) {
       const height = contentRef.current.scrollHeight
-      if (height > 360) {
+      // Ensure the button remains visible once it is determined to be needed
+      if (height > MAX_MESSAGE_HEIGHT) {
         setShowButton(true)
       }
     }
+  }
+
+  useEffect(() => {
+    updateButtonVisibility()
   }, [children])
+
+  useEffect(() => {
+    const observer = new MutationObserver(updateButtonVisibility)
+    if (contentRef.current) {
+      observer.observe(contentRef.current, { childList: true, subtree: true })
+    }
+    return () => observer.disconnect()
+  }, [contentRef])
 
   const handleCopy = async () => {
     if (contentRef.current) {
@@ -201,15 +228,39 @@ export const AssistantMessageWrapper = ({ children, onRemove }) => {
     }
   }
 
+  const renderExpandCollapseButton = () => (
+    <button
+      title={isExpanded ? 'Collapse message' : 'Expand message'}
+      onClick={() => setIsExpanded(!isExpanded)}
+      type="button"
+      className="inline-flex items-center px-2 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+    >
+      {isExpanded ? (
+        <>
+          <ChevronUpIcon className="w-3.5 h-3.5 mr-1" />
+          Show less
+        </>
+      ) : (
+        <>
+          <ChevronDownIcon className="w-3.5 h-3.5 mr-1" />
+          Show more
+        </>
+      )}
+    </button>
+  )
+
   return (
     <>
-      <div ref={contentRef}>
+      <div
+        ref={contentRef}
+        className="px-4 py-3 bg-white border border-gray-200 rounded-lg"
+      >
         {isExpanded ? (
           <div>{children}</div>
         ) : (
           <div
             className="overflow-hidden relative"
-            style={{ maxHeight: '360px' }}
+            style={{ maxHeight: `${MAX_MESSAGE_HEIGHT}px` }}
           >
             <div>{children}</div>
             <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
@@ -217,7 +268,7 @@ export const AssistantMessageWrapper = ({ children, onRemove }) => {
         )}
       </div>
 
-      <div className="flex flex-wrap gap-2 border-t border-gray-200 mt-3 pt-2">
+      <div className="flex flex-wrap gap-2 mt-2">
         <button
           title="Copy to clipboard"
           onClick={handleCopy}
@@ -247,32 +298,13 @@ export const AssistantMessageWrapper = ({ children, onRemove }) => {
           Delete
         </button>
 
-        {showButton && (
-          <button
-            title={isExpanded ? 'Collapse message' : 'Expand message'}
-            onClick={() => setIsExpanded(!isExpanded)}
-            type="button"
-            className="inline-flex items-center px-2 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 rounded hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-          >
-            {isExpanded ? (
-              <>
-                <ChevronUpIcon className="w-3.5 h-3.5 mr-1" />
-                Show less
-              </>
-            ) : (
-              <>
-                <ChevronDownIcon className="w-3.5 h-3.5 mr-1" />
-                Show more
-              </>
-            )}
-          </button>
-        )}
+        {showButton && renderExpandCollapseButton()}
       </div>
     </>
   )
 }
 
-export default function MessageBubble({ message, role, onRemove }) {
+export default function MessageBubble({ message, role, onRemove, onEdit }) {
   // Memoize the markdown rendering to avoid re-processing on every render
   const renderedContent = useMemo(
     () => (
@@ -287,15 +319,9 @@ export default function MessageBubble({ message, role, onRemove }) {
   )
 
   return (
-    <div
-      className={`p-4 rounded-lg w-full ${
-        role === 'user'
-          ? 'text-right bg-blue-50/70 border border-blue-100'
-          : 'bg-white border border-gray-200 shadow-sm'
-      }`}
-    >
+    <div className={`${role === 'user' ? 'text-right' : 'bg-white'}`}>
       {role === 'user' ? (
-        <UserMessageWrapper onRemove={onRemove}>
+        <UserMessageWrapper onRemove={onRemove} onEdit={onEdit}>
           {renderedContent}
         </UserMessageWrapper>
       ) : (

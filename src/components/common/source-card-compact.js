@@ -23,7 +23,7 @@ const SourceCardCompact = ({ item, index }) => {
         className="rounded-lg hover:bg-gray-50 bg-white group flex gap-2 px-2 py-1.5 border border-gray-200 transition-all duration-200"
       >
         {/* Thumbnail */}
-        <div className="flex-shrink-0 w-12 h-12 rounded-md overflow-hidden">
+        {/* <div className="flex-shrink-0 w-12 h-12 rounded-md overflow-hidden">
           {item.image ? (
             <Image
               src={item.image}
@@ -41,7 +41,7 @@ const SourceCardCompact = ({ item, index }) => {
               alt={item.title}
             />
           )}
-        </div>
+        </div> */}
 
         {/* Content */}
         <div className="flex-1 min-w-0">

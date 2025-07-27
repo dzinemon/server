@@ -74,6 +74,32 @@ export const LoadingLine = () => {
   )
 }
 
+export const ThreeLoadintPlaceholderRows = () => {
+  return (
+    <motion.div
+      className="flex flex-col space-y-2 w-full"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      {[...Array(3)].map((_, index) => (
+        <motion.div
+          key={index}
+          className={`h-5 bg-gray-200 rounded animate-pulse
+            bg-gradient-to-r from-gray-200 via-gray-100 to-gray-50
+          ${index === 0 ? 'w-3/4' : index === 1 ? 'w-2/3' : 'w-full'}
+            `}
+          initial={{ width: '0%' }}
+          animate={{
+            width: index === 0 ? '75%' : index === 1 ? '66%' : '100%',
+          }}
+          transition={{ duration: 1, delay: index * 0.2 }}
+        />
+      ))}
+    </motion.div>
+  )
+}
+
 const LoadingIndicator = ({ resourcesUsed }) => {
   return (
     <div className="flex flex-col items-center justify-center h-full space-y-4">

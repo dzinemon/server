@@ -12,6 +12,8 @@ import {
 import toast, { Toaster } from 'react-hot-toast'
 import { v4 as uuidv4 } from 'uuid'
 
+import { ThreeLoadintPlaceholderRows } from '@/components/common/chatloadingstate'
+
 import {
   ArrowLeftOnRectangleIcon,
   ArrowRightOnRectangleIcon,
@@ -20,8 +22,6 @@ import {
 } from '@heroicons/react/24/solid'
 
 import ModelPicker from '@/components/common/modelpicker'
-
-import LoadingIndicator from '@/components/common/chatloadingstate'
 
 // Lazy load MessageBubble since it now contains heavy markdown processing
 const MessageBubble = lazy(() => import('@/components/common/message-bubble'))
@@ -531,6 +531,37 @@ export default function ThreadedChatWidget() {
     setSideBarOpen(!sideBarIsOpen)
   }, [sideBarIsOpen])
 
+  const handleEditUserMessage = useCallback((message, idx) => {
+    setUserMessage(message.content)
+    setTimeout(() => {
+      if (messageInputRef.current) {
+        messageInputRef.current.focus()
+      }
+    }, 500)
+  }, [])
+
+  // Memoize message removal handler
+
+  const handleMessageRemove = useCallback(
+    (message, idx) => {
+      setThreads((prev) =>
+        prev.map((thread) => {
+          if (thread.id === currentThreadId) {
+            return {
+              ...thread,
+              messages: thread.messages.filter(
+                (_, messageIdx) => messageIdx !== idx
+              ),
+            }
+          }
+          return thread
+        })
+      )
+      localStorage.setItem('threadedChatThreads', JSON.stringify(threads))
+    },
+    [currentThreadId, threads]
+  )
+
   // Load threads from localStorage on mount
   useEffect(() => {
     try {
@@ -688,6 +719,7 @@ export default function ThreadedChatWidget() {
                                 ? 'text-slate-800'
                                 : 'text-gray-900'
                             }
+                            onRemove={() => handleMessageRemove(message, idx)}
                           />
                         </Suspense>
                         {message.sources && message.sources.length > 0 && (
@@ -720,8 +752,8 @@ export default function ThreadedChatWidget() {
                           🤖
                         </div>
                       </div>
-                      <div className="bg-white border border-gray-200 rounded-lg p-4">
-                        <LoadingIndicator />
+                      <div className="bg-white border border-gray-200 rounded-lg p-4 min-w-64 w-full">
+                        <ThreeLoadintPlaceholderRows />
                       </div>
                     </div>
                   )}

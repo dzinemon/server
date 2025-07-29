@@ -1,7 +1,7 @@
 const models = [
   'sonar',
   'sonar-pro',
-  'r1-1776',
+  // 'r1-1776',
   'gpt-4o-2024-08-06',
   'gpt-4o-mini-2024-07-18',
   // 'claude-3-5-sonnet-20241022',

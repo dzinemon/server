@@ -7,7 +7,7 @@ const models = [
   // 'claude-3-5-sonnet-20241022',
 ]
 
-const usedModel = models[0]
+const usedModel = models[0] // Using gpt-4o-mini-2024-07-18 for testing streaming
 
 const sourceFilters = ['website', 'slack', 'internal']
 //webpage, post, slack, tip, tax_calendar, qna, podcast

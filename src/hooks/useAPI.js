@@ -136,6 +136,75 @@ export function useAPI() {
     return result.completion || ''
   }
 
+  const getSingleCompletionStream = async (prompt, model, onChunk) => {
+    const myHeaders = new Headers()
+    myHeaders.append('Content-Type', 'application/json')
+
+    try {
+      const response = await fetch('/api/v1/singlecompletionstream', {
+        method: 'POST',
+        headers: myHeaders,
+        body: JSON.stringify({
+          messages: [
+            {
+              role: 'system',
+              content:
+                'You are a helpful startup tax, accounting and bookkeeping assistant.',
+            },
+            { role: 'user', content: prompt },
+          ],
+          model,
+          temperature: 0,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Streaming failed: ${response.status} - ${errorText}`)
+      }
+
+      if (!response.body) {
+        throw new Error('No response body for streaming')
+      }
+
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let fullText = ''
+      let chunkCount = 0
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read()
+
+          if (done) {
+            console.log(
+              `Streaming completed. Total chunks: ${chunkCount}, Final length: ${fullText.length}`
+            )
+            break
+          }
+
+          const chunk = decoder.decode(value, { stream: true })
+          fullText += chunk
+          chunkCount++
+
+          if (onChunk) {
+            onChunk(chunk, fullText)
+          }
+        }
+      } finally {
+        reader.releaseLock()
+      }
+
+      return fullText
+    } catch (error) {
+      console.error('Error in streaming completion:', error)
+      toast('Error generating streaming completion', {
+        icon: '❌',
+      })
+      throw error
+    }
+  }
+
   // Common utility methods
   const saveQuestionAnswer = async (question, answer, resources) => {
     const result = await makeAPIRequest(
@@ -168,6 +237,7 @@ export function useAPI() {
     // Q&A API methods
     getEmbeddingAndPrompt,
     getSingleCompletion,
+    getSingleCompletionStream,
 
     // Common utility methods
     saveQuestionAnswer,
@@ -195,6 +265,7 @@ export function useQAAPI() {
     setIsLoading: api.setIsLoading,
     getEmbeddingAndPrompt: api.getEmbeddingAndPrompt,
     getCompletion: api.getSingleCompletion,
+    getCompletionStream: api.getSingleCompletionStream,
     saveQuestionAnswer: api.saveQuestionAnswer,
   }
 }

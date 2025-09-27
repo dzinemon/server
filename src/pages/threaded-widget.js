@@ -230,13 +230,13 @@ export default function ThreadedChatWidget() {
   }, [threads, currentThreadId])
 
   // Memoize scroll handler
-  const handleScrollIntoView = useCallback(() => {
-    setTimeout(() => {
-      if (scrollTargetRef.current) {
-        scrollTargetRef.current.scrollIntoView({ behavior: 'smooth' })
-      }
-    }, 100)
-  }, [])
+  // const handleScrollIntoView = useCallback(() => {
+  //   setTimeout(() => {
+  //     if (scrollTargetRef.current) {
+  //       scrollTargetRef.current.scrollIntoView({ behavior: 'smooth' })
+  //     }
+  //   }, 100)
+  // }, [])
 
   // Memoize parent notification function
   const notifyParentOfThreadCount = useCallback((count) => {
@@ -286,7 +286,7 @@ export default function ThreadedChatWidget() {
     setCurrentThreadId(newThread.id)
     localStorage.setItem('threadedChatThreads', JSON.stringify(updatedThreads))
     notifyParentOfThreadCount(updatedThreads.length)
-    handleScrollIntoView()
+    // handleScrollIntoView()
     setSideBarOpen(false)
 
     // Focus on input
@@ -295,7 +295,7 @@ export default function ThreadedChatWidget() {
         messageInputRef.current.focus()
       }
     }, 300)
-  }, [threads, notifyParentOfThreadCount, handleScrollIntoView])
+  }, [threads, notifyParentOfThreadCount])
 
   // Memoize thread removal handler
   const handleThreadRemove = useCallback(
@@ -449,7 +449,7 @@ export default function ThreadedChatWidget() {
 
       setIsLoading(true)
       setUserMessage('')
-      handleScrollIntoView()
+      // handleScrollIntoView()
 
       try {
         // Get current thread to pass existing messages
@@ -504,14 +504,14 @@ export default function ThreadedChatWidget() {
 
       setIsLoading(false)
       setCurrentSources([])
-      handleScrollIntoView()
+      // handleScrollIntoView()
     },
     [
       userMessage,
       currentThreadId,
       threads,
       notifyParentOfThreadCount,
-      handleScrollIntoView,
+      // handleScrollIntoView,
       askQuestion,
       setIsLoading,
       setCurrentSources,

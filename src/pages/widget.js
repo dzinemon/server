@@ -71,6 +71,7 @@ export default function ChatWidget() {
     setIsLoading,
     getEmbeddingAndPrompt,
     getCompletion,
+    getCompletionStream,
     saveQuestionAnswer,
   } = useQAAPI()
   const scrollTargetRef = useRef(null)
@@ -81,6 +82,7 @@ export default function ChatWidget() {
   )
   const [questions, setQuestions] = useState([])
   const [attemptCount, setAttemptCount] = useState(0)
+  const [isStreaming, setIsStreaming] = useState(false)
 
   // Prefetch QuestionSearchResult when user starts typing
   const prefetchQuestionSearchResult = () => {
@@ -163,14 +165,6 @@ export default function ChatWidget() {
     setQuestions([])
   }
 
-  const handleScrollIntoView = () => {
-    setTimeout(() => {
-      if (scrollTargetRef.current) {
-        scrollTargetRef.current.scrollIntoView({ behavior: 'smooth' })
-      }
-    }, 100)
-  }
-
   const handleSendGoogleAnalyticsEvent = (question) => {
     if (typeof window !== 'undefined') {
       if (window.gtag) {
@@ -208,8 +202,6 @@ export default function ChatWidget() {
     setIsLoading(true)
     setIsSubmitted(true)
 
-    handleScrollIntoView()
-
     try {
       // Get embedding and prompt using the consolidated API
       const { sources, prompt } = await getEmbeddingAndPrompt(
@@ -227,12 +219,51 @@ export default function ChatWidget() {
         },
       ])
 
-      handleScrollIntoView()
+      // Try streaming first, fallback to regular completion if streaming fails
+      let completion = ''
+      let useStreaming = true
 
-      // Get completion using the consolidated API
-      const completion = await getCompletion(prompt, usedModel)
+      try {
+        // Set streaming state
+        setIsStreaming(true)
 
-      // Update answer in question
+        // Get completion using streaming API
+        let fullCompletion = ''
+        let updateCount = 0
+        await getCompletionStream(prompt, usedModel, (chunk, fullText) => {
+          fullCompletion = fullText
+          updateCount++
+
+          // Update answer incrementally with immediate state update
+          setQuestions((previous) => {
+            const newQuestions = [
+              ...previous.slice(0, -1),
+              {
+                ...previous[previous.length - 1],
+                answer: fullText,
+              },
+            ]
+
+            return newQuestions
+          })
+        })
+
+        completion = fullCompletion
+      } catch (streamError) {
+        console.error(
+          'Streaming failed, falling back to regular completion:',
+          streamError
+        )
+        useStreaming = false
+
+        // Fallback to regular completion
+        completion = await getCompletion(prompt, usedModel)
+      }
+
+      // Clear streaming state
+      setIsStreaming(false)
+
+      // Ensure final answer is set correctly
       setQuestions((previous) => {
         const currentQuestions = [
           ...previous.slice(0, -1),
@@ -260,7 +291,7 @@ export default function ChatWidget() {
       setQuestions((previous) => previous.slice(0, -1))
     } finally {
       setIsLoading(false)
-      handleScrollIntoView()
+      setIsStreaming(false)
     }
   }
 
@@ -294,6 +325,15 @@ export default function ChatWidget() {
             <div>attemptCount: {attemptCount}</div>
             <div>limit: {limitSearchAttempts}</div>
             <div>remaining: {limitSearchAttempts - questions.length}</div>
+            <div>streaming: {isStreaming ? 'YES' : 'NO'}</div>
+            <div>model: {usedModel}</div>
+            <div>questions: {questions.length}</div>
+            <div>
+              latest answer length:{' '}
+              {questions.length > 0
+                ? questions[questions.length - 1].answer?.length || 0
+                : 0}
+            </div>
           </div>
         </div>
       )}
@@ -322,6 +362,8 @@ export default function ChatWidget() {
                       handleReport={handleReport}
                       question={item}
                       isLatest={idx === arr.length - 1}
+                      isLoading={isLoading}
+                      isStreaming={isStreaming && idx === arr.length - 1}
                     />
                   </Suspense>
                 )

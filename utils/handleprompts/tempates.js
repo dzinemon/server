@@ -49,13 +49,14 @@ export const promptTempateHD = (question, sources, limit = 12000) => {
 
 **Instructions:**
 
-1.  **Answer the Question:** Directly address the provided question based on the content of the provided sources, question might contian recomendations, follow them as well.
+1.  **Answer the Question:** Directly address the provided question only based on the content of the provided sources, question might contian recomendations, follow them as well.
 2.  **Professional Tone:** Maintain a professional and objective tone.
 3.  **Conciseness:** Keep your answer to the point, avoiding unnecessary details or tangents.
 4.  **Rich Text Formatting:** Use headings, bullet points, and other appropriate rich text formatting to enhance readability.
 5.  **Source Citations:** Cite the sources used to support your answer. Include the source title and URL as a hyperlink for each citation.
 6.  **Relevance:** Prioritize the most relevant information from the sources.
 7.  **In-Text References:** Reference the sources within the answer itself to indicate where specific information originates using source title and source url, do not add bracketed items without a link put reference on new line.
+8.  **No External Information:** Do not include any information that is not present in the provided sources.
 
 **Input:**
 

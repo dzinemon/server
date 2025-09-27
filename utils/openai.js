@@ -70,4 +70,25 @@ const chatCompletionMessages = async (messages, model, temperature) => {
   }
 }
 
-export { chatCompletionMessages, createChatCompletionCustom, generateEmbedding }
+const chatCompletionMessagesStream = async (messages, model, temperature) => {
+  try {
+    const stream = await openai.chat.completions.create({
+      model,
+      temperature: temperature,
+      messages: messages,
+      stream: true,
+    })
+
+    return stream
+  } catch (error) {
+    console.error('Error creating chat completion stream:', error)
+    throw error
+  }
+}
+
+export {
+  chatCompletionMessages,
+  chatCompletionMessagesStream,
+  createChatCompletionCustom,
+  generateEmbedding,
+}

@@ -1,6 +1,6 @@
 import { Menu } from '@headlessui/react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Fragment, useState, useMemo } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import CopyToClipboard from '../copy-to-clipboard'
 import InlineLoading from '../InlineLoading'
 import TypingEffect from './typing-placeholder'
@@ -11,8 +11,8 @@ const links = [
 ]
 
 import {
-  ChatBubbleBottomCenterTextIcon,
   ArrowPathIcon,
+  ChatBubbleBottomCenterTextIcon,
   ChevronDownIcon,
   DocumentTextIcon,
   EnvelopeIcon,
@@ -162,7 +162,7 @@ export default function QuestionSearchResult({
                   <div className="w-auto px-1">
                     <div className="w-6 h-6 rounded-full bg-blue-400 flex items-center justify-center">
                       {isLoading && isLatest ? (
-                        <ArrowPathIcon className="text-white w-4 h-4 inline animate-spin" />  
+                        <ArrowPathIcon className="text-white w-4 h-4 inline animate-spin" />
                       ) : (
                         <ChatBubbleBottomCenterTextIcon className="text-white w-4 h-4 inline" />
                       )}
@@ -173,10 +173,7 @@ export default function QuestionSearchResult({
                     {isLoading && isLatest ? (
                       <span className="flex items-center">
                         <div className="ml-2">
-                          <TypingEffect 
-                            text="Answer generating" 
-                            speed={110}
-                          />
+                          <TypingEffect text="Answer generating" speed={110} />
                         </div>
                       </span>
                     ) : (

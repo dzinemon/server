@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 
-export default function TypingEffect({ 
-  text = "Answer generating", 
-  speed = 100
+export default function TypingEffect({
+  text = 'Answer generating',
+  speed = 100,
 }) {
   const [displayText, setDisplayText] = useState('')
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -10,8 +10,8 @@ export default function TypingEffect({
   useEffect(() => {
     if (currentIndex < text.length) {
       const timeout = setTimeout(() => {
-        setDisplayText(prev => prev + text[currentIndex])
-        setCurrentIndex(prev => prev + 1)
+        setDisplayText((prev) => prev + text[currentIndex])
+        setCurrentIndex((prev) => prev + 1)
       }, speed)
 
       return () => clearTimeout(timeout)

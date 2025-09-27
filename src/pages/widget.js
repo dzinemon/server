@@ -74,6 +74,7 @@ export default function ChatWidget() {
     getCompletionStream,
     saveQuestionAnswer,
   } = useQAAPI()
+  const questionsScrollRef = useRef(null)
   const scrollTargetRef = useRef(null)
   const [isAccepted, setIsAccepted] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
@@ -219,6 +220,9 @@ export default function ChatWidget() {
         },
       ])
 
+      // Scroll to bottom to show loading state
+      scrollTargetRef.current.scrollIntoView({ behavior: 'smooth' })
+
       // Try streaming first, fallback to regular completion if streaming fails
       let completion = ''
       let useStreaming = true
@@ -234,7 +238,14 @@ export default function ChatWidget() {
           fullCompletion = fullText
           updateCount++
 
-          // Update answer incrementally with immediate state update
+          // while updateCount < 100 scroll every 10-20 chunks to avoid excessive scrolling
+
+          if (updateCount < 50 && updateCount % 6 === 0) {
+            console.log(updateCount)
+            scrollTargetRef.current?.scrollIntoView({ behavior: 'smooth' })
+          }
+
+          // Update answer incrementally
           setQuestions((previous) => {
             const newQuestions = [
               ...previous.slice(0, -1),
@@ -243,7 +254,6 @@ export default function ChatWidget() {
                 answer: fullText,
               },
             ]
-
             return newQuestions
           })
         })
@@ -352,6 +362,7 @@ export default function ChatWidget() {
                     key={`qsr-${idx}`}
                     fallback={<QuestionSearchResultSkeleton />}
                   >
+                    <div ref={questionsScrollRef}></div>
                     <QuestionSearchResult
                       handleLike={() => {
                         handleLike(item)
@@ -370,7 +381,7 @@ export default function ChatWidget() {
               })
             : ''}
 
-          <div key={'loading'} ref={scrollTargetRef}></div>
+          <div className="pt-10" key={'loading'} ref={scrollTargetRef}></div>
         </motion.div>
 
         {/* FORM */}

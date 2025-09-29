@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import Script from 'next/script'
-import { useEffect, useRef, useState, lazy, Suspense } from 'react'
+import { useEffect, useRef, useState, lazy, Suspense, useCallback } from 'react'
 import toast, { Toaster } from 'react-hot-toast'
 import { useQAAPI } from '@/hooks/useAPI'
 import { usedModel } from '../../utils/hardcoded'
@@ -85,6 +85,42 @@ export default function ChatWidget() {
   const [attemptCount, setAttemptCount] = useState(0)
   const [isStreaming, setIsStreaming] = useState(false)
 
+  const updateLatestQuestion = useCallback(
+    (updater) => {
+      setQuestions((prev) => {
+        if (prev.length === 0) return prev
+        const updated = [...prev]
+        const lastIndex = updated.length - 1
+        const last = updated[lastIndex]
+        updated[lastIndex] =
+          typeof updater === 'function' ? updater(last) : { ...last, ...updater }
+        return updated
+      })
+    },
+    [setQuestions]
+  )
+
+  const finalizeLatestQuestion = useCallback(
+    (updater) => {
+      setQuestions((prev) => {
+        if (prev.length === 0) return prev
+        const updated = [...prev]
+        const lastIndex = updated.length - 1
+        const last = updated[lastIndex]
+        const next =
+          typeof updater === 'function' ? updater(last) : { ...last, ...updater }
+        updated[lastIndex] = next
+
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('localQuestions', JSON.stringify(updated))
+        }
+
+        return updated
+      })
+    },
+    [setQuestions]
+  )
+
   // Prefetch QuestionSearchResult when user starts typing
   const prefetchQuestionSearchResult = () => {
     import('../components/web-widget/question-search-result')
@@ -153,10 +189,32 @@ export default function ChatWidget() {
   }
 
   const handleSetQuestionsFromLocalStorage = () => {
-    const localQuestions = JSON.parse(localStorage.getItem('localQuestions'))
-    if (localQuestions && localQuestions.length > 0) {
-      setQuestions(localQuestions)
-      setIsSubmitted(true)
+    try {
+      const stored = localStorage.getItem('localQuestions')
+      if (!stored) {
+        return
+      }
+
+      const parsed = JSON.parse(stored)
+
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const sanitized = parsed.map((item) => ({
+          ...item,
+          stage: item.stage ?? 'complete',
+          resourceCount:
+            typeof item.resourceCount === 'number'
+              ? item.resourceCount
+              : Array.isArray(item.sources)
+              ? item.sources.length
+              : 0,
+        }))
+
+        setQuestions(sanitized)
+        setIsSubmitted(true)
+      }
+    } catch (error) {
+      console.error('Failed to restore local questions', error)
+      localStorage.removeItem('localQuestions')
     }
   }
 
@@ -191,45 +249,72 @@ export default function ChatWidget() {
       return
     }
 
-    let currentQuestion = { question: question, answer: '', sources: [] }
+    const currentQuestion = {
+      question,
+      answer: '',
+      sources: [],
+      stage: 'submitting',
+      resourceCount: null,
+    }
 
     if (typeof window !== 'undefined' && window.gtag !== undefined) {
       handleSendGoogleAnalyticsEvent(question)
     }
 
     setQuestions((prev) => [...prev, currentQuestion])
-    setAttemptCount((prev) => prev + 1)
+    setAttemptCount((prev) => {
+      const next = prev + 1
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('attemptCount', next.toString())
+      }
+      return next
+    })
     setQuestion('')
     setIsLoading(true)
     setIsSubmitted(true)
 
     try {
+      updateLatestQuestion((latest) => ({
+        ...latest,
+        stage: 'embedding',
+      }))
+
       // Get embedding and prompt using the consolidated API
-      const { sources, prompt } = await getEmbeddingAndPrompt(
+      const { sources: rawSources, prompt } = await getEmbeddingAndPrompt(
         question,
         ['website'],
         ['webpage', 'post', 'tip', 'tax_calendar', 'qna']
       )
 
+      const sources = Array.isArray(rawSources) ? rawSources : []
+
       // Update sources in question
-      setQuestions((previous) => [
-        ...previous.slice(0, -1),
-        {
-          ...previous[previous.length - 1],
-          sources,
-        },
-      ])
+      updateLatestQuestion((latest) => ({
+        ...latest,
+        sources,
+        resourceCount: sources.length,
+        stage: 'resources',
+      }))
 
       // Scroll to bottom to show loading state
       scrollTargetRef.current.scrollIntoView({ behavior: 'smooth' })
 
+      updateLatestQuestion((latest) => ({
+        ...latest,
+        stage: 'prompting',
+      }))
+
       // Try streaming first, fallback to regular completion if streaming fails
       let completion = ''
-      let useStreaming = true
 
       try {
         // Set streaming state
         setIsStreaming(true)
+
+        updateLatestQuestion((latest) => ({
+          ...latest,
+          stage: 'generating',
+        }))
 
         // Get completion using streaming API
         let fullCompletion = ''
@@ -246,16 +331,10 @@ export default function ChatWidget() {
           }
 
           // Update answer incrementally
-          setQuestions((previous) => {
-            const newQuestions = [
-              ...previous.slice(0, -1),
-              {
-                ...previous[previous.length - 1],
-                answer: fullText,
-              },
-            ]
-            return newQuestions
-          })
+          updateLatestQuestion((latest) => ({
+            ...latest,
+            answer: fullText,
+          }))
         })
 
         completion = fullCompletion
@@ -264,9 +343,12 @@ export default function ChatWidget() {
           'Streaming failed, falling back to regular completion:',
           streamError
         )
-        useStreaming = false
 
         // Fallback to regular completion
+        updateLatestQuestion((latest) => ({
+          ...latest,
+          stage: 'generating',
+        }))
         completion = await getCompletion(prompt, usedModel)
       }
 
@@ -274,20 +356,11 @@ export default function ChatWidget() {
       setIsStreaming(false)
 
       // Ensure final answer is set correctly
-      setQuestions((previous) => {
-        const currentQuestions = [
-          ...previous.slice(0, -1),
-          {
-            ...previous[previous.length - 1],
-            answer: completion,
-          },
-        ]
-
-        localStorage.setItem('localQuestions', JSON.stringify(currentQuestions))
-        sessionStorage.setItem('attemptCount', attemptCount + 1)
-
-        return currentQuestions
-      })
+      finalizeLatestQuestion((latest) => ({
+        ...latest,
+        answer: completion,
+        stage: 'complete',
+      }))
 
       // Save to database
       await saveQuestionAnswer(question, completion, JSON.stringify(sources))
@@ -373,7 +446,6 @@ export default function ChatWidget() {
                       handleReport={handleReport}
                       question={item}
                       isLatest={idx === arr.length - 1}
-                      isLoading={isLoading}
                       isStreaming={isStreaming && idx === arr.length - 1}
                     />
                   </Suspense>

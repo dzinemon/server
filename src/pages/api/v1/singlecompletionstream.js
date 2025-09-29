@@ -116,10 +116,6 @@ const postUrl = async (req, res) => {
                   const content = parsed.choices[0]?.delta?.content || ''
                   if (content) {
                     chunkCount++
-                    console.log(
-                      `Perplexity chunk ${chunkCount}:`,
-                      content.slice(0, 50)
-                    )
                     res.write(content)
                     if (res.flush) res.flush()
                   }

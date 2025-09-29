@@ -8,6 +8,11 @@ export default function TypingEffect({
   const [currentIndex, setCurrentIndex] = useState(0)
 
   useEffect(() => {
+    setDisplayText('')
+    setCurrentIndex(0)
+  }, [text])
+
+  useEffect(() => {
     if (currentIndex < text.length) {
       const timeout = setTimeout(() => {
         setDisplayText((prev) => prev + text[currentIndex])

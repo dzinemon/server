@@ -19,6 +19,9 @@ import {
   FlagIcon,
   HandThumbDownIcon,
   HandThumbUpIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  ExclamationTriangleIcon,
 } from '@heroicons/react/24/solid'
 
 import {
@@ -44,7 +47,6 @@ export default function QuestionSearchResult({
   handleLike,
   handleDislike,
   handleReport,
-  isLoading = false,
   isStreaming = false,
 }) {
   const [isOpen, setIsOpen] = useState(isLatest)
@@ -55,6 +57,88 @@ export default function QuestionSearchResult({
     () => question.answer.replace(/(<([^>]+)>)/gi, ''),
     [question.answer]
   )
+
+  const resourceCount =
+    typeof question.resourceCount === 'number'
+      ? question.resourceCount
+      : Array.isArray(question.sources)
+      ? question.sources.length
+      : null
+
+  const resourceSummary = useMemo(() => {
+    if (resourceCount === null) {
+      return {
+        label: 'Gathering resources',
+        message: 'Gathering supporting resources…',
+      }
+    }
+
+    if (resourceCount === 0) {
+      return {
+        label: 'No resources found',
+        message: 'No supporting resources found',
+      }
+    }
+
+    const plural = resourceCount === 1 ? 'resource' : 'resources'
+
+    return {
+      label: `${resourceCount} ${plural}`,
+      message: `${resourceCount} supporting ${plural} found`,
+    }
+  }, [resourceCount])
+
+  const currentStage = question.stage ?? (question.answer ? 'complete' : 'idle')
+
+  const currentStageMessage = useMemo(() => {
+    switch (currentStage) {
+      case 'submitting':
+        return 'Submitting your question…'
+      case 'embedding':
+        return 'Querying knowledge base…'
+      case 'resources':
+        return resourceSummary.message
+      case 'prompting':
+        return 'Creating prompt for the language model…'
+      case 'generating':
+        return 'Generating answer…'
+      default:
+        return ''
+    }
+  }, [currentStage, resourceSummary])
+
+  const stageDefinitions = useMemo(
+    () => [
+      // { key: 'submitting', label: 'Submitting question' },
+      { key: 'embedding', label: 'Querying knowledge base' },
+      { key: 'resources', label: resourceSummary.label },
+      // { key: 'prompting', label: 'Preparing prompt' },
+      { key: 'generating', label: 'Generating answer' },
+    ],
+    [resourceSummary]
+  )
+
+  const stageKeys = useMemo(
+    () => stageDefinitions.map((stage) => stage.key),
+    [stageDefinitions]
+  )
+
+  const currentStageIndex =
+    currentStage === 'complete'
+      ? stageDefinitions.length
+      : stageKeys.indexOf(currentStage)
+
+  const showLoadingStages =
+    isLatest && currentStage !== 'complete' && currentStage !== 'error'
+
+  const isErrored = currentStage === 'error'
+  const isInProgress = currentStage !== 'complete' && !isErrored
+
+  const stageBadgeStyles = {
+    done: 'bg-blue-100 border-blue-200 text-blue-700',
+    current: 'bg-blue-500/10 border-blue-300 text-blue-600',
+    pending: 'bg-slate-100 border-slate-200 text-slate-500',
+  }
 
   // Memoize encoded URLs for social sharing
   const shareUrls = useMemo(
@@ -160,8 +244,14 @@ export default function QuestionSearchResult({
                   className=" flex items-center text-dark-900 font-bold text-blue-400 -mx-1 mb-2"
                 >
                   <div className="w-auto px-1">
-                    <div className="w-6 h-6 rounded-full bg-blue-400 flex items-center justify-center">
-                      {isLoading && isLatest ? (
+                    <div
+                      className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors duration-200 ${
+                        isErrored ? 'bg-red-500' : 'bg-blue-400'
+                      }`}
+                    >
+                      {isErrored ? (
+                        <ExclamationTriangleIcon className="text-white w-4 h-4 inline" />
+                      ) : isInProgress ? (
                         <ArrowPathIcon className="text-white w-4 h-4 inline animate-spin" />
                       ) : (
                         <ChatBubbleBottomCenterTextIcon className="text-white w-4 h-4 inline" />
@@ -169,18 +259,55 @@ export default function QuestionSearchResult({
                     </div>
                   </div>
 
-                  <div className="w-auto px-1 text-base lg:text-lg">
-                    {isLoading && isLatest ? (
-                      <span className="flex items-center">
-                        <div className="ml-2">
-                          <TypingEffect text="Answer generating" speed={110} />
-                        </div>
-                      </span>
-                    ) : (
+                  <div className="w-auto px-1 text-base lg:text-lg min-h-[1.5rem] flex items-center">
+                    {isErrored ? (
+                      'Unable to generate answer'
+                    ) : currentStage === 'complete' ? (
                       'Answer'
+                    ) : (
+                      <TypingEffect text={currentStageMessage} speed={70} />
                     )}
                   </div>
                 </motion.div>
+                {showLoadingStages && (
+                  <motion.div
+                    key="answer-stages"
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.2 }}
+                    className="mb-2"
+                  >
+                    <div className="flex flex-wrap gap-2">
+                      {stageDefinitions.map((stage, idx) => {
+                        const status =
+                          currentStageIndex === -1
+                            ? 'pending'
+                            : currentStageIndex > idx
+                            ? 'done'
+                            : currentStageIndex === idx
+                            ? 'current'
+                            : 'pending'
+
+                        return (
+                          <div
+                            key={stage.key}
+                            className={`flex items-center gap-1 px-1.5 py-1 text-xs font-medium border rounded-full ${stageBadgeStyles[status]}`}
+                          >
+                            {status === 'done' ? (
+                              <CheckCircleIcon className="w-4 h-4 text-current" />
+                            ) : status === 'current' ? (
+                              <ArrowPathIcon className="w-4 h-4 text-current animate-spin" />
+                            ) : (
+                              <ClockIcon className="w-4 h-4 text-current" />
+                            )}
+                            <span>{stage.label}</span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </motion.div>
+                )}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}

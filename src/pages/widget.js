@@ -84,6 +84,7 @@ export default function ChatWidget() {
   const [questions, setQuestions] = useState([])
   const [attemptCount, setAttemptCount] = useState(0)
   const [isStreaming, setIsStreaming] = useState(false)
+  const warmupTriggeredRef = useRef(false)
 
   const updateLatestQuestion = useCallback(
     (updater) => {
@@ -122,9 +123,9 @@ export default function ChatWidget() {
   )
 
   // Prefetch QuestionSearchResult when user starts typing
-  const prefetchQuestionSearchResult = () => {
+  const prefetchQuestionSearchResult = useCallback(() => {
     import('../components/web-widget/question-search-result')
-  }
+  }, [])
 
   const handleLike = (question) => {
     const localQuestions = JSON.parse(localStorage.getItem('localQuestions'))
@@ -388,6 +389,54 @@ export default function ChatWidget() {
       setQuestion(router.query.question)
     }
   }, [router.query.question])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined
+    }
+
+    if (warmupTriggeredRef.current) {
+      return undefined
+    }
+
+    warmupTriggeredRef.current = true
+
+    prefetchQuestionSearchResult()
+
+    const controller = new AbortController()
+
+    const warmup = async () => {
+      try {
+        await fetch('/api/v1/embeddingprompt', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            question: '__warmup__',
+            sourceFilters: ['website'],
+            typeFilters: ['webpage'],
+            topK: 1,
+            metadata: { warmup: true },
+          }),
+          signal: controller.signal,
+        })
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.debug('Warmup request failed:', error)
+        }
+      }
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      warmup()
+    }, 300)
+
+    return () => {
+      controller.abort()
+      window.clearTimeout(timeoutId)
+    }
+  }, [prefetchQuestionSearchResult])
 
   return (
     <div className="h-screen w-screen  flex items-center justify-center relative">

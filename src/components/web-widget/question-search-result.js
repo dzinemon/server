@@ -33,6 +33,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import SourceCard from '../common/source-card'
 
 import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 export const widgetpage = 'https://kruzeconsulting.com/#ask-kruze-ai-tool'
 
@@ -320,15 +321,55 @@ export default function QuestionSearchResult({
                   className="grow"
                 >
                   {question.answer.indexOf('</') >= 0 ? (
-                    <div
-                      className="prose prose-img:rounded-xl prose-headings:underline prose-a:text-blue-600"
-                      dangerouslySetInnerHTML={{
-                        __html: question.answer,
-                      }}
-                    />
+                    <div className="prose prose-img:rounded-xl prose-headings:underline prose-a:text-blue-600">
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: question.answer,
+                        }}
+                      />
+                    </div>
                   ) : (
                     <div className="prose prose-img:rounded-xl prose-headings:underline prose-a:text-blue-600">
-                      <ReactMarkdown key={`markdown-${question.answer.length}`}>
+                      <ReactMarkdown
+                        key={`markdown-${question.answer.length}`}
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          table: ({ node, ...props }) => (
+                            <div className="overflow-x-auto">
+                              <table
+                                {...props}
+                                className={`min-w-full border border-slate-200 text-left text-sm ${
+                                  props.className ? ` ${props.className}` : ''
+                                }`}
+                              />
+                            </div>
+                          ),
+                          thead: ({ node, ...props }) => (
+                            <thead
+                              {...props}
+                              className={`bg-slate-100 ${
+                                props.className ? props.className : ''
+                              }`}
+                            />
+                          ),
+                          th: ({ node, ...props }) => (
+                            <th
+                              {...props}
+                              className={`border border-slate-200 px-3 py-2 font-semibold ${
+                                props.className ? props.className : ''
+                              }`}
+                            />
+                          ),
+                          td: ({ node, ...props }) => (
+                            <td
+                              {...props}
+                              className={`border border-slate-200 px-3 py-2 align-top ${
+                                props.className ? props.className : ''
+                              }`}
+                            />
+                          ),
+                        }}
+                      >
                         {question.answer}
                       </ReactMarkdown>
                     </div>
